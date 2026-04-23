@@ -33,3 +33,6 @@ table {
   color: #667085;
 }
 
+::ng-deep .mat-mdc-paginator {
+  background-color: #fff;
+}

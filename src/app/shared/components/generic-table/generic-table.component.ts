@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 export interface TableColumn {
   key: string;
@@ -24,7 +25,8 @@ export interface TableColumn {
     MatIconModule,
     MatProgressSpinnerModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatPaginatorModule
   ],
   templateUrl: './generic-table.component.html',
   styleUrl: './generic-table.component.css'
@@ -35,12 +37,16 @@ export class GenericTableComponent<T = unknown> {
   @Input() loading = false;
   @Input() clickableRows = true;
   @Input() emptyMessage = 'No records found';
+  @Input() pageSize = 10;
+  @Input() pageSizeOptions = [5, 10, 25, 50];
 
   @Output() edit = new EventEmitter<T>();
   @Output() delete = new EventEmitter<T>();
   @Output() rowClick = new EventEmitter<T>();
 
   searchText = '';
+  currentPage = 0;
+  currentPageSize = this.pageSize;
 
   get displayedColumns(): string[] {
     return [...this.columns.map((column) => column.key), 'actions'];
@@ -59,6 +65,21 @@ export class GenericTableComponent<T = unknown> {
           .includes(query)
       )
     );
+  }
+
+  get paginatedData(): T[] {
+    const startIndex = this.currentPage * this.currentPageSize;
+    const endIndex = startIndex + this.currentPageSize;
+    return this.filteredData.slice(startIndex, endIndex);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex;
+    this.currentPageSize = event.pageSize;
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 0;
   }
 
   getCellValue(row: T, key: string): unknown {
@@ -82,6 +103,3 @@ export class GenericTableComponent<T = unknown> {
     this.delete.emit(row);
   }
 }
-
-
-

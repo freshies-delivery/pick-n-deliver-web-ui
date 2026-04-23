@@ -1,7 +1,7 @@
 <div class="table-toolbar">
   <mat-form-field appearance="outline" class="filter-field">
     <mat-label>Search</mat-label>
-    <input matInput [(ngModel)]="searchText" placeholder="Filter rows" />
+    <input matInput [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" placeholder="Filter rows" />
   </mat-form-field>
 </div>
 
@@ -11,7 +11,7 @@
   </div>
 } @else {
   <div class="table-wrapper mat-elevation-z1">
-    <table mat-table [dataSource]="filteredData">
+    <table mat-table [dataSource]="paginatedData">
       @for (column of columns; track column.key) {
         <ng-container [matColumnDef]="column.key">
           <th mat-header-cell *matHeaderCellDef>{{ column.label }}</th>
@@ -43,6 +43,14 @@
 
   @if (filteredData.length === 0) {
     <div class="empty-state">{{ emptyMessage }}</div>
+  } @else {
+    <mat-paginator
+      [length]="filteredData.length"
+      [pageSize]="currentPageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPageChange($event)"
+      aria-label="Select page of table data"
+    ></mat-paginator>
   }
 }
 

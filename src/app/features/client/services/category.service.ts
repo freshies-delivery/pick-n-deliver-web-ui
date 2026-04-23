@@ -21,9 +21,7 @@ export class CategoryService {
   list(outletId?: number): Observable<CategoryDto[]> {
     const params = outletId ? new HttpParams().set('outletId', String(outletId)) : undefined;
 
-    return this.http.get<CategoryDto[]>(this.endpoint, { params }).pipe(
-      map((categories) => (outletId ? categories.filter((category) => category.outletId === outletId) : categories))
-    );
+    return this.http.get<CategoryDto[]>(this.endpoint, { params });
   }
 
   create(payload: CategoryDto): Observable<CategoryDto> {

@@ -30,15 +30,7 @@ export class ItemService {
       params = params.set('categoryId', String(categoryId));
     }
 
-    return this.http.get<ItemDto[]>(this.endpoint, { params }).pipe(
-      map((items) =>
-        items.filter(
-          (item) =>
-            (outletId ? item.outletId === outletId : true) &&
-            (categoryId ? item.categoryId === categoryId : true)
-        )
-      )
-    );
+    return this.http.get<ItemDto[]>(this.endpoint, { params });
   }
 
   create(payload: ItemDto): Observable<ItemDto> {

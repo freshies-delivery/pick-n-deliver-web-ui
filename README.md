@@ -1,59 +1,62 @@
-# PickNDeliverWebUi
+# Pick N Deliver Web UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.22.
+Angular 19 standalone app with a production-focused `Client -> Outlet -> Category -> Item` management flow built using Angular Material.
 
-## Development server
+## Implemented Feature Module
 
-To start a local development server, run:
+Feature path: `src/app/features/client/`
 
-```bash
-ng serve
+- Client list CRUD with row navigation to outlets
+- Outlet list CRUD scoped to `clientId`
+- Outlet detail page with 3 sections (Address, Categories, Ratings)
+- Category navigation to item list route
+- Item list CRUD scoped to `outletId` and `categoryId`
+- Generic reusable table and dynamic form dialog
+- Reusable confirmation dialog and breadcrumb component
+
+## Route Structure
+
+```text
+/client/clients
+/client/:clientId/outlets
+/client/:clientId/outlets/:outletId
+/client/:clientId/outlets/:outletId/categories/:categoryId/items
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Parent Mapping Rules Enforced
 
-## Code scaffolding
+- Outlet save: `outlet.clientId = selectedClientId`
+- Category save: `category.outletId = selectedOutletId`
+- Item save: `item.categoryId = selectedCategoryId` and `item.outletId = selectedOutletId`
+- Address save: `address.outletId = selectedOutletId`
+- Rating save: `rating.targetType = 'OUTLET'` and `rating.targetId = selectedOutletId`
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Setup
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
-
-To build the project run:
+## Run Locally
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+## Test
 
 ```bash
-ng e2e
+npm test
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## API Notes
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Services are wired to endpoints from `swagger.json`.
+- Ratings update/delete endpoints are referenced as `/api/ratings/{id}` for full CRUD UI handling.
+- If your backend currently supports only list/create for ratings, keep comments CRUD (`/api/rating-comments`) and disable rating edit/delete actions.

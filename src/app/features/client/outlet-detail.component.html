@@ -1,0 +1,88 @@
+<app-breadcrumbs
+  [items]="[
+    { label: 'Client', link: '/client/clients' },
+    { label: 'Outlets', link: '/client/' + clientId() + '/outlets' },
+    { label: 'Outlet Detail' }
+  ]"
+/>
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Outlet {{ outletId() }} Details</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <mat-tab-group>
+      <mat-tab label="Address">
+        <div class="tab-section">
+          <div class="actions">
+            <button mat-flat-button color="primary" (click)="openAddressDialog()">
+              {{ outletAddress() ? 'Edit Address' : 'Add Address' }}
+            </button>
+            @if (outletAddress()) {
+              <button mat-stroked-button color="warn" (click)="deleteAddress()">Delete</button>
+            }
+          </div>
+
+          @if (loadingAddress()) {
+            <p>Loading address...</p>
+          } @else {
+            @if (outletAddress(); as address) {
+              <div class="address-grid">
+                <div><strong>Door No:</strong> {{ address.doorNo }}</div>
+                <div><strong>Building:</strong> {{ address.buildingName }}</div>
+                <div><strong>Address 1:</strong> {{ address.addressLine1 }}</div>
+                <div><strong>Address 2:</strong> {{ address.addressLine2 }}</div>
+                <div><strong>City:</strong> {{ address.city }}</div>
+                <div><strong>State:</strong> {{ address.state }}</div>
+                <div><strong>Zip:</strong> {{ address.zipCode }}</div>
+                <div><strong>Country:</strong> {{ address.country }}</div>
+              </div>
+            } @else {
+              <p class="empty">No address configured for this outlet.</p>
+            }
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Categories">
+        <div class="tab-section">
+          <app-category-list [outletId]="outletId()" (openItems)="openCategoryItems($event)" />
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Ratings">
+        <div class="tab-section">
+          <div class="actions">
+            <button mat-flat-button color="primary" (click)="openCreateRatingDialog()">Add Rating</button>
+            <button mat-flat-button color="accent" (click)="openCreateCommentDialog()">Add Comment</button>
+          </div>
+
+          <h3>Ratings</h3>
+          <app-generic-table
+            [columns]="ratingColumns"
+            [data]="ratings()"
+            [loading]="loadingRatings()"
+            [emptyMessage]="'No ratings for this outlet'"
+            [clickableRows]="false"
+            (edit)="openEditRatingDialog($event)"
+            (delete)="deleteRating($event)"
+          />
+
+          <h3 class="section-gap">Rating Comments</h3>
+          <app-generic-table
+            [columns]="commentColumns"
+            [data]="ratingComments()"
+            [loading]="loadingRatings()"
+            [emptyMessage]="'No comments found'"
+            [clickableRows]="false"
+            (edit)="openEditCommentDialog($event)"
+            (delete)="deleteComment($event)"
+          />
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card-content>
+</mat-card>
+
+

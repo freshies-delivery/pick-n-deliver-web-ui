@@ -1,0 +1,35 @@
+.table-toolbar {
+  margin-bottom: 12px;
+}
+
+.filter-field {
+  width: 280px;
+}
+
+.table-wrapper {
+  overflow: auto;
+  border-radius: 8px;
+  background: #fff;
+}
+
+table {
+  width: 100%;
+}
+
+.actions-col {
+  width: 120px;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.table-loading,
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  color: #667085;
+}
+

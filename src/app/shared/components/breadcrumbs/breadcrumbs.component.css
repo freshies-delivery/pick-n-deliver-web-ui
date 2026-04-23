@@ -1,0 +1,19 @@
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  color: #475467;
+}
+
+.breadcrumbs a {
+  text-decoration: none;
+  color: #175cd3;
+}
+
+.breadcrumbs mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+

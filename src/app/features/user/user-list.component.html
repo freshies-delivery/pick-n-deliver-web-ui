@@ -1,0 +1,23 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'User View'"
+    [title]="'User List'"
+    [subtitle]="'Select a user to manage orders, addresses, and ratings'"
+    [actions]="headerActions"
+  ></app-page-header>
+
+  <div class="page-content">
+    <div class="card">
+      <app-data-table
+        [columns]="columns"
+        [data]="users()"
+        [loading]="loading()"
+        [emptyMessage]="'No users available'"
+        (edit)="onEdit($event)"
+        (delete)="onDelete($event)"
+        (rowClick)="openUserOrders($event)"
+      ></app-data-table>
+    </div>
+  </div>
+</div>
+

@@ -1,8 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import { HierarchyStateService } from '../../../core/services/hierarchy-state.service';
+import { UserContextService } from '../../../core/services/user-context.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,18 +14,24 @@ import { HierarchyStateService } from '../../../core/services/hierarchy-state.se
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly hierarchyState = inject(HierarchyStateService);
+  private readonly userContext = inject(UserContextService);
 
   readonly hierarchy = toSignal(this.hierarchyState.hierarchy$, {
     initialValue: this.hierarchyState.state
+  });
+
+  readonly user = toSignal(this.userContext.user$, {
+    initialValue: this.userContext.state
   });
 
   readonly expanded = signal({
     clientView: true,
     outletList: true,
     outletDetails: true,
-    userView: false,
+    userView: true,
     adminPanel: false
   });
 
@@ -38,6 +46,18 @@ export class SidebarComponent {
   readonly hasClient = computed(() => !!this.hierarchy().clientId);
   readonly hasOutlet = computed(() => !!this.hierarchy().outletId);
   readonly hasCategory = computed(() => !!this.hierarchy().categoryId);
+  readonly hasUser = computed(() => !!this.user().userId);
+  readonly userSummary = computed(() => `User: ${this.user().userName ?? (this.user().userId ? `#${this.user().userId}` : 'None')}`);
+
+  constructor() {
+    this.userContext.syncFromRoute(this.router.routerState.snapshot.root);
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.userContext.syncFromRoute(this.router.routerState.snapshot.root));
+  }
 
   toggle(section: keyof ReturnType<typeof this.expanded>): void {
     this.expanded.update((current) => ({ ...current, [section]: !current[section] }));
@@ -85,6 +105,34 @@ export class SidebarComponent {
       return;
     }
     this.router.navigate(['/client', clientId, 'outlets', outletId]);
+  }
+
+  navigateUserList(): void {
+    this.router.navigate(['/users']);
+  }
+
+  navigateUserOrders(): void {
+    const { userId } = this.user();
+    if (!userId) {
+      return;
+    }
+    this.router.navigate(['/users', userId, 'orders']);
+  }
+
+  navigateUserAddresses(): void {
+    const { userId } = this.user();
+    if (!userId) {
+      return;
+    }
+    this.router.navigate(['/users', userId, 'addresses']);
+  }
+
+  navigateUserRatings(): void {
+    const { userId } = this.user();
+    if (!userId) {
+      return;
+    }
+    this.router.navigate(['/users', userId, 'ratings']);
   }
 
   isRouteActive(prefix: string): boolean {

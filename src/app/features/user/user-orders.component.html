@@ -1,0 +1,15 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'User View / User List'"
+    [title]="'Orders'"
+    [subtitle]="'Manage orders for ' + userLabel()"
+  ></app-page-header>
+
+  <div class="page-content">
+    <div class="card user-card">
+      <h3>User {{ userLabel() }}</h3>
+      <p>Orders content is ready for userId: {{ userId() }}</p>
+    </div>
+  </div>
+</div>
+

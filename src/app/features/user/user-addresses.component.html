@@ -1,0 +1,15 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'User View / User List'"
+    [title]="'Addresses'"
+    [subtitle]="'Manage addresses for ' + userLabel()"
+  ></app-page-header>
+
+  <div class="page-content">
+    <div class="card user-card">
+      <h3>User {{ userLabel() }}</h3>
+      <p>Addresses content is ready for userId: {{ userId() }}</p>
+    </div>
+  </div>
+</div>
+

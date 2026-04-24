@@ -1,6 +1,7 @@
 <aside class="sidebar">
   <div class="brand">Pick N Deliver</div>
   <div class="hierarchy-summary">{{ summary() }}</div>
+  <div class="user-summary">{{ userSummary() }}</div>
 
   <nav class="tree-nav" aria-label="Hierarchy Navigation">
     <button type="button" class="menu-item" (click)="toggle('clientView')">
@@ -88,9 +89,48 @@
     </button>
 
     @if (expanded().userView) {
-      <div class="menu-item child disabled"><mat-icon>receipt_long</mat-icon><span>Orders</span></div>
-      <div class="menu-item child disabled"><mat-icon>home</mat-icon><span>Addresses</span></div>
-      <div class="menu-item child disabled"><mat-icon>reviews</mat-icon><span>Ratings</span></div>
+      <button
+        type="button"
+        class="menu-item child"
+        [class.active]="isRouteActive('/users')"
+        (click)="navigateUserList()"
+      >
+        <mat-icon>groups</mat-icon>
+        <span>User List</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item sub-child"
+        [class.disabled]="!hasUser()"
+        [class.active]="hasUser() && isRouteActive('/users/' + user().userId + '/orders')"
+        (click)="navigateUserOrders()"
+      >
+        <mat-icon>receipt_long</mat-icon>
+        <span>Orders</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item sub-child"
+        [class.disabled]="!hasUser()"
+        [class.active]="hasUser() && isRouteActive('/users/' + user().userId + '/addresses')"
+        (click)="navigateUserAddresses()"
+      >
+        <mat-icon>home</mat-icon>
+        <span>Addresses</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item sub-child"
+        [class.disabled]="!hasUser()"
+        [class.active]="hasUser() && isRouteActive('/users/' + user().userId + '/ratings')"
+        (click)="navigateUserRatings()"
+      >
+        <mat-icon>reviews</mat-icon>
+        <span>Ratings</span>
+      </button>
     }
 
     <button type="button" class="menu-item section-toggle" (click)="toggle('adminPanel')">

@@ -1,38 +1,32 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 
-import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   DialogFieldConfig,
   GenericFormDialogComponent
 } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
-import { GenericTableComponent, TableColumn } from '../../shared/components/generic-table/generic-table.component';
+import { ColumnConfig, DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { PageHeaderAction, PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ClientDto, ClientService } from './services/client.service';
+import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
+import { FabActionService } from '../../core/services/fab-action.service';
 
 @Component({
   selector: 'app-client-list',
   standalone: true,
-  imports: [
-    MatCardModule,
-    MatButtonModule,
-    MatSnackBarModule,
-    BreadcrumbsComponent,
-    GenericTableComponent
-  ],
+  imports: [PageHeaderComponent, DataTableComponent],
   templateUrl: './client-list.component.html',
-  styleUrl: './client-list.component.css'
+  styleUrl: './client-list.component.scss'
 })
-export class ClientListComponent implements OnInit {
+export class ClientListComponent implements OnInit, OnDestroy {
   readonly loading = signal(false);
   readonly clients = signal<ClientDto[]>([]);
 
-  readonly columns: TableColumn[] = [
+  readonly columns: ColumnConfig[] = [
     { key: 'clientId', label: 'ID' },
     { key: 'name', label: 'Name' },
     { key: 'description', label: 'Description' }
@@ -43,15 +37,32 @@ export class ClientListComponent implements OnInit {
     { key: 'description', label: 'Description', type: 'textarea' }
   ];
 
+  readonly headerActions: PageHeaderAction[] = [
+    {
+      label: 'Add Client',
+      icon: 'add',
+      type: 'primary',
+      action: () => this.openCreateDialog()
+    }
+  ];
+
   constructor(
     private readonly clientService: ClientService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly hierarchyState: HierarchyStateService,
+    private readonly fabActionService: FabActionService
   ) {}
 
   ngOnInit(): void {
+    this.fabActionService.registerAction('createClient', () => this.openCreateDialog());
+    this.fabActionService.setFabAction(() => this.openCreateDialog());
     this.loadClients();
+  }
+
+  ngOnDestroy(): void {
+    this.fabActionService.unregisterAction('createClient');
   }
 
   loadClients(): void {
@@ -147,6 +158,7 @@ export class ClientListComponent implements OnInit {
       return;
     }
 
+    this.hierarchyState.setClient(client.clientId, client.name ?? null);
     this.router.navigate(['/client', client.clientId, 'outlets']);
   }
 }

@@ -12,7 +12,7 @@ export interface BreadcrumbItem {
   standalone: true,
   imports: [RouterLink, MatIconModule],
   templateUrl: './breadcrumbs.component.html',
-  styleUrl: './breadcrumbs.component.css'
+  styleUrl: './breadcrumbs.component.scss'
 })
 export class BreadcrumbsComponent {
   @Input({ required: true }) items: BreadcrumbItem[] = [];

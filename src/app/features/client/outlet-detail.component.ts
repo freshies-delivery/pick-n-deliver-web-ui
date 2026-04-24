@@ -1,39 +1,52 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTabsModule } from '@angular/material/tabs';
 import { finalize, forkJoin } from 'rxjs';
 
-import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { CategoryListComponent } from './category-list.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   DialogFieldConfig,
   GenericFormDialogComponent
 } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
-import { GenericTableComponent, TableColumn } from '../../shared/components/generic-table/generic-table.component';
+import { ColumnConfig, DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { AddressDto, AddressService } from './services/address.service';
 import { CategoryDto } from './services/category.service';
 import { RatingCommentDto, RatingDto, RatingService } from './services/rating.service';
+import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
 
 @Component({
   selector: 'app-outlet-detail',
   standalone: true,
   imports: [
     MatCardModule,
-    MatTabsModule,
+    MatIconModule,
     MatButtonModule,
-    BreadcrumbsComponent,
     CategoryListComponent,
-    GenericTableComponent
+    DataTableComponent
   ],
   templateUrl: './outlet-detail.component.html',
-  styleUrl: './outlet-detail.component.css'
+  styleUrl: './outlet-detail.component.scss',
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(8px)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'none' }))
+      ])
+    ])
+  ]
 })
-export class OutletDetailComponent implements OnInit {
+export class OutletDetailComponent implements OnInit, AfterViewInit {
+  @ViewChild(CategoryListComponent) private readonly categoryListComponent?: CategoryListComponent;
+
+  readonly activeTab = signal<'address' | 'categories' | 'ratings'>('categories');
+  private openCategoryDialogPending = false;
+
   readonly clientId = signal(0);
   readonly outletId = signal(0);
 
@@ -66,15 +79,21 @@ export class OutletDetailComponent implements OnInit {
     { key: 'comment', label: 'Comment', type: 'textarea', required: true }
   ];
 
-  readonly ratingColumns: TableColumn[] = [
+  readonly ratingColumns: ColumnConfig[] = [
     { key: 'ratingId', label: 'ID' },
     { key: 'score', label: 'Rating' },
     { key: 'comment', label: 'Comments' }
   ];
 
-  readonly commentColumns: TableColumn[] = [
+  readonly commentColumns: ColumnConfig[] = [
     { key: 'ratingCommentId', label: 'ID' },
     { key: 'comment', label: 'Comment' }
+  ];
+
+  readonly tabs = [
+    { key: 'address' as const, label: 'Address' },
+    { key: 'categories' as const, label: 'Categories' },
+    { key: 'ratings' as const, label: 'Ratings' }
   ];
 
   constructor(
@@ -83,14 +102,40 @@ export class OutletDetailComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly addressService: AddressService,
-    private readonly ratingService: RatingService
+    private readonly ratingService: RatingService,
+    private readonly hierarchyState: HierarchyStateService
   ) {}
 
   ngOnInit(): void {
     this.clientId.set(Number(this.route.snapshot.paramMap.get('clientId')));
     this.outletId.set(Number(this.route.snapshot.paramMap.get('outletId')));
+    this.hierarchyState.syncFromRoute(this.route.snapshot);
     this.loadAddress();
     this.loadRatingsAndComments();
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.openCategoryDialogPending) {
+      return;
+    }
+
+    this.openCategoryDialogPending = false;
+    setTimeout(() => this.categoryListComponent?.openCreateDialog());
+  }
+
+  setTab(tab: 'address' | 'categories' | 'ratings'): void {
+    this.activeTab.set(tab);
+  }
+
+  openAddCategoryFromHeader(): void {
+    this.activeTab.set('categories');
+
+    if (this.categoryListComponent) {
+      setTimeout(() => this.categoryListComponent?.openCreateDialog());
+      return;
+    }
+
+    this.openCategoryDialogPending = true;
   }
 
   loadAddress(): void {
@@ -190,6 +235,7 @@ export class OutletDetailComponent implements OnInit {
       return;
     }
 
+    this.hierarchyState.setCategory(category.categoryId, category.name ?? null);
     this.router.navigate([
       '/client',
       this.clientId(),

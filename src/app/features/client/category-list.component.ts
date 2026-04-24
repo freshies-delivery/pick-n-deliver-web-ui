@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
@@ -9,13 +8,13 @@ import {
   DialogFieldConfig,
   GenericFormDialogComponent
 } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
-import { GenericTableComponent, TableColumn } from '../../shared/components/generic-table/generic-table.component';
+import { ColumnConfig, DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { CategoryDto, CategoryService } from './services/category.service';
 
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [MatButtonModule, GenericTableComponent],
+  imports: [DataTableComponent],
   templateUrl: './category-list.component.html',
   styleUrl: './category-list.component.css'
 })
@@ -26,7 +25,7 @@ export class CategoryListComponent implements OnChanges {
   readonly loading = signal(false);
   readonly categories = signal<CategoryDto[]>([]);
 
-  readonly columns: TableColumn[] = [
+  readonly columns: ColumnConfig[] = [
     { key: 'categoryId', label: 'ID' },
     { key: 'name', label: 'Name' },
     { key: 'description', label: 'Description' }

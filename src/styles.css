@@ -1,12 +1,122 @@
 @import '@angular/material/prebuilt-themes/azure-blue.css';
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  background: #f7f9fc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  color: #1f2937;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Material Customization */
+.mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button {
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0;
+  padding: 0 16px;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field .mdc-text-field--filled {
+  background-color: #f9fafb;
+}
+
+.mat-mdc-snack-bar-container {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mat-mdc-chip {
+  border-radius: 20px;
+}
+
+.mat-mdc-paginator {
+  background-color: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mdc-data-table__header-cell {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+body.dark-theme {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+body.dark-theme .app-header,
+body.dark-theme .table-wrapper,
+body.dark-theme .toolbar-card,
+body.dark-theme .grid-placeholder,
+body.dark-theme .mat-mdc-paginator,
+body.dark-theme .mat-mdc-dialog-container {
+  background-color: #111827 !important;
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Animation Classes */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

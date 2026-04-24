@@ -1,33 +1,33 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 
-import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs/breadcrumbs.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   DialogFieldConfig,
   GenericFormDialogComponent
 } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
-import { GenericTableComponent, TableColumn } from '../../shared/components/generic-table/generic-table.component';
+import { ColumnConfig, DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { PageHeaderAction, PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { OutletDto, OutletService } from './services/outlet.service';
+import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
+import { FabActionService } from '../../core/services/fab-action.service';
 
 @Component({
   selector: 'app-outlet-list',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, BreadcrumbsComponent, GenericTableComponent],
+  imports: [PageHeaderComponent, DataTableComponent],
   templateUrl: './outlet-list.component.html',
-  styleUrl: './outlet-list.component.css'
+  styleUrl: './outlet-list.component.scss'
 })
-export class OutletListComponent implements OnInit {
+export class OutletListComponent implements OnInit, OnDestroy {
   readonly clientId = signal(0);
   readonly loading = signal(false);
   readonly outlets = signal<OutletDto[]>([]);
 
-  readonly columns: TableColumn[] = [
+  readonly columns: ColumnConfig[] = [
     { key: 'outletId', label: 'ID' },
     { key: 'name', label: 'Name' },
     { key: 'type', label: 'Type' },
@@ -42,17 +42,35 @@ export class OutletListComponent implements OnInit {
     { key: 'isPickupAvailable', label: 'Pickup Available', type: 'checkbox' }
   ];
 
+  readonly headerActions: PageHeaderAction[] = [
+    {
+      label: 'Add Outlet',
+      icon: 'add',
+      type: 'primary',
+      action: () => this.openCreateDialog()
+    }
+  ];
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly outletService: OutletService,
     private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly hierarchyState: HierarchyStateService,
+    private readonly fabActionService: FabActionService
   ) {}
 
   ngOnInit(): void {
     this.clientId.set(Number(this.route.snapshot.paramMap.get('clientId')));
+    this.hierarchyState.syncFromRoute(this.route.snapshot);
+    this.fabActionService.registerAction('createOutlet', () => this.openCreateDialog());
+    this.fabActionService.setFabAction(() => this.openCreateDialog());
     this.loadOutlets();
+  }
+
+  ngOnDestroy(): void {
+    this.fabActionService.unregisterAction('createOutlet');
   }
 
   loadOutlets(): void {
@@ -159,6 +177,7 @@ export class OutletListComponent implements OnInit {
       return;
     }
 
+    this.hierarchyState.setOutlet(outlet.outletId, outlet.name ?? null);
     this.router.navigate(['/client', this.clientId(), 'outlets', outlet.outletId]);
   }
 }

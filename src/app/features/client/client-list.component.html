@@ -1,24 +1,23 @@
-<app-breadcrumbs [items]="[{ label: 'Client' }, { label: 'Clients' }]" />
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Client'"
+    [title]="'Client List'"
+    [subtitle]="'Manage all your clients'"
+    [actions]="headerActions"
+  ></app-page-header>
 
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Client List</mat-card-title>
-  </mat-card-header>
-
-  <mat-card-content>
-    <div class="actions">
-      <button mat-flat-button color="primary" (click)="openCreateDialog()">Add Client</button>
+  <div class="page-content">
+    <div class="card">
+      <app-data-table
+        [columns]="columns"
+        [data]="clients()"
+        [loading]="loading()"
+        [emptyMessage]="'No clients available'"
+        (edit)="openEditDialog($event)"
+        (delete)="confirmDelete($event)"
+        (rowClick)="openOutlets($event)"
+      ></app-data-table>
     </div>
-
-    <app-generic-table
-      [columns]="columns"
-      [data]="clients()"
-      [loading]="loading()"
-      [emptyMessage]="'No clients available'"
-      (edit)="openEditDialog($event)"
-      (delete)="confirmDelete($event)"
-      (rowClick)="openOutlets($event)"
-    />
-  </mat-card-content>
-</mat-card>
+  </div>
+</div>
 

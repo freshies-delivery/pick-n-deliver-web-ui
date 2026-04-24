@@ -1,31 +1,33 @@
-<app-breadcrumbs
-  [items]="[
-    { label: 'Client', link: '/client/clients' },
-    { label: 'Outlets', link: '/client/' + clientId() + '/outlets' },
-    { label: 'Outlet Detail', link: '/client/' + clientId() + '/outlets/' + outletId() },
-    { label: 'Items' }
-  ]"
-/>
+<div class="page items-page" @fadeIn>
+  <app-page-header
+    [breadcrumb]="'Client / Outlets / Categories'"
+    [title]="'Items'"
+    [subtitle]="'Manage all items in this category'"
+    [actions]="headerActions"
+  ></app-page-header>
 
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Items for Category {{ categoryId() }}</mat-card-title>
-  </mat-card-header>
-
-  <mat-card-content>
-    <div class="actions">
-      <button mat-flat-button color="primary" (click)="openCreateDialog()">Add Item</button>
-    </div>
-
-    <app-generic-table
-      [columns]="columns"
-      [data]="items()"
-      [loading]="loading()"
-      [emptyMessage]="'No items in this category'"
-      (edit)="openEditDialog($event)"
-      (delete)="confirmDelete($event)"
-      [clickableRows]="false"
-    />
-  </mat-card-content>
-</mat-card>
-
+  <div class="page-content">
+    @if (viewMode() === 'table') {
+      <div class="card">
+        <app-data-table
+          [columns]="columns"
+          [data]="visibleItems()"
+          [searchTerm]="searchQuery()"
+          [loading]="loading()"
+          [emptyMessage]="'No items found'"
+          (edit)="openEditDialog($event)"
+          (delete)="confirmDelete($event)"
+          [clickableRows]="false"
+          [pageSize]="10"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+        ></app-data-table>
+      </div>
+    } @else {
+      <div class="grid-placeholder card">
+        <mat-icon>grid_view</mat-icon>
+        <h3>Grid view coming soon</h3>
+        <p>Switch back to table mode to manage items.</p>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,67 @@
+<div class="toolbar-card">
+  <div class="toolbar-content">
+    @if (config.showSearch) {
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchValue"
+          (ngModelChange)="onSearchChange($event)"
+          [placeholder]="searchPlaceholder"
+        />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+    }
+
+    @if (config.showFilter && config.filterOptions) {
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-label>Filter</mat-label>
+        <mat-select [(ngModel)]="filterValue" (ngModelChange)="onFilterChange($event)">
+          <mat-option value="">All</mat-option>
+          @for (option of config.filterOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (config.showSort && config.sortOptions) {
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-label>Sort</mat-label>
+        <mat-select [(ngModel)]="sortValue" (ngModelChange)="onSortChange($event)">
+          <mat-option value="">Default</mat-option>
+          @for (option of config.sortOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (config.showViewToggle) {
+      <mat-button-toggle-group
+        [value]="viewMode"
+        (change)="onViewModeChange($event.value)"
+        aria-label="View mode"
+        class="view-toggle"
+      >
+        <mat-button-toggle value="table" matTooltip="Table view">
+          <mat-icon>table_rows</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="grid" matTooltip="Grid view">
+          <mat-icon>grid_view</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    }
+
+    @if (config.showDarkModeToggle) {
+      <div class="dark-mode-toggle">
+        <mat-icon>dark_mode</mat-icon>
+        <mat-slide-toggle [ngModel]="darkMode" (ngModelChange)="onDarkModeChange($event)">
+          Dark
+        </mat-slide-toggle>
+      </div>
+    }
+  </div>
+</div>
+
+

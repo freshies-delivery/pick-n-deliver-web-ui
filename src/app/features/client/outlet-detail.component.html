@@ -1,65 +1,87 @@
-<app-breadcrumbs
-  [items]="[
-    { label: 'Client', link: '/client/clients' },
-    { label: 'Outlets', link: '/client/' + clientId() + '/outlets' },
-    { label: 'Outlet Detail' }
-  ]"
-/>
+<div class="page outlet-detail-page" @fadeIn>
+  <div class="page-header">
+    <div class="header-left">
+      <div class="breadcrumb">Client / Outlets / Outlet Detail</div>
+      <h1>Outlet {{ outletId() }}</h1>
+      <p class="subtitle">Manage categories, items, and ratings</p>
+    </div>
 
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Outlet {{ outletId() }} Details</mat-card-title>
-  </mat-card-header>
+    <div class="header-right">
+      <button class="primary-btn" type="button" (click)="openAddCategoryFromHeader()">+ Add Category</button>
+    </div>
+  </div>
 
-  <mat-card-content>
-    <mat-tab-group>
-      <mat-tab label="Address">
-        <div class="tab-section">
-          <div class="actions">
-            <button mat-flat-button color="primary" (click)="openAddressDialog()">
+  <div class="page-content">
+    <div class="card detail-card">
+    <div class="tabs-nav" role="tablist" aria-label="Outlet sections">
+      @for (tab of tabs; track tab.key) {
+        <button
+          type="button"
+          class="tab"
+          [class.active]="activeTab() === tab.key"
+          [attr.aria-selected]="activeTab() === tab.key"
+          (click)="setTab(tab.key)"
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <div class="tab-body">
+      @if (activeTab() === 'address') {
+        <section class="section-pane">
+          <div class="actions-row">
+            <button mat-stroked-button type="button" class="secondary-btn" (click)="openAddressDialog()">
               {{ outletAddress() ? 'Edit Address' : 'Add Address' }}
             </button>
+
             @if (outletAddress()) {
-              <button mat-stroked-button color="warn" (click)="deleteAddress()">Delete</button>
+              <button mat-stroked-button type="button" class="secondary-btn delete-outline" (click)="deleteAddress()">
+                Delete
+              </button>
             }
           </div>
 
           @if (loadingAddress()) {
-            <p>Loading address...</p>
+            <p class="status-text">Loading address...</p>
           } @else {
             @if (outletAddress(); as address) {
               <div class="address-grid">
-                <div><strong>Door No:</strong> {{ address.doorNo }}</div>
-                <div><strong>Building:</strong> {{ address.buildingName }}</div>
-                <div><strong>Address 1:</strong> {{ address.addressLine1 }}</div>
-                <div><strong>Address 2:</strong> {{ address.addressLine2 }}</div>
-                <div><strong>City:</strong> {{ address.city }}</div>
-                <div><strong>State:</strong> {{ address.state }}</div>
-                <div><strong>Zip:</strong> {{ address.zipCode }}</div>
-                <div><strong>Country:</strong> {{ address.country }}</div>
+                <div class="address-item"><span>Door No</span><strong>{{ address.doorNo || '-' }}</strong></div>
+                <div class="address-item"><span>Building</span><strong>{{ address.buildingName || '-' }}</strong></div>
+                <div class="address-item"><span>Address 1</span><strong>{{ address.addressLine1 || '-' }}</strong></div>
+                <div class="address-item"><span>Address 2</span><strong>{{ address.addressLine2 || '-' }}</strong></div>
+                <div class="address-item"><span>City</span><strong>{{ address.city || '-' }}</strong></div>
+                <div class="address-item"><span>State</span><strong>{{ address.state || '-' }}</strong></div>
+                <div class="address-item"><span>Zip</span><strong>{{ address.zipCode || '-' }}</strong></div>
+                <div class="address-item"><span>Country</span><strong>{{ address.country || '-' }}</strong></div>
               </div>
             } @else {
               <p class="empty">No address configured for this outlet.</p>
             }
           }
-        </div>
-      </mat-tab>
+        </section>
+      }
 
-      <mat-tab label="Categories">
-        <div class="tab-section">
-          <app-category-list [outletId]="outletId()" (openItems)="openCategoryItems($event)" />
-        </div>
-      </mat-tab>
+      @if (activeTab() === 'categories') {
+        <section class="section-pane">
+          <app-category-list [outletId]="outletId()" (openItems)="openCategoryItems($event)"></app-category-list>
+        </section>
+      }
 
-      <mat-tab label="Ratings">
-        <div class="tab-section">
-          <div class="actions">
-            <button mat-flat-button color="primary" (click)="openCreateRatingDialog()">Add Rating</button>
-            <button mat-flat-button color="accent" (click)="openCreateCommentDialog()">Add Comment</button>
+      @if (activeTab() === 'ratings') {
+        <section class="section-pane">
+          <div class="actions-row">
+            <button mat-stroked-button type="button" class="secondary-btn" (click)="openCreateRatingDialog()">
+              + Add Rating
+            </button>
+            <button mat-stroked-button type="button" class="secondary-btn" (click)="openCreateCommentDialog()">
+              + Add Comment
+            </button>
           </div>
 
-          <h3>Ratings</h3>
-          <app-generic-table
+          <h3 class="section-title">Ratings</h3>
+          <app-data-table
             [columns]="ratingColumns"
             [data]="ratings()"
             [loading]="loadingRatings()"
@@ -67,10 +89,10 @@
             [clickableRows]="false"
             (edit)="openEditRatingDialog($event)"
             (delete)="deleteRating($event)"
-          />
+          ></app-data-table>
 
-          <h3 class="section-gap">Rating Comments</h3>
-          <app-generic-table
+          <h3 class="section-title section-gap">Rating Comments</h3>
+          <app-data-table
             [columns]="commentColumns"
             [data]="ratingComments()"
             [loading]="loadingRatings()"
@@ -78,11 +100,12 @@
             [clickableRows]="false"
             (edit)="openEditCommentDialog($event)"
             (delete)="deleteComment($event)"
-          />
-        </div>
-      </mat-tab>
-    </mat-tab-group>
-  </mat-card-content>
-</mat-card>
+          ></app-data-table>
+        </section>
+      }
+    </div>
+    </div>
+  </div>
+</div>
 
 

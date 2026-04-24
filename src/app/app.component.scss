@@ -1,0 +1,25 @@
+@use '../theme' as theme;
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.content {
+  flex: 1;
+  padding: 0;
+  background: theme.$bg-secondary;
+}
+
+@media (max-width: 1024px) {
+  .content {
+    padding: 0;
+  }
+}

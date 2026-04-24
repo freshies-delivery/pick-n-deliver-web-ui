@@ -8,7 +8,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-export interface TableColumn {
+export interface ColumnConfig {
   key: string;
   label: string;
   type?: 'text' | 'number' | 'boolean' | 'currency' | 'custom';
@@ -16,7 +16,7 @@ export interface TableColumn {
 }
 
 @Component({
-  selector: 'app-generic-table',
+  selector: 'app-data-table',
   standalone: true,
   imports: [
     CommonModule,
@@ -27,8 +27,8 @@ export interface TableColumn {
     MatPaginatorModule,
     MatTooltipModule
   ],
-  templateUrl: './generic-table.component.html',
-  styleUrl: './generic-table.component.scss',
+  templateUrl: './data-table.component.html',
+  styleUrl: './data-table.component.scss',
   animations: [
     trigger('rowsStagger', [
       transition('* => *', [
@@ -44,8 +44,8 @@ export interface TableColumn {
     ])
   ]
 })
-export class GenericTableComponent<T = unknown> {
-  @Input({ required: true }) columns: TableColumn[] = [];
+export class DataTableComponent<T = unknown> {
+  @Input({ required: true }) columns: ColumnConfig[] = [];
   @Input({ required: true }) data: T[] = [];
   @Input() loading = false;
   @Input() clickableRows = true;
@@ -67,8 +67,8 @@ export class GenericTableComponent<T = unknown> {
   }
 
   get filteredData(): T[] {
-    const query = this.searchTerm.trim().toLowerCase();
-    if (!query) {
+    const queryText = this.searchTerm.trim().toLowerCase();
+    if (!queryText) {
       return this.data;
     }
 
@@ -76,7 +76,7 @@ export class GenericTableComponent<T = unknown> {
       this.columns.some((column) =>
         String(this.getCellValue(row, column.key) ?? '')
           .toLowerCase()
-          .includes(query)
+          .includes(queryText)
       )
     );
   }
@@ -91,7 +91,6 @@ export class GenericTableComponent<T = unknown> {
     this.currentPage = event.pageIndex;
     this.currentPageSize = event.pageSize;
   }
-
 
   getCellValue(row: T, key: string): unknown {
     return (row as Record<string, unknown>)[key];
@@ -115,7 +114,7 @@ export class GenericTableComponent<T = unknown> {
     return '';
   }
 
-  getFormattedValue(row: T, column: TableColumn): string | boolean {
+  getFormattedValue(row: T, column: ColumnConfig): string | boolean {
     const value = this.getCellValue(row, column.key);
 
     if (column.type === 'boolean') {
@@ -150,3 +149,4 @@ export class GenericTableComponent<T = unknown> {
     this.delete.emit(row);
   }
 }
+

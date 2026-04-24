@@ -1,0 +1,110 @@
+<aside class="sidebar">
+  <div class="brand">Pick N Deliver</div>
+  <div class="hierarchy-summary">{{ summary() }}</div>
+
+  <nav class="tree-nav" aria-label="Hierarchy Navigation">
+    <button type="button" class="menu-item" (click)="toggle('clientView')">
+      <mat-icon>{{ expanded().clientView ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      <mat-icon>domain</mat-icon>
+      <span>Client View</span>
+    </button>
+
+    @if (expanded().clientView) {
+      <button
+        type="button"
+        class="menu-item child"
+        [class.active]="isRouteActive('/client')"
+        (click)="navigateClientRoot()"
+      >
+        <mat-icon>groups</mat-icon>
+        <span>Client List</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item child"
+        [class.disabled]="!hasClient()"
+        [class.active]="hasClient() && isRouteActive('/client/' + hierarchy().clientId + '/outlets')"
+        (click)="navigateOutletList()"
+      >
+        <mat-icon>storefront</mat-icon>
+        <span>Outlet List</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item child"
+        [class.disabled]="!hasOutlet()"
+        (click)="toggle('outletDetails')"
+      >
+        <mat-icon>{{ expanded().outletDetails ? 'expand_more' : 'chevron_right' }}</mat-icon>
+        <mat-icon>info</mat-icon>
+        <span>Outlet Details</span>
+      </button>
+
+      @if (expanded().outletDetails) {
+        <button
+          type="button"
+          class="menu-item sub-child"
+          [class.disabled]="!hasOutlet()"
+          [class.active]="hasOutlet() && isRouteActive('/client/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories')"
+          (click)="navigateCategories()"
+        >
+          <mat-icon>category</mat-icon>
+          <span>Categories</span>
+        </button>
+
+        <button
+          type="button"
+          class="menu-item sub-child"
+          [class.disabled]="!hasCategory()"
+          [class.active]="
+            hasCategory() &&
+            isRouteActive('/client/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories/' + hierarchy().categoryId + '/items')
+          "
+          (click)="navigateItems()"
+        >
+          <mat-icon>restaurant_menu</mat-icon>
+          <span>Items</span>
+        </button>
+
+        <button
+          type="button"
+          class="menu-item sub-child"
+          [class.disabled]="!hasOutlet()"
+          [class.active]="hasOutlet() && isRouteActive('/client/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId)"
+          (click)="navigateRatings()"
+        >
+          <mat-icon>star</mat-icon>
+          <span>Ratings</span>
+        </button>
+      }
+    }
+
+    <button type="button" class="menu-item section-toggle" (click)="toggle('userView')">
+      <mat-icon>{{ expanded().userView ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      <mat-icon>person</mat-icon>
+      <span>User View</span>
+    </button>
+
+    @if (expanded().userView) {
+      <div class="menu-item child disabled"><mat-icon>receipt_long</mat-icon><span>Orders</span></div>
+      <div class="menu-item child disabled"><mat-icon>home</mat-icon><span>Addresses</span></div>
+      <div class="menu-item child disabled"><mat-icon>reviews</mat-icon><span>Ratings</span></div>
+    }
+
+    <button type="button" class="menu-item section-toggle" (click)="toggle('adminPanel')">
+      <mat-icon>{{ expanded().adminPanel ? 'expand_more' : 'chevron_right' }}</mat-icon>
+      <mat-icon>admin_panel_settings</mat-icon>
+      <span>Admin Panel</span>
+    </button>
+
+    @if (expanded().adminPanel) {
+      <div class="menu-item child disabled"><mat-icon>segment</mat-icon><span>Segments</span></div>
+      <div class="menu-item child disabled"><mat-icon>tune</mat-icon><span>Config (Key-Value)</span></div>
+      <div class="menu-item child disabled"><mat-icon>local_offer</mat-icon><span>Offers</span></div>
+      <div class="menu-item child disabled"><mat-icon>notifications</mat-icon><span>Notifications</span></div>
+    }
+  </nav>
+</aside>
+

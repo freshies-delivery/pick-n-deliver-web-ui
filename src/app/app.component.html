@@ -1,4 +1,13 @@
-<mat-toolbar color="primary">{{ title }}</mat-toolbar>
-<main class="app-shell">
-  <router-outlet />
-</main>
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="main">
+    <app-header></app-header>
+    <div class="content">
+      <router-outlet />
+    </div>
+  </div>
+</div>
+
+<app-global-fab></app-global-fab>
+

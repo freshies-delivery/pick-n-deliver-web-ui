@@ -1,0 +1,30 @@
+@use '../../../theme' as theme;
+
+.items-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.grid-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  color: theme.$text-secondary;
+  gap: 8px;
+
+  mat-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 34px;
+    color: #9ca3af;
+  }
+
+  h3,
+  p {
+    margin: 0;
+  }
+}
+

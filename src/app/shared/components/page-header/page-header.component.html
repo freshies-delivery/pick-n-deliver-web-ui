@@ -1,0 +1,28 @@
+<div class="page-header">
+  <div class="header-left">
+    @if (breadcrumb) {
+      <div class="breadcrumb">{{ breadcrumb }}</div>
+    }
+    <h1>{{ title }}</h1>
+    @if (subtitle) {
+      <p class="subtitle">{{ subtitle }}</p>
+    }
+  </div>
+
+  <div class="header-right">
+    @for (btn of actions; track btn.label) {
+      <button
+        type="button"
+        [class.primary-btn]="(btn.type || 'primary') === 'primary'"
+        [class.secondary-btn]="btn.type === 'secondary'"
+        (click)="btn.action()"
+      >
+        @if (btn.icon) {
+          <mat-icon>{{ btn.icon }}</mat-icon>
+        }
+        {{ btn.label }}
+      </button>
+    }
+  </div>
+</div>
+

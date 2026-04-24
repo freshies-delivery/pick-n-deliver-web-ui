@@ -1,8 +1,4 @@
-<div class="actions">
-  <button mat-flat-button color="primary" (click)="openCreateDialog()">Add Category</button>
-</div>
-
-<app-generic-table
+<app-data-table
   [columns]="columns"
   [data]="categories()"
   [loading]="loading()"
@@ -10,5 +6,5 @@
   (edit)="openEditDialog($event)"
   (delete)="confirmDelete($event)"
   (rowClick)="openItems.emit($event)"
-/>
+></app-data-table>
 

@@ -1,0 +1,133 @@
+@use './theme' as theme;
+
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: theme.$bg-secondary;
+  color: theme.$text-primary;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.card {
+  background: theme.$bg-primary;
+  border-radius: 10px;
+  border: 1px solid theme.$border-color;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-color: #d1d5db;
+}
+
+.page {
+  padding: 24px 32px;
+}
+
+.page-content {
+  margin-top: 24px;
+  width: 100%;
+}
+
+.page-content > * + * {
+  margin-top: 24px;
+}
+
+.tabs {
+  margin-bottom: 16px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.header-left h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.primary-btn {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: #1f1f1f;
+  transform: translateY(-1px);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+button.mat-mdc-icon-button {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+button.mat-mdc-icon-button:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.mat-mdc-dialog-container {
+  border-radius: 8px !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16) !important;
+}
+
+.mdc-data-table__row:last-child .mdc-data-table__cell {
+  border-bottom: 0;
+}
+
+

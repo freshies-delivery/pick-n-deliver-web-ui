@@ -1,0 +1,56 @@
+@use '../../../../theme' as theme;
+
+.header {
+  height: 58px;
+  padding: 0 24px;
+  border-bottom: 1px solid theme.$border-color;
+  background: theme.$bg-primary;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: theme.$text-primary;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  color: #111827;
+  opacity: 1 !important;
+  transition: all 0.2s ease;
+}
+
+.header-icon-btn:hover {
+  background: #f3f4f6;
+  transform: none !important;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid theme.$border-color;
+  background: #0a0a0a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatar:hover {
+  background: #1f1f1f;
+}
+

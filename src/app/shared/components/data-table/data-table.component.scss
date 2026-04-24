@@ -1,0 +1,140 @@
+@use '../../../../theme' as theme;
+
+.table-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+  background: #fafafa;
+}
+
+tr {
+  height: 48px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s ease;
+}
+
+tr:hover {
+  background: #f9fafb;
+}
+
+.mat-column-id,
+.mat-column-clientId,
+.mat-column-outletId,
+.mat-column-categoryId,
+.mat-column-itemId,
+.mat-column-ratingId,
+.mat-column-ratingCommentId,
+.mat-column-addressId,
+.col-id {
+  width: 64px;
+  color: #6b7280;
+}
+
+.mat-column-name,
+.col-name {
+  min-width: 160px;
+  font-weight: 500;
+}
+
+.mat-column-type,
+.col-type {
+  min-width: 120px;
+}
+
+.mat-column-description,
+.mat-column-comment,
+.mat-column-comments,
+.col-description {
+  min-width: 220px;
+  color: #6b7280;
+}
+
+.mat-column-actions {
+  width: 96px;
+  text-align: right;
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+button {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.text-muted {
+  color: #6b7280;
+}
+
+.text-primary,
+.text-bold {
+  color: theme.$text-primary;
+}
+
+.text-bold {
+  font-weight: 600;
+}
+
+.table-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  gap: 12px;
+  color: #6b7280;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  gap: 10px;
+  color: #6b7280;
+  background: #fff;
+  border: 1px dashed #e5e7eb;
+  border-radius: 12px;
+  margin-top: 12px;
+
+  h3,
+  p {
+    margin: 0;
+  }
+}
+
+.modern-paginator {
+  background: #fff;
+  border-top: 1px solid #f1f5f9;
+}
+

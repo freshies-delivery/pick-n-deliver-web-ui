@@ -1,25 +1,62 @@
-<h2 mat-dialog-title>{{ data.title }}</h2>
+<div class="dialog-header">
+  <div class="header-content">
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+    @if (data.subtitle) {
+      <p class="dialog-subtitle">{{ data.subtitle }}</p>
+    }
+  </div>
+  <button mat-icon-button (click)="cancel()" class="close-btn">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
 
 <mat-dialog-content [formGroup]="form" class="dialog-content">
-  @for (field of data.fields; track field.key) {
-    @if (field.type === 'checkbox') {
-      <mat-checkbox [formControlName]="field.key">{{ field.label }}</mat-checkbox>
-    } @else {
-      <mat-form-field appearance="outline">
-        <mat-label>{{ field.label }}</mat-label>
-
-        @if (field.type === 'textarea') {
-          <textarea matInput rows="3" [formControlName]="field.key"></textarea>
+  <div class="fields-grid">
+    @for (field of data.fields; track field.key) {
+      <div class="field-wrapper" [class.full-width]="field.type === 'textarea'">
+        @if (field.type === 'checkbox') {
+          <div class="checkbox-wrapper">
+            <mat-checkbox [formControlName]="field.key">{{ field.label }}</mat-checkbox>
+          </div>
+        } @else if (field.type === 'toggle') {
+          <div class="toggle-wrapper">
+            <label>{{ field.label }}</label>
+            <mat-slide-toggle [formControlName]="field.key"></mat-slide-toggle>
+          </div>
         } @else {
-          <input matInput [type]="field.type" [formControlName]="field.key" />
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ field.label }}</mat-label>
+
+            @if (field.type === 'textarea') {
+              <textarea
+                matInput
+                [rows]="field.rows || 3"
+                [formControlName]="field.key"
+                [placeholder]="field.placeholder || ''"
+              ></textarea>
+            } @else {
+              <input
+                matInput
+                [type]="field.type"
+                [formControlName]="field.key"
+                [placeholder]="field.placeholder || ''"
+              />
+            }
+
+            @if (form.get(field.key)?.invalid && form.get(field.key)?.touched) {
+              <mat-error>{{ getFieldError(field.key) }}</mat-error>
+            }
+          </mat-form-field>
         }
-      </mat-form-field>
+      </div>
     }
-  }
+  </div>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
-  <button mat-flat-button color="primary" (click)="save()">Save</button>
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="cancel()" class="cancel-btn">Cancel</button>
+  <button mat-flat-button (click)="save()" [disabled]="form.invalid" class="save-btn">
+    Save
+  </button>
 </mat-dialog-actions>
 

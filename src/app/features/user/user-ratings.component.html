@@ -1,15 +1,19 @@
 <div class="page">
   <app-page-header
-    [breadcrumb]="'User View / User List'"
+    [breadcrumb]="'User View / Users'"
     [title]="'Ratings'"
-    [subtitle]="'Manage ratings for ' + userLabel()"
+    [subtitle]="'Ratings received by ' + userLabel()"
   ></app-page-header>
 
   <div class="page-content">
-    <div class="card user-card">
-      <h3>User {{ userLabel() }}</h3>
-      <p>Ratings content is ready for userId: {{ userId() }}</p>
+    <div class="card">
+      <app-data-table
+        [columns]="columns"
+        [data]="ratings()"
+        [loading]="loading()"
+        [clickableRows]="false"
+        [emptyMessage]="'No ratings found for this user'"
+      ></app-data-table>
     </div>
   </div>
 </div>
-

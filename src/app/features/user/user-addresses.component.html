@@ -1,14 +1,22 @@
 <div class="page">
   <app-page-header
-    [breadcrumb]="'User View / User List'"
+    [breadcrumb]="'User View / Users'"
     [title]="'Addresses'"
-    [subtitle]="'Manage addresses for ' + userLabel()"
+    [subtitle]="'Delivery addresses for ' + userLabel()"
+    [actions]="headerActions"
   ></app-page-header>
 
   <div class="page-content">
-    <div class="card user-card">
-      <h3>User {{ userLabel() }}</h3>
-      <p>Addresses content is ready for userId: {{ userId() }}</p>
+    <div class="card">
+      <app-data-table
+        [columns]="columns"
+        [data]="addresses()"
+        [loading]="loading()"
+        [clickableRows]="false"
+        [emptyMessage]="'No addresses found for this user'"
+        (edit)="openEditDialog($event)"
+        (delete)="confirmDelete($event)"
+      ></app-data-table>
     </div>
   </div>
 </div>

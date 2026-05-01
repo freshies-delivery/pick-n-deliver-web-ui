@@ -1,8 +1,8 @@
 <div class="page">
   <app-page-header
     [breadcrumb]="'User View'"
-    [title]="'User List'"
-    [subtitle]="'Select a user to manage orders, addresses, and ratings'"
+    [title]="'Users'"
+    [subtitle]="'Manage users — click a row to view orders'"
     [actions]="headerActions"
   ></app-page-header>
 
@@ -12,9 +12,9 @@
         [columns]="columns"
         [data]="users()"
         [loading]="loading()"
-        [emptyMessage]="'No users available'"
-        (edit)="onEdit($event)"
-        (delete)="onDelete($event)"
+        [emptyMessage]="'No users found. Add one to get started.'"
+        (edit)="openEditDialog($event)"
+        (delete)="confirmDelete($event)"
         (rowClick)="openUserOrders($event)"
       ></app-data-table>
     </div>

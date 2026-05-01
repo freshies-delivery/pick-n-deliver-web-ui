@@ -1,0 +1,522 @@
+<!-- NAVBAR (sticky, frosted glass) -->
+<nav class="navbar" [class.scrolled]="scrolled" role="navigation">
+  <div class="nav-inner">
+    <!-- SVG Logo -->
+    <a class="logo" href="/" aria-label="Swiftly home">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="16" fill="#22C55E" opacity="0.15"/>
+        <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22"
+              stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M22 8L26 12L22 16" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="wordmark">Swift<span class="accent">ly</span></span>
+    </a>
+
+    <!-- Center Nav Links -->
+    <ul class="nav-links" [class.open]="menuOpen">
+      <li><a href="#features" (click)="menuOpen=false">Features</a></li>
+      <li><a href="#stores" (click)="menuOpen=false">For Stores</a></li>
+      <li><a href="#riders" (click)="menuOpen=false">For Riders</a></li>
+      <li><a href="#delivery-times" (click)="menuOpen=false">Delivery Times</a></li>
+      <li><a href="#download" (click)="menuOpen=false">Download</a></li>
+    </ul>
+
+    <!-- Right Actions -->
+    <div class="nav-actions">
+      <button class="btn-ghost" (click)="openLogin()" aria-label="Log in">Log in</button>
+      <button class="btn-accent" aria-label="Get the app">Get the App</button>
+      <button class="hamburger" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero" id="home">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text animate-on-scroll">
+        <span class="pill-badge">&#9889; Now live in 150+ cities</span>
+        <h1>Everything Near You.<br>Delivered <em class="accent-text">Swiftly.</em></h1>
+        <p class="hero-sub">From groceries to garden tools, fine wine to furniture — Swiftly connects you to every store in your neighborhood in minutes.</p>
+        <div class="hero-ctas">
+          <button class="btn-accent btn-lg">Download Free</button>
+          <button class="btn-ghost btn-lg">Partner With Us</button>
+        </div>
+        <div class="trust-stats">
+          <div class="stat"><span class="stat-num">2M+</span><span class="stat-label">Orders</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><span class="stat-num">10K+</span><span class="stat-label">Stores</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><span class="stat-num">28 min</span><span class="stat-label">Avg Delivery</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat"><span class="stat-num">98.4%</span><span class="stat-label">On-Time</span></div>
+        </div>
+      </div>
+      <!-- CSS Phone Mockup -->
+      <div class="phone-mockup animate-on-scroll">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="mock-header">
+              <div class="mock-logo-small"></div>
+              <div class="mock-search"></div>
+            </div>
+            <div class="mock-banner"></div>
+            <div class="mock-categories">
+              <div class="mock-cat"></div>
+              <div class="mock-cat"></div>
+              <div class="mock-cat"></div>
+              <div class="mock-cat"></div>
+            </div>
+            <div class="mock-card"></div>
+            <div class="mock-card short"></div>
+            <div class="mock-tracking">
+              <div class="mock-dot pulse"></div>
+              <div class="mock-track-line"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Floating badges -->
+        <div class="float-badge badge-1">
+          <span class="badge-icon">🛒</span>
+          <div><strong>Delivered!</strong><small>12 items · 24 min</small></div>
+        </div>
+        <div class="float-badge badge-2">
+          <span class="badge-icon">⭐</span>
+          <div><strong>4.9 Rating</strong><small>1.2M+ reviews</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE STRIP -->
+<section class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-content">
+      <span class="tag">🛒 Supermarkets</span>
+      <span class="tag">🥩 Meat &amp; Seafood</span>
+      <span class="tag">🌿 Nurseries</span>
+      <span class="tag">👗 Fashion</span>
+      <span class="tag">🛋️ Furniture</span>
+      <span class="tag">🔧 Hardware</span>
+      <span class="tag">🍷 Alcohol</span>
+      <span class="tag">☕ Beverages</span>
+      <span class="tag">💊 Pharmacy</span>
+      <span class="tag">🐾 Pet Supplies</span>
+      <span class="tag">🎁 Gifts</span>
+      <span class="tag">🧴 Beauty</span>
+      <span class="tag">🧹 Household</span>
+      <span class="tag">🍱 Restaurants</span>
+      <span class="tag">🌾 Organic Farms</span>
+      <span class="tag">📦 Department Stores</span>
+    </div>
+    <!-- Duplicate for seamless loop -->
+    <div class="marquee-content" aria-hidden="true">
+      <span class="tag">🛒 Supermarkets</span>
+      <span class="tag">🥩 Meat &amp; Seafood</span>
+      <span class="tag">🌿 Nurseries</span>
+      <span class="tag">👗 Fashion</span>
+      <span class="tag">🛋️ Furniture</span>
+      <span class="tag">🔧 Hardware</span>
+      <span class="tag">🍷 Alcohol</span>
+      <span class="tag">☕ Beverages</span>
+      <span class="tag">💊 Pharmacy</span>
+      <span class="tag">🐾 Pet Supplies</span>
+      <span class="tag">🎁 Gifts</span>
+      <span class="tag">🧴 Beauty</span>
+      <span class="tag">🧹 Household</span>
+      <span class="tag">🍱 Restaurants</span>
+      <span class="tag">🌾 Organic Farms</span>
+      <span class="tag">📦 Department Stores</span>
+    </div>
+  </div>
+</section>
+
+<!-- DELIVERY TIMES SECTION -->
+<section class="delivery-times" id="delivery-times">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <h2>Faster Than You Think</h2>
+      <p>Real delivery windows. Not estimates.</p>
+    </div>
+    <div class="times-grid animate-on-scroll">
+      <div class="time-card">
+        <span class="time-emoji">🛒</span>
+        <h4>Groceries</h4>
+        <div class="time-value">Under 30 min</div>
+      </div>
+      <div class="time-card">
+        <span class="time-emoji">🥩</span>
+        <h4>Meat &amp; Fresh Produce</h4>
+        <div class="time-value">Under 45 min</div>
+      </div>
+      <div class="time-card">
+        <span class="time-emoji">🍷</span>
+        <h4>Alcohol &amp; Beverages</h4>
+        <div class="time-value">Under 25 min</div>
+      </div>
+      <div class="time-card">
+        <span class="time-emoji">💊</span>
+        <h4>Pharmacy</h4>
+        <div class="time-value">Under 20 min</div>
+      </div>
+      <div class="time-card">
+        <span class="time-emoji">🔧</span>
+        <h4>Hardware &amp; Tools</h4>
+        <div class="time-value">Under 60 min</div>
+      </div>
+      <div class="time-card">
+        <span class="time-emoji">🛋️</span>
+        <h4>Furniture (small items)</h4>
+        <div class="time-value">Same Day</div>
+      </div>
+      <div class="time-card">
+        <span class="time-emoji">👗</span>
+        <h4>Clothing &amp; Fashion</h4>
+        <div class="time-value">Under 2 hours</div>
+      </div>
+      <div class="time-card">
+        <span class="time-emoji">🌿</span>
+        <h4>Plants &amp; Nursery</h4>
+        <div class="time-value">Under 90 min</div>
+      </div>
+    </div>
+    <p class="footnote">Delivery times vary by location and availability. Live tracking on every order.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="features">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <h2>Three Steps. Door in Minutes.</h2>
+      <p>The simplest delivery experience you've ever had.</p>
+    </div>
+    <div class="steps-grid animate-on-scroll">
+      <div class="step-card">
+        <span class="step-num">01</span>
+        <h3>Open Swiftly</h3>
+        <p>Browse every store near you across 50+ categories. Real-time stock, live menus, and honest prices.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">02</span>
+        <h3>Pick &amp; Order</h3>
+        <p>Add from multiple stores in a single cart. No juggling multiple apps or separate checkouts.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">03</span>
+        <h3>Track Live</h3>
+        <p>Watch your rider move to your door in real time. Know exactly when to open the front door.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THREE APPS SECTION -->
+<section class="three-apps" id="stores">
+  <div class="container">
+    <div class="section-header animate-on-scroll">
+      <h2>Built for Everyone</h2>
+      <p>One platform. Three powerful experiences.</p>
+    </div>
+    <div class="apps-grid animate-on-scroll">
+      <div class="app-card featured">
+        <div class="app-icon consumer-icon">🛍️</div>
+        <h3>For Consumers</h3>
+        <p class="app-tagline">Shop anything. One cart. Minutes away.</p>
+        <ul class="app-features">
+          <li>✓ Multi-store cart</li>
+          <li>✓ Live rider tracking</li>
+          <li>✓ Scheduled delivery</li>
+          <li>✓ Smart reorder</li>
+        </ul>
+        <div class="store-buttons">
+          <button class="store-btn apple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            App Store
+          </button>
+          <button class="store-btn google">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.65.21.97.12L14.76 12 3.18.12C2.86.21 2.5.25 2.18.42 1.56.77 1.17 1.42 1.17 2.13v19.73c0 .72.39 1.37 1.01 1.9zM16.54 13.65L5.93 24l10.61-10.35.95.95-1 1zM20.5 10.5l-2.55-1.45L15.24 12l2.71 2.95 2.58-1.47c.73-.42 1.17-1.15 1.17-1.98s-.45-1.58-1.2-2z"/></svg>
+            Google Play
+          </button>
+        </div>
+      </div>
+
+      <div class="app-card" id="stores-card">
+        <div class="app-icon store-icon">🏪</div>
+        <h3>For Store Owners</h3>
+        <p class="app-tagline">Reach thousands of customers — zero fleet required.</p>
+        <ul class="app-features">
+          <li>✓ Easy inventory management</li>
+          <li>✓ Real-time order dashboard</li>
+          <li>✓ Sales analytics</li>
+          <li>✓ No setup fee</li>
+        </ul>
+        <button class="btn-accent-outline">Become a Partner</button>
+      </div>
+
+      <div class="app-card" id="riders">
+        <div class="app-icon rider-icon">🏍️</div>
+        <h3>For Delivery Partners</h3>
+        <p class="app-tagline">Earn on your schedule. Every day, any time.</p>
+        <ul class="app-features">
+          <li>✓ Flexible hours</li>
+          <li>✓ Instant payouts</li>
+          <li>✓ Route optimization</li>
+          <li>✓ Weekly bonuses</li>
+        </ul>
+        <button class="btn-accent-outline">Start Earning</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE HIGHLIGHTS (alternating) -->
+<section class="features" id="features-detail">
+  <div class="container">
+    <div class="feature-row animate-on-scroll">
+      <div class="feature-visual">
+        <div class="feature-art cart-art">
+          <div class="art-circle"></div>
+          <div class="art-lines"><div></div><div></div><div></div></div>
+          <div class="art-dot accent"></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <span class="feature-tag">Cart</span>
+        <h3>Multi-Store, One Cart</h3>
+        <p>Order from FreshMart, TopCut Butchery, and Cellar Direct in the same checkout. Swiftly batches and routes deliveries so everything arrives together.</p>
+      </div>
+    </div>
+
+    <div class="feature-row reverse animate-on-scroll">
+      <div class="feature-visual">
+        <div class="feature-art tracking-art">
+          <div class="art-map-bg"></div>
+          <div class="art-route"></div>
+          <div class="art-ping"></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <span class="feature-tag">Tracking</span>
+        <h3>Live Rider Tracking</h3>
+        <p>Real-time GPS updates every 5 seconds. See your rider's exact position, estimated arrival, and get notified when they're 2 minutes away.</p>
+      </div>
+    </div>
+
+    <div class="feature-row animate-on-scroll">
+      <div class="feature-visual">
+        <div class="feature-art schedule-art">
+          <div class="art-calendar"></div>
+          <div class="art-clock"></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <span class="feature-tag">Scheduling</span>
+        <h3>Scheduled Delivery Windows</h3>
+        <p>Pick a 30-minute delivery window up to 7 days in advance. Your order leaves the store at exactly the right time.</p>
+      </div>
+    </div>
+
+    <div class="feature-row reverse animate-on-scroll">
+      <div class="feature-visual">
+        <div class="feature-art pass-art">
+          <div class="art-badge-bg"></div>
+          <div class="art-badge-text">PASS</div>
+          <div class="art-badge-glow"></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <span class="feature-tag">Membership</span>
+        <h3>Swiftly Pass</h3>
+        <p>Unlimited free delivery on every order, every day. One flat monthly fee. Pays for itself after two orders.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<section class="stats-bar animate-on-scroll">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="big-stat" data-target="2000000" data-suffix="M+" data-divisor="1000000">0</span>
+        <span class="stat-desc">Orders Delivered</span>
+      </div>
+      <div class="stat-item">
+        <span class="big-stat" data-target="10000" data-suffix="K+" data-divisor="1000">0</span>
+        <span class="stat-desc">Partner Stores</span>
+      </div>
+      <div class="stat-item">
+        <span class="big-stat" data-target="984" data-suffix="%" data-divisor="10">0</span>
+        <span class="stat-desc">On-Time Delivery</span>
+      </div>
+      <div class="stat-item">
+        <span class="big-stat" data-target="150" data-suffix="+">0</span>
+        <span class="stat-desc">Cities Live</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials animate-on-scroll">
+  <div class="container">
+    <div class="section-header">
+      <h2>People Love Swiftly</h2>
+      <p>Real customers, real stories.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p>"I've got two kids under five and zero time. Swiftly changed my life — groceries, nappies, formula, all delivered before the school run is even done. It's not a luxury anymore, it's a necessity."</p>
+        <div class="testimonial-author">
+          <div class="avatar">SR</div>
+          <div><strong>Sarah R.</strong><span>Busy parent, Melbourne</span></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p>"We're a small butchery. Before Swiftly, we barely had 40 customers a day. Six months in, we're doing 200+ orders — and I didn't have to hire a single driver. The dashboard is genuinely brilliant."</p>
+        <div class="testimonial-author">
+          <div class="avatar">MK</div>
+          <div><strong>Marcus K.</strong><span>Owner, TopCut Butchery</span></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p>"I work three days on Swiftly and make more than my old full-time job. The route optimization is smart — I rarely backtrack. Instant payouts mean I can pay for fuel on the same day. Genuinely love it."</p>
+        <div class="testimonial-author">
+          <div class="avatar">JD</div>
+          <div><strong>Jamie D.</strong><span>Delivery Partner, Sydney</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD CTA -->
+<section class="download-cta" id="download">
+  <div class="container">
+    <div class="cta-content animate-on-scroll">
+      <h2>Your Neighborhood.<br>Delivered.</h2>
+      <p>Free to download. Free to order. Available on iOS and Android.</p>
+      <div class="store-buttons-row">
+        <button class="store-btn-lg apple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          <div><small>Download on the</small><strong>App Store</strong></div>
+        </button>
+        <button class="store-btn-lg google">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.36.6 1.24 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>
+          <div><small>Get it on</small><strong>Google Play</strong></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="/" aria-label="Swiftly">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="16" fill="#22C55E" opacity="0.15"/>
+            <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M22 8L26 12L22 16" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <span class="wordmark">Swift<span class="accent">ly</span></span>
+        </a>
+        <p>Connecting neighborhoods<br>one delivery at a time.</p>
+        <div class="social-links">
+          <!-- Instagram -->
+          <a href="#" aria-label="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+          <!-- Twitter/X -->
+          <a href="#" aria-label="X (Twitter)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <!-- Facebook -->
+          <a href="#" aria-label="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <!-- LinkedIn -->
+          <a href="#" aria-label="LinkedIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Consumers</h5>
+        <ul>
+          <li><a href="#">Download App</a></li>
+          <li><a href="#">Swiftly Pass</a></li>
+          <li><a href="#">Gift Cards</a></li>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Safety</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Partners</h5>
+        <ul>
+          <li><a href="#">Store Partners</a></li>
+          <li><a href="#">Delivery Partners</a></li>
+          <li><a href="#">Advertising</a></li>
+          <li><a href="#">API Access</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Swiftly Technologies Inc. · All rights reserved.</p>
+      <p>Built for speed. Built for you.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" [class.active]="loginModalOpen" (click)="closeLogin()" role="dialog" aria-modal="true" aria-label="Login">
+  <div class="modal-box" (click)="$event.stopPropagation()" (keydown)="onKeydown($event)">
+    <button class="modal-close" (click)="closeLogin()" aria-label="Close login">&times;</button>
+    <!-- Logo inside modal -->
+    <div class="modal-logo">
+      <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="16" fill="#22C55E" opacity="0.15"/>
+        <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M22 8L26 12L22 16" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="wordmark">Swift<span class="accent">ly</span></span>
+    </div>
+    <h2>Welcome back</h2>
+    <p class="modal-sub">Log in to your Swiftly account</p>
+    <form (ngSubmit)="submitLogin()" #loginForm="ngForm">
+      <div class="form-group" [class.error]="loginError && !loginEmail">
+        <label for="email">Email address</label>
+        <input id="email" type="email" [(ngModel)]="loginEmail" name="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="form-group" [class.error]="loginError && (!loginPassword || loginPassword.length < 6)">
+        <label for="password">Password</label>
+        <input id="password" type="password" [(ngModel)]="loginPassword" name="password" placeholder="Min. 6 characters" autocomplete="current-password"/>
+      </div>
+      <div class="form-error" *ngIf="loginError">{{ loginError }}</div>
+      <button type="submit" class="btn-accent btn-full">Log in to Swiftly</button>
+    </form>
+    <p class="modal-footer-link">Don't have an account? <a href="#">Sign up free</a></p>
+  </div>
+</div>

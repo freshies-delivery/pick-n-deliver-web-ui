@@ -1,0 +1,125 @@
+<div class="dashboard-wrapper">
+  <!-- Dashboard Navbar -->
+  <nav class="dash-nav">
+    <div class="nav-inner">
+      <a class="logo" href="/">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="16" fill="#22C55E" opacity="0.15"/>
+          <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M22 8L26 12L22 16" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="wordmark">Swift<span class="accent">ly</span></span>
+      </a>
+
+      <nav class="dash-tabs" role="navigation">
+        <button [class.active]="activeTab === 'dashboard'" (click)="activeTab='dashboard'">Dashboard</button>
+        <button [class.active]="activeTab === 'orders'" (click)="activeTab='orders'">Orders</button>
+        <button [class.active]="activeTab === 'stores'" (click)="activeTab='stores'">Stores</button>
+        <button [class.active]="activeTab === 'tracking'" (click)="activeTab='tracking'">Tracking</button>
+        <button [class.active]="activeTab === 'account'" (click)="activeTab='account'">Account</button>
+      </nav>
+
+      <div class="dash-right">
+        <div class="user-avatar" [title]="user?.name || ''">{{ initials }}</div>
+        <button class="btn-ghost-sm" (click)="logout()">Log out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Body -->
+  <main class="dash-main">
+    <div class="container">
+      <!-- Greeting -->
+      <div class="greeting">
+        <h1>Welcome back, {{ user?.name }} &#128075;</h1>
+        <p>Here's your delivery overview for today — May 1, 2025</p>
+      </div>
+
+      <!-- Metrics Row -->
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-icon">📦</span>
+            <span class="metric-badge amber">2 out for delivery</span>
+          </div>
+          <div class="metric-value">3</div>
+          <div class="metric-label">Active Orders</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-icon">📊</span>
+            <span class="metric-badge green">12 this month</span>
+          </div>
+          <div class="metric-value">147</div>
+          <div class="metric-label">Total Orders</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-icon">🏪</span>
+            <span class="metric-badge blue">3 with new items</span>
+          </div>
+          <div class="metric-value">8</div>
+          <div class="metric-label">Saved Stores</div>
+        </div>
+        <div class="metric-card featured-metric">
+          <div class="metric-top">
+            <span class="metric-icon">✨</span>
+            <span class="metric-badge green">Active ✓</span>
+          </div>
+          <div class="metric-value pass-value">Pass</div>
+          <div class="metric-label">Swiftly Pass · Renews Jun 1</div>
+        </div>
+      </div>
+
+      <!-- Two Column Grid -->
+      <div class="dash-grid">
+        <!-- Recent Orders -->
+        <div class="dash-card">
+          <div class="card-header">
+            <h3>Recent Orders</h3>
+            <button class="link-btn">View all</button>
+          </div>
+          <div class="orders-list">
+            <div class="order-row" *ngFor="let order of orders">
+              <div class="order-info">
+                <span class="order-store">{{ order.store }}</span>
+                <span class="order-meta">{{ order.time }} · {{ order.items }} items</span>
+              </div>
+              <span class="status-chip" [class]="order.statusClass">{{ order.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Favourite Stores -->
+        <div class="dash-card">
+          <div class="card-header">
+            <h3>Favourite Stores</h3>
+            <button class="link-btn">Browse all</button>
+          </div>
+          <div class="stores-list">
+            <div class="store-row" *ngFor="let store of stores">
+              <div class="store-icon">{{ store.icon }}</div>
+              <div class="store-info">
+                <span class="store-name">{{ store.name }}</span>
+                <span class="store-cat">{{ store.category }}</span>
+              </div>
+              <span class="order-count">{{ store.orders }} orders</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Tracking Banner -->
+      <div class="tracking-banner">
+        <div class="tracking-left">
+          <span class="pulse-dot"></span>
+          <div>
+            <strong>2 orders currently on the way</strong>
+            <p>Tap to track live — estimated arrivals in 12 and 28 minutes</p>
+          </div>
+        </div>
+        <button class="btn-accent">Track Orders</button>
+      </div>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,12 @@
+[
+  { "id": "cfg001", "key": "delivery.max_radius_km",       "value": "15",      "type": "number",  "description": "Maximum delivery radius in kilometers",           "group": "delivery",     "last_updated": "2025-03-10", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg002", "key": "delivery.base_fee",            "value": "25",      "type": "number",  "description": "Base delivery fee in INR",                        "group": "delivery",     "last_updated": "2025-03-10", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg003", "key": "delivery.express_fee",         "value": "49",      "type": "number",  "description": "Express delivery surcharge in INR",               "group": "delivery",     "last_updated": "2025-02-20", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg004", "key": "payment.razorpay_enabled",     "value": "true",    "type": "boolean", "description": "Enable Razorpay payment gateway",                 "group": "payment",      "last_updated": "2025-01-05", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg005", "key": "payment.cod_enabled",          "value": "false",   "type": "boolean", "description": "Enable cash on delivery option",                  "group": "payment",      "last_updated": "2025-04-01", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg006", "key": "app.maintenance_mode",         "value": "false",   "type": "boolean", "description": "Put app in maintenance mode for all users",       "group": "app",          "last_updated": "2025-03-01", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg007", "key": "app.min_order_value",          "value": "99",      "type": "number",  "description": "Minimum cart value in INR",                       "group": "app",          "last_updated": "2025-02-14", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg008", "key": "notification.sms_provider",    "value": "twilio",  "type": "string",  "description": "SMS gateway provider name",                       "group": "notification", "last_updated": "2024-11-20", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg009", "key": "notification.sms_enabled",     "value": "true",    "type": "boolean", "description": "Enable SMS notifications to users",               "group": "notification", "last_updated": "2025-01-10", "updated_by": "admin@swiftly.in" },
+  { "id": "cfg010", "key": "offers.max_discount_percent",  "value": "50",      "type": "number",  "description": "Maximum allowed discount percentage on any offer", "group": "offers",       "last_updated": "2025-03-22", "updated_by": "admin@swiftly.in" }
+]

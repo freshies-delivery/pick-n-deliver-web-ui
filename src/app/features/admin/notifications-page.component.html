@@ -1,0 +1,51 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Admin Panel'"
+    [title]="'Notifications'"
+    [subtitle]="'View and manage platform notifications'"
+  ></app-page-header>
+
+  <div class="page-content">
+    @if (loading()) {
+      <div class="empty">Loading notifications…</div>
+    } @else if (notifications().length === 0) {
+      <div class="empty">No notifications found.</div>
+    } @else {
+      <div class="notif-list">
+        @for (notif of notifications(); track notif.id) {
+          <div class="notif-card">
+            <div class="notif-channel">
+              <span class="material-icons">{{ channelIcon(notif.channel) }}</span>
+            </div>
+            <div class="notif-body">
+              <div class="notif-top">
+                <span class="notif-title">{{ notif.title }}</span>
+                <span class="notif-status" [class]="notif.status">{{ notif.status }}</span>
+              </div>
+              <p class="notif-message">{{ notif.message }}</p>
+              <div class="notif-meta">
+                <span class="target-badge">{{ notif.targetLabel }}</span>
+                @if (notif.status === 'sent') {
+                  <span class="meta-item">
+                    <span class="material-icons">send</span>
+                    {{ notif.sentCount | number }} sent
+                  </span>
+                  <span class="meta-item">
+                    <span class="material-icons">open_in_new</span>
+                    {{ notif.openRate }}% open rate
+                  </span>
+                  <span class="meta-item date">{{ notif.sentAt | date:'MMM d, h:mm a' }}</span>
+                } @else {
+                  <span class="meta-item">
+                    <span class="material-icons">schedule</span>
+                    Scheduled: {{ notif.scheduledAt | date:'MMM d, h:mm a' }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

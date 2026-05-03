@@ -1,0 +1,41 @@
+{
+  "total_clients": 284,
+  "clients_growth": 12,
+  "active_outlets": 1247,
+  "outlets_growth": 38,
+  "orders_today": 8432,
+  "orders_growth_percent": 14.2,
+  "active_riders": 312,
+  "rider_utilization_percent": 89,
+  "daily_orders": [
+    { "date": "Apr 26", "consumer_orders": 7210, "store_orders": 5840 },
+    { "date": "Apr 27", "consumer_orders": 8820, "store_orders": 6120 },
+    { "date": "Apr 28", "consumer_orders": 6540, "store_orders": 4980 },
+    { "date": "Apr 29", "consumer_orders": 7980, "store_orders": 5630 },
+    { "date": "Apr 30", "consumer_orders": 9210, "store_orders": 6740 },
+    { "date": "May 1",  "consumer_orders": 8432, "store_orders": 6100 },
+    { "date": "May 2",  "consumer_orders": 8900, "store_orders": 6300 }
+  ],
+  "orders_by_category": [
+    { "category": "Groceries",   "count": 2840, "color": "#22C55E" },
+    { "category": "Restaurants", "count": 1920, "color": "#3B82F6" },
+    { "category": "Pharmacy",    "count": 980,  "color": "#F59E0B" },
+    { "category": "Meat",        "count": 760,  "color": "#EF4444" },
+    { "category": "Beverages",   "count": 620,  "color": "#8B5CF6" },
+    { "category": "Others",      "count": 1312, "color": "#7A8A9A" }
+  ],
+  "revenue_by_city": [
+    { "city": "Bangalore", "revenue": 284200 },
+    { "city": "Mumbai",    "revenue": 198400 },
+    { "city": "Delhi",     "revenue": 176300 },
+    { "city": "Hyderabad", "revenue": 142100 },
+    { "city": "Chennai",   "revenue": 118700 }
+  ],
+  "top_outlets": [
+    { "rank": 1, "name": "FreshMart Koramangala", "category": "Supermarket", "orders_today": 148, "rating": 4.7 },
+    { "rank": 2, "name": "QuickPharm Bandra",     "category": "Pharmacy",    "orders_today": 134, "rating": 4.9 },
+    { "rank": 3, "name": "MeatHouse HSR",          "category": "Butchery",    "orders_today": 112, "rating": 4.6 },
+    { "rank": 4, "name": "BrewCo Indiranagar",     "category": "Beverages",   "orders_today": 98,  "rating": 4.5 },
+    { "rank": 5, "name": "GreenLeaf Whitefield",   "category": "Nursery",     "orders_today": 87,  "rating": 4.8 }
+  ]
+}

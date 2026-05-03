@@ -1,0 +1,38 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Admin Panel'"
+    [title]="'Segments'"
+    [subtitle]="'User segments for targeted campaigns'"
+  ></app-page-header>
+
+  <div class="page-content">
+    @if (loading()) {
+      <div class="empty">Loading segments…</div>
+    } @else if (segments().length === 0) {
+      <div class="empty">No segments found.</div>
+    } @else {
+      <div class="segment-grid">
+        @for (seg of segments(); track seg.id) {
+          <div class="segment-card">
+            <div class="seg-header">
+              <span class="seg-dot" [style.background]="seg.color"></span>
+              <span class="seg-name">{{ seg.name }}</span>
+              <span class="seg-badge" [class.active]="seg.isActive" [class.inactive]="!seg.isActive">
+                {{ seg.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <p class="seg-desc">{{ seg.description }}</p>
+            <div class="seg-criteria">
+              <span class="material-icons">filter_list</span>
+              {{ seg.criteriaReadable }}
+            </div>
+            <div class="seg-footer">
+              <span class="seg-count">{{ seg.userCount | number }} users</span>
+              <span class="seg-date">Since {{ seg.createdAt | date:'MMM d, yyyy' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

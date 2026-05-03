@@ -135,6 +135,26 @@ export class SidebarComponent {
     this.router.navigate(['/users', userId, 'ratings']);
   }
 
+  navigateOverview(): void {
+    this.router.navigate(['/overview']);
+  }
+
+  navigateSegments(): void {
+    this.router.navigate(['/admin/segments']);
+  }
+
+  navigateConfig(): void {
+    this.router.navigate(['/admin/config']);
+  }
+
+  navigateOffers(): void {
+    this.router.navigate(['/admin/offers']);
+  }
+
+  navigateNotifications(): void {
+    this.router.navigate(['/admin/notifications']);
+  }
+
   isRouteActive(prefix: string): boolean {
     return this.router.url.startsWith(prefix);
   }

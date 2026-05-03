@@ -1,0 +1,63 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Admin Panel'"
+    [title]="'Configuration'"
+    [subtitle]="'Manage platform key-value settings'"
+  ></app-page-header>
+
+  <div class="page-content">
+    @if (loading()) {
+      <div class="empty">Loading configuration…</div>
+    } @else {
+      @for (group of groups; track group) {
+        <div class="card config-group">
+          <div class="group-header">
+            <span class="material-icons">tune</span>
+            {{ group | titlecase }}
+          </div>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Value</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Last Updated</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of entriesForGroup(group); track entry.id) {
+                <tr>
+                  <td><code>{{ entry.key }}</code></td>
+                  <td>
+                    @if (editingId() === entry.id) {
+                      <input class="value-input" [(ngModel)]="editValue" (keyup.enter)="saveEdit(entry)" (keyup.escape)="cancelEdit()" />
+                    } @else {
+                      <span class="value-chip" [class.bool-true]="entry.value === 'true'" [class.bool-false]="entry.value === 'false'">
+                        {{ entry.value }}
+                      </span>
+                    }
+                  </td>
+                  <td><span class="type-badge">{{ entry.type }}</span></td>
+                  <td class="desc-col">{{ entry.description }}</td>
+                  <td class="date-col">{{ entry.lastUpdated | date:'MMM d, yyyy' }}</td>
+                  <td>
+                    @if (editingId() === entry.id) {
+                      <button class="btn-save" (click)="saveEdit(entry)">Save</button>
+                      <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+                    } @else {
+                      <button class="btn-edit" (click)="startEdit(entry)">
+                        <span class="material-icons">edit</span>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+</div>

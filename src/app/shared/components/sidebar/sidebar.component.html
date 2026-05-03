@@ -4,6 +4,16 @@
   <div class="user-summary">{{ userSummary() }}</div>
 
   <nav class="tree-nav" aria-label="Hierarchy Navigation">
+    <button
+      type="button"
+      class="menu-item"
+      [class.active]="isRouteActive('/overview')"
+      (click)="navigateOverview()"
+    >
+      <mat-icon>dashboard</mat-icon>
+      <span>Overview</span>
+    </button>
+
     <button type="button" class="menu-item" (click)="toggle('clientView')">
       <mat-icon>{{ expanded().clientView ? 'expand_more' : 'chevron_right' }}</mat-icon>
       <mat-icon>domain</mat-icon>
@@ -140,10 +150,45 @@
     </button>
 
     @if (expanded().adminPanel) {
-      <div class="menu-item child disabled"><mat-icon>segment</mat-icon><span>Segments</span></div>
-      <div class="menu-item child disabled"><mat-icon>tune</mat-icon><span>Config (Key-Value)</span></div>
-      <div class="menu-item child disabled"><mat-icon>local_offer</mat-icon><span>Offers</span></div>
-      <div class="menu-item child disabled"><mat-icon>notifications</mat-icon><span>Notifications</span></div>
+      <button
+        type="button"
+        class="menu-item child"
+        [class.active]="isRouteActive('/admin/segments')"
+        (click)="navigateSegments()"
+      >
+        <mat-icon>segment</mat-icon>
+        <span>Segments</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item child"
+        [class.active]="isRouteActive('/admin/config')"
+        (click)="navigateConfig()"
+      >
+        <mat-icon>tune</mat-icon>
+        <span>Config (Key-Value)</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item child"
+        [class.active]="isRouteActive('/admin/offers')"
+        (click)="navigateOffers()"
+      >
+        <mat-icon>local_offer</mat-icon>
+        <span>Offers</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item child"
+        [class.active]="isRouteActive('/admin/notifications')"
+        (click)="navigateNotifications()"
+      >
+        <mat-icon>notifications</mat-icon>
+        <span>Notifications</span>
+      </button>
     }
   </nav>
 </aside>

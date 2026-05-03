@@ -1,0 +1,11 @@
+{
+  "avg_delivery_time_mins": 26,
+  "avg_delivery_time_prev_mins": 31,
+  "on_time_rate_percent": 98.4,
+  "on_time_rate_prev_percent": 96.1,
+  "failed_delivery_rate_percent": 0.8,
+  "failed_delivery_rate_prev_percent": 1.2,
+  "sparkline_delivery_time": [31, 29, 28, 30, 27, 26, 26],
+  "sparkline_on_time":       [96, 97, 97, 98, 98, 98, 98],
+  "sparkline_failed":        [1.2, 1.1, 1.0, 0.9, 0.9, 0.8, 0.8]
+}

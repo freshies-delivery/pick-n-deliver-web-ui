@@ -1,0 +1,197 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Admin'"
+    [title]="'Overview'"
+    [subtitle]="'Platform performance at a glance'"
+  ></app-page-header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading dashboard…</p>
+    </div>
+  }
+
+  @if (!loading() && stats()) {
+    <div class="page-content">
+
+      <!-- Stat Cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon clients">
+            <span class="material-icons">domain</span>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ stats()!.totalClients | number }}</div>
+            <div class="stat-label">Total Clients</div>
+            <div class="stat-trend up">↑ {{ stats()!.clientsGrowth }} this month</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon outlets">
+            <span class="material-icons">storefront</span>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ stats()!.activeOutlets | number }}</div>
+            <div class="stat-label">Active Outlets</div>
+            <div class="stat-trend up">↑ {{ stats()!.outletsGrowth }} this month</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon orders">
+            <span class="material-icons">receipt_long</span>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ stats()!.ordersToday | number }}</div>
+            <div class="stat-label">Orders Today</div>
+            <div class="stat-trend up">↑ {{ stats()!.ordersGrowthPercent }}% vs yesterday</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon riders">
+            <span class="material-icons">directions_bike</span>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ stats()!.activeRiders }}</div>
+            <div class="stat-label">Active Riders</div>
+            <div class="stat-trend up">{{ stats()!.riderUtilizationPercent }}% utilization</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="chart-row">
+        <div class="card chart-card wide">
+          <h3>Daily Orders — Last 7 Days</h3>
+          <div class="chart-wrap">
+            <canvas baseChart
+              [data]="lineChartData()"
+              [options]="lineChartOptions"
+              type="line">
+            </canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-row two-col">
+        <div class="card chart-card">
+          <h3>Orders by Category</h3>
+          <div class="chart-wrap">
+            <canvas baseChart
+              [data]="doughnutChartData()"
+              [options]="doughnutChartOptions"
+              type="doughnut">
+            </canvas>
+          </div>
+        </div>
+
+        <div class="card chart-card">
+          <h3>Revenue by City</h3>
+          <div class="chart-wrap">
+            <canvas baseChart
+              [data]="barChartData()"
+              [options]="barChartOptions"
+              type="bar">
+            </canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity + Top Outlets -->
+      <div class="chart-row two-col">
+        <div class="card activity-card">
+          <h3>Recent Activity</h3>
+          <ul class="activity-list">
+            @for (item of activity(); track item.id) {
+              <li class="activity-item">
+                <span class="dot" [style.background]="item.color"></span>
+                <span class="activity-text">{{ item.text }}</span>
+                <span class="activity-time">{{ item.timestamp | date:'MMM d, h:mm a' }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="card outlets-card">
+          <h3>Top Outlets Today</h3>
+          <table class="outlets-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Orders</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (outlet of stats()!.topOutlets; track outlet.rank) {
+                <tr>
+                  <td><span class="rank">{{ outlet.rank }}</span></td>
+                  <td>{{ outlet.name }}</td>
+                  <td><span class="cat-badge">{{ outlet.category }}</span></td>
+                  <td>{{ outlet.ordersToday }}</td>
+                  <td><span class="rating">★ {{ outlet.rating }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Delivery Metrics -->
+      @if (metrics()) {
+        <div class="card delivery-metrics">
+          <h3>Delivery Performance</h3>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-label">Avg Delivery Time</div>
+              <div class="metric-value">{{ metrics()!.avgDeliveryTimeMins }} min</div>
+              <div class="metric-trend" [class.up]="metrics()!.avgDeliveryTimeMins < metrics()!.avgDeliveryTimePrevMins"
+                                        [class.down]="metrics()!.avgDeliveryTimeMins > metrics()!.avgDeliveryTimePrevMins">
+                {{ trendLabel(metrics()!.avgDeliveryTimeMins, metrics()!.avgDeliveryTimePrevMins, ' min') }}
+              </div>
+              <div class="sparkline">
+                @for (v of metrics()!.sparklineDeliveryTime; track $index) {
+                  <div class="spark-bar" [style.height.%]="(v / sparklineMax(metrics()!.sparklineDeliveryTime)) * 100"></div>
+                }
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-label">On-Time Rate</div>
+              <div class="metric-value">{{ metrics()!.onTimeRatePercent }}%</div>
+              <div class="metric-trend" [class.up]="metrics()!.onTimeRatePercent > metrics()!.onTimeRatePrevPercent"
+                                        [class.down]="metrics()!.onTimeRatePercent < metrics()!.onTimeRatePrevPercent">
+                {{ trendLabel(metrics()!.onTimeRatePercent, metrics()!.onTimeRatePrevPercent, '%') }}
+              </div>
+              <div class="sparkline">
+                @for (v of metrics()!.sparklineOnTime; track $index) {
+                  <div class="spark-bar" [style.height.%]="(v / sparklineMax(metrics()!.sparklineOnTime)) * 100"></div>
+                }
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-label">Failed Deliveries</div>
+              <div class="metric-value">{{ metrics()!.failedDeliveryRatePercent }}%</div>
+              <div class="metric-trend" [class.up]="metrics()!.failedDeliveryRatePercent < metrics()!.failedDeliveryRatePrevPercent"
+                                        [class.down]="metrics()!.failedDeliveryRatePercent > metrics()!.failedDeliveryRatePrevPercent">
+                {{ trendLabel(metrics()!.failedDeliveryRatePercent, metrics()!.failedDeliveryRatePrevPercent, '%') }}
+              </div>
+              <div class="sparkline">
+                @for (v of metrics()!.sparklineFailed; track $index) {
+                  <div class="spark-bar danger" [style.height.%]="(v / sparklineMax(metrics()!.sparklineFailed)) * 100"></div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+</div>

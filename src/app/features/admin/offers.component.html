@@ -1,0 +1,69 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Admin Panel'"
+    [title]="'Offers'"
+    [subtitle]="'Manage discount codes and promotions'"
+  ></app-page-header>
+
+  <div class="page-content">
+    <div class="filter-tabs">
+      <button class="tab-btn" [class.active]="filter() === 'all'"       (click)="setFilter('all')">All</button>
+      <button class="tab-btn" [class.active]="filter() === 'active'"    (click)="setFilter('active')">Active</button>
+      <button class="tab-btn" [class.active]="filter() === 'scheduled'" (click)="setFilter('scheduled')">Scheduled</button>
+      <button class="tab-btn" [class.active]="filter() === 'expired'"   (click)="setFilter('expired')">Expired</button>
+    </div>
+
+    @if (loading()) {
+      <div class="empty">Loading offers…</div>
+    } @else if (filtered.length === 0) {
+      <div class="empty">No offers found for this filter.</div>
+    } @else {
+      <div class="offers-grid">
+        @for (offer of filtered; track offer.id) {
+          <div class="offer-card">
+            <div class="offer-top">
+              <div>
+                <div class="offer-name">{{ offer.name }}</div>
+                <code class="offer-code">{{ offer.code }}</code>
+              </div>
+              <span class="status-badge" [class]="offer.status">{{ offer.status }}</span>
+            </div>
+
+            <div class="offer-discount">
+              @if (offer.discountType === 'percentage') {
+                <span class="discount-big">{{ offer.discountValue }}% OFF</span>
+              } @else {
+                <span class="discount-big">₹{{ offer.discountValue }} OFF</span>
+              }
+              <span class="min-order">Min order ₹{{ offer.minOrderValue }}</span>
+            </div>
+
+            <div class="offer-meta">
+              <span>Cap: ₹{{ offer.maxDiscountCap }}</span>
+              <span>{{ offer.startDate | date:'MMM d' }} – {{ offer.endDate | date:'MMM d, yyyy' }}</span>
+            </div>
+
+            <div class="usage-bar-wrap">
+              <div class="usage-label">
+                <span>{{ offer.usageCount | number }} used</span>
+                <span>{{ offer.usageLimit | number }} limit</span>
+              </div>
+              <div class="usage-bar">
+                <div class="usage-fill" [style.width.%]="usagePercent(offer)"></div>
+              </div>
+            </div>
+
+            <div class="offer-categories">
+              @for (cat of offer.applicableCategories.slice(0, 3); track cat) {
+                <span class="cat-tag">{{ cat }}</span>
+              }
+              @if (offer.applicableCategories.length > 3) {
+                <span class="cat-tag more">+{{ offer.applicableCategories.length - 3 }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

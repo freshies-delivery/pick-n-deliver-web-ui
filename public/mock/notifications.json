@@ -1,0 +1,26 @@
+[
+  {
+    "id": "notif001", "title": "Weekend Deals Are Here!", "message": "Get 20% off groceries this weekend. Use code WKND20.",
+    "channel": "push", "target_type": "all", "target_label": "All Users",
+    "sent_count": 48210, "open_count": 19284, "open_rate": 40.0,
+    "status": "sent", "scheduled_at": null, "sent_at": "2025-04-26T09:00:00", "created_by": "admin@swiftly.in"
+  },
+  {
+    "id": "notif002", "title": "We miss you!", "message": "It's been a while. Come back and get ₹50 off your next order.",
+    "channel": "sms", "target_type": "segment", "target_label": "Churned Users",
+    "sent_count": 432, "open_count": 97, "open_rate": 22.5,
+    "status": "sent", "scheduled_at": null, "sent_at": "2025-04-22T11:30:00", "created_by": "admin@swiftly.in"
+  },
+  {
+    "id": "notif003", "title": "Your Swiftly Pass is expiring", "message": "Renew before May 31 to keep enjoying free delivery.",
+    "channel": "email", "target_type": "segment", "target_label": "Swiftly Pass Holders",
+    "sent_count": 1847, "open_count": 1102, "open_rate": 59.7,
+    "status": "sent", "scheduled_at": null, "sent_at": "2025-04-20T08:00:00", "created_by": "admin@swiftly.in"
+  },
+  {
+    "id": "notif004", "title": "Swiftly Pass Launch — 50% Off", "message": "Exclusive offer for power users. Limited time only.",
+    "channel": "push", "target_type": "segment", "target_label": "Power Users",
+    "sent_count": 0, "open_count": 0, "open_rate": 0,
+    "status": "scheduled", "scheduled_at": "2025-05-10T10:00:00", "sent_at": null, "created_by": "admin@swiftly.in"
+  }
+]

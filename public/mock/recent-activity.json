@@ -1,0 +1,10 @@
+[
+  { "id": "act001", "type": "outlet_registered", "color": "#22C55E", "text": "New outlet registered: FreshMart Whitefield",             "timestamp": "2025-05-02T09:14:00" },
+  { "id": "act002", "type": "order_delivered",   "color": "#3B82F6", "text": "Order #SW-8821 delivered in 22 min",                       "timestamp": "2025-05-02T09:08:00" },
+  { "id": "act003", "type": "user_registered",   "color": "#8B5CF6", "text": "3 new users registered in the last hour",                  "timestamp": "2025-05-02T09:00:00" },
+  { "id": "act004", "type": "offer_activated",   "color": "#F59E0B", "text": "Offer activated: Weekend Grocery Deal (WKND20)",            "timestamp": "2025-05-01T18:30:00" },
+  { "id": "act005", "type": "rating_update",     "color": "#22C55E", "text": "Rider Ravi Kumar rating updated to 4.8★",                  "timestamp": "2025-05-01T17:45:00" },
+  { "id": "act006", "type": "outlet_registered", "color": "#22C55E", "text": "New outlet registered: StyleHub Phoenix Mall",             "timestamp": "2025-05-01T16:20:00" },
+  { "id": "act007", "type": "order_delivered",   "color": "#3B82F6", "text": "Order #SW-8819 delivered in 18 min — new record",          "timestamp": "2025-05-01T15:55:00" },
+  { "id": "act008", "type": "config_updated",    "color": "#7A8A9A", "text": "Config updated: delivery.base_fee changed to ₹25",          "timestamp": "2025-05-01T14:10:00" }
+]

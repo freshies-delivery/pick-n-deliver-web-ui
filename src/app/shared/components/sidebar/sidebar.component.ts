@@ -47,7 +47,9 @@ export class SidebarComponent {
   readonly hasOutlet = computed(() => !!this.hierarchy().outletId);
   readonly hasCategory = computed(() => !!this.hierarchy().categoryId);
   readonly hasUser = computed(() => !!this.user().userId);
-  readonly userSummary = computed(() => `User: ${this.user().userName ?? (this.user().userId ? `#${this.user().userId}` : 'None')}`);
+  readonly userSummary = computed(
+    () => `User: ${this.user().userName ?? (this.user().userId ? `#${this.user().userId}` : 'None')}`
+  );
 
   constructor() {
     this.userContext.syncFromRoute(this.router.routerState.snapshot.root);
@@ -56,107 +58,115 @@ export class SidebarComponent {
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(() => this.userContext.syncFromRoute(this.router.routerState.snapshot.root));
+      .subscribe(() => {
+        this.userContext.syncFromRoute(this.router.routerState.snapshot.root);
+        this.autoExpandFromUrl();
+      });
+    this.autoExpandFromUrl();
+  }
+
+  private autoExpandFromUrl(): void {
+    const url = this.router.url;
+    if (url.includes('/dashboard/admin/')) {
+      this.expanded.update((e) => ({ ...e, adminPanel: true }));
+    }
+    if (url.includes('/dashboard/clients/') && url.includes('/outlets/')) {
+      this.expanded.update((e) => ({ ...e, clientView: true, outletDetails: true }));
+    }
+    if (url.startsWith('/dashboard/users/')) {
+      this.expanded.update((e) => ({ ...e, userView: true }));
+    }
   }
 
   toggle(section: keyof ReturnType<typeof this.expanded>): void {
     this.expanded.update((current) => ({ ...current, [section]: !current[section] }));
   }
 
+  // ── Client View ─────────────────────────────────────────────────────────────
+
   navigateClientRoot(): void {
-    this.router.navigate(['/client']);
+    this.router.navigate(['/dashboard/clients']);
   }
 
   navigateOutletList(): void {
     const { clientId } = this.hierarchy();
-    if (!clientId) {
-      return;
-    }
-    this.router.navigate(['/client', clientId, 'outlets']);
-  }
-
-  navigateOutletDetails(): void {
-    const { clientId, outletId } = this.hierarchy();
-    if (!clientId || !outletId) {
-      return;
-    }
-    this.router.navigate(['/client', clientId, 'outlets', outletId]);
+    if (!clientId) return;
+    this.router.navigate(['/dashboard/clients', clientId, 'outlets']);
   }
 
   navigateCategories(): void {
     const { clientId, outletId } = this.hierarchy();
-    if (!clientId || !outletId) {
-      return;
-    }
-    this.router.navigate(['/client', clientId, 'outlets', outletId, 'categories']);
+    if (!clientId || !outletId) return;
+    this.router.navigate(['/dashboard/clients', clientId, 'outlets', outletId, 'categories']);
   }
 
   navigateItems(): void {
     const { clientId, outletId, categoryId } = this.hierarchy();
-    if (!clientId || !outletId || !categoryId) {
-      return;
-    }
-    this.router.navigate(['/client', clientId, 'outlets', outletId, 'categories', categoryId, 'items']);
+    if (!clientId || !outletId || !categoryId) return;
+    this.router.navigate([
+      '/dashboard/clients', clientId, 'outlets', outletId, 'categories', categoryId, 'items'
+    ]);
   }
 
   navigateRatings(): void {
     const { clientId, outletId } = this.hierarchy();
-    if (!clientId || !outletId) {
-      return;
-    }
-    this.router.navigate(['/client', clientId, 'outlets', outletId]);
+    if (!clientId || !outletId) return;
+    this.router.navigate(['/dashboard/clients', clientId, 'outlets', outletId, 'ratings']);
   }
 
+  // ── User View ────────────────────────────────────────────────────────────────
+
   navigateUserList(): void {
-    this.router.navigate(['/users']);
+    this.router.navigate(['/dashboard/users']);
   }
 
   navigateUserOrders(): void {
     const { userId } = this.user();
-    if (!userId) {
-      return;
-    }
-    this.router.navigate(['/users', userId, 'orders']);
+    if (!userId) return;
+    this.router.navigate(['/dashboard/users', userId, 'orders']);
   }
 
   navigateUserAddresses(): void {
     const { userId } = this.user();
-    if (!userId) {
-      return;
-    }
-    this.router.navigate(['/users', userId, 'addresses']);
+    if (!userId) return;
+    this.router.navigate(['/dashboard/users', userId, 'addresses']);
   }
 
   navigateUserRatings(): void {
     const { userId } = this.user();
-    if (!userId) {
-      return;
-    }
-    this.router.navigate(['/users', userId, 'ratings']);
+    if (!userId) return;
+    this.router.navigate(['/dashboard/users', userId, 'ratings']);
   }
 
+  // ── Overview & Admin Panel ───────────────────────────────────────────────────
+
   navigateOverview(): void {
-    this.router.navigate(['/overview']);
+    this.router.navigate(['/dashboard']);
   }
 
   navigateSegments(): void {
-    this.router.navigate(['/admin/segments']);
+    this.router.navigate(['/dashboard/admin/segments']);
   }
 
   navigateConfig(): void {
-    this.router.navigate(['/admin/config']);
+    this.router.navigate(['/dashboard/admin/config']);
   }
 
   navigateOffers(): void {
-    this.router.navigate(['/admin/offers']);
+    this.router.navigate(['/dashboard/admin/offers']);
   }
 
   navigateNotifications(): void {
-    this.router.navigate(['/admin/notifications']);
+    this.router.navigate(['/dashboard/admin/notifications']);
   }
+
+  // ── Active state ─────────────────────────────────────────────────────────────
 
   isRouteActive(prefix: string): boolean {
     return this.router.url.startsWith(prefix);
   }
-}
 
+  isRouteExact(path: string): boolean {
+    return this.router.url === path || this.router.url === path + '/';
+  }
+}

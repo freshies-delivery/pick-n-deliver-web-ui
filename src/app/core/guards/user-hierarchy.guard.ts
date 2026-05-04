@@ -9,11 +9,10 @@ export class UserHierarchyGuard implements CanActivate {
     const userId = route.paramMap.get('userId');
 
     if (!userId) {
-      this.router.navigate(['/users']);
+      this.router.navigate(['/dashboard/users']);
       return false;
     }
 
     return true;
   }
 }
-

@@ -178,7 +178,7 @@ export class OutletListComponent implements OnInit, OnDestroy {
     }
 
     this.hierarchyState.setOutlet(outlet.outletId, outlet.name ?? null);
-    this.router.navigate(['/client', this.clientId(), 'outlets', outlet.outletId]);
+    this.router.navigate(['/dashboard/clients', this.clientId(), 'outlets', outlet.outletId]);
   }
 }
 

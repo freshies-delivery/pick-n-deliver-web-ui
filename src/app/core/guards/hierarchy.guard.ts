@@ -16,21 +16,20 @@ export class HierarchyGuard implements CanActivate {
     const requiresCategory = path.includes(':categoryId');
 
     if (requiresClient && !clientId) {
-      this.router.navigate(['/client']);
+      this.router.navigate(['/dashboard/clients']);
       return false;
     }
 
     if (requiresOutlet && !outletId) {
-      this.router.navigate(['/client']);
+      this.router.navigate(['/dashboard/clients']);
       return false;
     }
 
     if (requiresCategory && !categoryId) {
-      this.router.navigate(['/client']);
+      this.router.navigate(['/dashboard/clients']);
       return false;
     }
 
     return true;
   }
 }
-

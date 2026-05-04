@@ -159,7 +159,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
     }
 
     this.hierarchyState.setClient(client.clientId, client.name ?? null);
-    this.router.navigate(['/client', client.clientId, 'outlets']);
+    this.router.navigate(['/dashboard/clients', client.clientId, 'outlets']);
   }
 }
 

@@ -18,3 +18,27 @@
   padding: 24px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
+
+.user-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 24px;
+  margin-bottom: 0;
+}
+
+.user-tab {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: #111; }
+  &.active {
+    color: #111;
+    border-bottom-color: #111;
+  }
+}

@@ -1,23 +1,52 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+export interface AuthUser {
+  name: string;
+  email: string;
+  initials: string;
+}
+
+const STORAGE_KEY = 'swiftly_user';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private userSubject = new BehaviorSubject<{ name: string; email: string } | null>(null);
+  private readonly userSubject = new BehaviorSubject<AuthUser | null>(this.loadFromStorage());
 
-  currentUser$ = this.userSubject.asObservable();
-  isLoggedIn$ = new BehaviorSubject<boolean>(false);
+  readonly currentUser$ = this.userSubject.asObservable();
 
-  login(email: string, password: string): void {
+  get currentUser(): AuthUser | null {
+    return this.userSubject.value;
+  }
+
+  isLoggedIn(): boolean {
+    return this.userSubject.value !== null;
+  }
+
+  login(email: string, _password: string): void {
     const namePart = email.split('@')[0];
-    const name = namePart.charAt(0).toUpperCase() + namePart.slice(1).replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).split(' ')[0];
-    const user = { name, email };
+    const name = namePart
+      .charAt(0).toUpperCase() + namePart.slice(1)
+      .replace(/[._-]/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .split(' ')[0];
+    const initials = name.slice(0, 2).toUpperCase();
+    const user: AuthUser = { name, email, initials };
     this.userSubject.next(user);
-    this.isLoggedIn$.next(true);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
   }
 
   logout(): void {
     this.userSubject.next(null);
-    this.isLoggedIn$.next(false);
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  private loadFromStorage(): AuthUser | null {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as AuthUser) : null;
+    } catch {
+      return null;
+    }
   }
 }

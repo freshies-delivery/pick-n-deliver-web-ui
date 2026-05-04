@@ -1,6 +1,6 @@
-import { Component, HostListener, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements AfterViewInit, OnDestroy {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   loginModalOpen = false;
   loginEmail = '';
   loginPassword = '';
@@ -23,7 +23,17 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private statsObserver?: IntersectionObserver;
   private statsAnimated = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    if (this.auth.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
 
   @HostListener('window:scroll')
   onScroll() {
@@ -58,7 +68,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     }
     this.auth.login(this.loginEmail, this.loginPassword);
     this.closeLogin();
-    this.router.navigate(['/dashboard']);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+    this.router.navigateByUrl(returnUrl);
   }
 
   onKeydown(e: KeyboardEvent) {

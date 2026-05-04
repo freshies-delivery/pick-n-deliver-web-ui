@@ -110,6 +110,14 @@ export class OutletDetailComponent implements OnInit, AfterViewInit {
     this.clientId.set(Number(this.route.snapshot.paramMap.get('clientId')));
     this.outletId.set(Number(this.route.snapshot.paramMap.get('outletId')));
     this.hierarchyState.syncFromRoute(this.route.snapshot);
+    const url = this.router.url;
+    if (url.includes('/ratings')) {
+      this.activeTab.set('ratings');
+    } else if (url.includes('/categories')) {
+      this.activeTab.set('categories');
+    } else {
+      this.activeTab.set('address');
+    }
     this.loadAddress();
     this.loadRatingsAndComments();
   }
@@ -125,6 +133,15 @@ export class OutletDetailComponent implements OnInit, AfterViewInit {
 
   setTab(tab: 'address' | 'categories' | 'ratings'): void {
     this.activeTab.set(tab);
+    const cId = this.clientId();
+    const oId = this.outletId();
+    if (tab === 'categories') {
+      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'categories']);
+    } else if (tab === 'ratings') {
+      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'ratings']);
+    } else {
+      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId]);
+    }
   }
 
   openAddCategoryFromHeader(): void {
@@ -237,7 +254,7 @@ export class OutletDetailComponent implements OnInit, AfterViewInit {
 
     this.hierarchyState.setCategory(category.categoryId, category.name ?? null);
     this.router.navigate([
-      '/client',
+      '/dashboard/clients',
       this.clientId(),
       'outlets',
       this.outletId(),

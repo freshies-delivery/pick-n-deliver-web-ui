@@ -1,14 +1,40 @@
 <header class="header">
-  <div class="header-title">Admin</div>
+  <div class="header-left">
+    <app-breadcrumbs></app-breadcrumbs>
+  </div>
 
   <div class="header-actions">
     <button mat-icon-button class="header-icon-btn" type="button" aria-label="Search">
       <mat-icon>search</mat-icon>
     </button>
+
     <button mat-icon-button class="header-icon-btn" type="button" aria-label="Notifications">
       <mat-icon>notifications</mat-icon>
     </button>
-    <button class="avatar" type="button" aria-label="Profile">SN</button>
+
+    <div class="avatar-wrap">
+      <button
+        class="avatar"
+        type="button"
+        [attr.aria-label]="'User menu for ' + currentUser?.name"
+        (click)="toggleDropdown()"
+      >
+        {{ currentUser?.initials ?? '?' }}
+      </button>
+
+      @if (dropdownOpen()) {
+        <div class="dropdown" role="menu">
+          <div class="dropdown-user">
+            <span class="dropdown-name">{{ currentUser?.name }}</span>
+            <span class="dropdown-email">{{ currentUser?.email }}</span>
+          </div>
+          <hr class="dropdown-divider" />
+          <button class="dropdown-item" type="button" role="menuitem" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Log out
+          </button>
+        </div>
+      }
+    </div>
   </div>
 </header>
-

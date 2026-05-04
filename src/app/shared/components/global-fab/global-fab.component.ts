@@ -41,7 +41,7 @@ export class GlobalFabComponent {
       route = route.firstChild;
     }
 
-    const data = route.snapshot.data as { showFab?: boolean; fabAction?: string };
+    const data = (route.snapshot?.data ?? {}) as { showFab?: boolean; fabAction?: string };
     this.fabService.configure(!!data.showFab, data.fabAction);
   }
 }

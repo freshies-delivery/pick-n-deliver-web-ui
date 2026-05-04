@@ -11,15 +11,27 @@ export const CLIENT_ROUTES: Routes = [
     component: ClientListComponent,
     data: { showFab: true, fabAction: 'createClient' }
   },
-  { path: 'clients', redirectTo: '', pathMatch: 'full' },
   {
     path: ':clientId/outlets',
     component: OutletListComponent,
     canActivate: [HierarchyGuard],
     data: { showFab: true, fabAction: 'createOutlet' }
   },
-  { path: ':clientId/outlets/:outletId', component: OutletDetailComponent, canActivate: [HierarchyGuard] },
-  { path: ':clientId/outlets/:outletId/categories', component: OutletDetailComponent, canActivate: [HierarchyGuard] },
+  {
+    path: ':clientId/outlets/:outletId',
+    component: OutletDetailComponent,
+    canActivate: [HierarchyGuard]
+  },
+  {
+    path: ':clientId/outlets/:outletId/categories',
+    component: OutletDetailComponent,
+    canActivate: [HierarchyGuard]
+  },
+  {
+    path: ':clientId/outlets/:outletId/ratings',
+    component: OutletDetailComponent,
+    canActivate: [HierarchyGuard]
+  },
   {
     path: ':clientId/outlets/:outletId/categories/:categoryId/items',
     component: ItemListComponent,
@@ -27,4 +39,3 @@ export const CLIENT_ROUTES: Routes = [
     data: { showFab: true, fabAction: 'createItem' }
   }
 ];
-

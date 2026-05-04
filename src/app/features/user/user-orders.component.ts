@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 
@@ -11,7 +11,7 @@ import { OrderDto, OrderService } from './services/order.service';
 @Component({
   selector: 'app-user-orders',
   standalone: true,
-  imports: [PageHeaderComponent, DataTableComponent],
+  imports: [PageHeaderComponent, DataTableComponent, RouterLink, RouterLinkActive],
   templateUrl: './user-orders.component.html',
   styleUrl: './user-orders.component.scss'
 })

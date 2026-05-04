@@ -1,20 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-
-export interface BreadcrumbItem {
-  label: string;
-  link?: string;
-}
+import { BreadcrumbService } from './breadcrumb.service';
 
 @Component({
   selector: 'app-breadcrumbs',
   standalone: true,
-  imports: [RouterLink, MatIconModule],
+  imports: [AsyncPipe, NgFor, NgIf, RouterLink],
   templateUrl: './breadcrumbs.component.html',
   styleUrl: './breadcrumbs.component.scss'
 })
 export class BreadcrumbsComponent {
-  @Input({ required: true }) items: BreadcrumbItem[] = [];
+  readonly breadcrumbs$ = inject(BreadcrumbService).breadcrumbs$;
 }
-

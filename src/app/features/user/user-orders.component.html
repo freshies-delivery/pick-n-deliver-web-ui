@@ -5,6 +5,12 @@
     [subtitle]="'Orders for ' + userLabel()"
   ></app-page-header>
 
+  <div class="user-tabs">
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'ratings']" routerLinkActive="active">Ratings</a>
+  </div>
+
   <div class="page-content">
     <div class="card">
       <app-data-table

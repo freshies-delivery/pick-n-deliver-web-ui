@@ -1,14 +1,9 @@
 <nav class="breadcrumbs" aria-label="Breadcrumb">
-  @for (item of items; track item.label; let isLast = $last) {
-    @if (item.link && !isLast) {
-      <a [routerLink]="item.link">{{ item.label }}</a>
-    } @else {
-      <span>{{ item.label }}</span>
-    }
-
-    @if (!isLast) {
-      <mat-icon>chevron_right</mat-icon>
-    }
-  }
+  <ng-container *ngFor="let crumb of breadcrumbs$ | async">
+    <a *ngIf="!crumb.isLast" [routerLink]="crumb.route" class="breadcrumb-link">
+      {{ crumb.label }}
+    </a>
+    <span *ngIf="crumb.isLast" class="breadcrumb-current">{{ crumb.label }}</span>
+    <span *ngIf="!crumb.isLast" class="breadcrumb-sep">/</span>
+  </ng-container>
 </nav>
-

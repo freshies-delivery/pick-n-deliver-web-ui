@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs';
@@ -18,7 +18,7 @@ import { AddressDto, AddressService } from './services/address.service';
 @Component({
   selector: 'app-user-addresses',
   standalone: true,
-  imports: [PageHeaderComponent, DataTableComponent],
+  imports: [PageHeaderComponent, DataTableComponent, RouterLink, RouterLinkActive],
   templateUrl: './user-addresses.component.html',
   styleUrl: './user-addresses.component.scss'
 })

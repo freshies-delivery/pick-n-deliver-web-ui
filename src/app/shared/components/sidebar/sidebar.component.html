@@ -7,7 +7,7 @@
     <button
       type="button"
       class="menu-item"
-      [class.active]="isRouteActive('/overview')"
+      [class.active]="isRouteExact('/dashboard')"
       (click)="navigateOverview()"
     >
       <mat-icon>dashboard</mat-icon>
@@ -24,7 +24,7 @@
       <button
         type="button"
         class="menu-item child"
-        [class.active]="isRouteActive('/client')"
+        [class.active]="isRouteActive('/dashboard/clients')"
         (click)="navigateClientRoot()"
       >
         <mat-icon>groups</mat-icon>
@@ -35,7 +35,7 @@
         type="button"
         class="menu-item child"
         [class.disabled]="!hasClient()"
-        [class.active]="hasClient() && isRouteActive('/client/' + hierarchy().clientId + '/outlets')"
+        [class.active]="hasClient() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets')"
         (click)="navigateOutletList()"
       >
         <mat-icon>storefront</mat-icon>
@@ -58,7 +58,7 @@
           type="button"
           class="menu-item sub-child"
           [class.disabled]="!hasOutlet()"
-          [class.active]="hasOutlet() && isRouteActive('/client/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories')"
+          [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories')"
           (click)="navigateCategories()"
         >
           <mat-icon>category</mat-icon>
@@ -71,7 +71,7 @@
           [class.disabled]="!hasCategory()"
           [class.active]="
             hasCategory() &&
-            isRouteActive('/client/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories/' + hierarchy().categoryId + '/items')
+            isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories/' + hierarchy().categoryId + '/items')
           "
           (click)="navigateItems()"
         >
@@ -83,7 +83,7 @@
           type="button"
           class="menu-item sub-child"
           [class.disabled]="!hasOutlet()"
-          [class.active]="hasOutlet() && isRouteActive('/client/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId)"
+          [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/ratings')"
           (click)="navigateRatings()"
         >
           <mat-icon>star</mat-icon>
@@ -102,7 +102,7 @@
       <button
         type="button"
         class="menu-item child"
-        [class.active]="isRouteActive('/users')"
+        [class.active]="isRouteActive('/dashboard/users')"
         (click)="navigateUserList()"
       >
         <mat-icon>groups</mat-icon>
@@ -113,7 +113,7 @@
         type="button"
         class="menu-item sub-child"
         [class.disabled]="!hasUser()"
-        [class.active]="hasUser() && isRouteActive('/users/' + user().userId + '/orders')"
+        [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/orders')"
         (click)="navigateUserOrders()"
       >
         <mat-icon>receipt_long</mat-icon>
@@ -124,7 +124,7 @@
         type="button"
         class="menu-item sub-child"
         [class.disabled]="!hasUser()"
-        [class.active]="hasUser() && isRouteActive('/users/' + user().userId + '/addresses')"
+        [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/addresses')"
         (click)="navigateUserAddresses()"
       >
         <mat-icon>home</mat-icon>
@@ -135,7 +135,7 @@
         type="button"
         class="menu-item sub-child"
         [class.disabled]="!hasUser()"
-        [class.active]="hasUser() && isRouteActive('/users/' + user().userId + '/ratings')"
+        [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/ratings')"
         (click)="navigateUserRatings()"
       >
         <mat-icon>reviews</mat-icon>
@@ -153,7 +153,7 @@
       <button
         type="button"
         class="menu-item child"
-        [class.active]="isRouteActive('/admin/segments')"
+        [class.active]="isRouteActive('/dashboard/admin/segments')"
         (click)="navigateSegments()"
       >
         <mat-icon>segment</mat-icon>
@@ -163,7 +163,7 @@
       <button
         type="button"
         class="menu-item child"
-        [class.active]="isRouteActive('/admin/config')"
+        [class.active]="isRouteActive('/dashboard/admin/config')"
         (click)="navigateConfig()"
       >
         <mat-icon>tune</mat-icon>
@@ -173,7 +173,7 @@
       <button
         type="button"
         class="menu-item child"
-        [class.active]="isRouteActive('/admin/offers')"
+        [class.active]="isRouteActive('/dashboard/admin/offers')"
         (click)="navigateOffers()"
       >
         <mat-icon>local_offer</mat-icon>
@@ -183,7 +183,7 @@
       <button
         type="button"
         class="menu-item child"
-        [class.active]="isRouteActive('/admin/notifications')"
+        [class.active]="isRouteActive('/dashboard/admin/notifications')"
         (click)="navigateNotifications()"
       >
         <mat-icon>notifications</mat-icon>

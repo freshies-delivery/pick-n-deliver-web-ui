@@ -1,0 +1,77 @@
+<div class="map-panel">
+  <div class="map-header">
+    <h3 class="map-title">Location</h3>
+    <button class="btn-pin" type="button" (click)="toggleCoordForm()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="8" cy="7" r="3"/>
+        <path d="M8 1v2M8 12v3M1 7h2M12 7h3"/>
+      </svg>
+      Set Coordinates
+    </button>
+  </div>
+
+  @if (showCoordForm()) {
+    <form class="coord-form" [formGroup]="coordForm" (ngSubmit)="submitCoords()">
+      <div class="coord-inputs">
+        <div class="field">
+          <label>Latitude</label>
+          <input formControlName="latitude" placeholder="e.g. 13.0827" />
+        </div>
+        <div class="field">
+          <label>Longitude</label>
+          <input formControlName="longitude" placeholder="e.g. 80.2707" />
+        </div>
+      </div>
+      <div class="coord-btns">
+        <button class="btn-primary" type="submit" [disabled]="coordForm.invalid">Update Pin</button>
+        <button class="btn-ghost" type="button" (click)="toggleCoordForm()">Cancel</button>
+      </div>
+    </form>
+  }
+
+  <div class="map-view">
+    @if (mapUrl) {
+      <iframe
+        class="map-iframe"
+        [src]="mapUrl"
+        frameborder="0"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+      @if (address?.latitude && address?.longitude) {
+        <div class="coord-bar">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="8" cy="7" r="3"/>
+            <path d="M8 1v2M8 12v3M1 7h2M12 7h3"/>
+          </svg>
+          {{ address?.latitude?.toFixed(6) }}, {{ address?.longitude?.toFixed(6) }}
+        </div>
+      }
+    } @else {
+      <div class="map-placeholder">
+        <svg viewBox="0 0 200 140" fill="none" class="map-bg-svg">
+          <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="200" height="140" fill="url(#grid)"/>
+          <circle cx="100" cy="70" r="8" fill="none" stroke="#6366F1" stroke-width="2"/>
+          <circle cx="100" cy="70" r="3" fill="#6366F1"/>
+          <line x1="100" y1="50" x2="100" y2="62" stroke="#6366F1" stroke-width="1.5" stroke-dasharray="2"/>
+          <line x1="100" y1="78" x2="100" y2="90" stroke="#6366F1" stroke-width="1.5" stroke-dasharray="2"/>
+          <line x1="80" y1="70" x2="92" y2="70" stroke="#6366F1" stroke-width="1.5" stroke-dasharray="2"/>
+          <line x1="108" y1="70" x2="120" y2="70" stroke="#6366F1" stroke-width="1.5" stroke-dasharray="2"/>
+        </svg>
+        <div class="placeholder-label">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="8" cy="7" r="3"/>
+            <path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 8 5 8s5-4 5-8c0-2.76-2.24-5-5-5z"/>
+          </svg>
+          <span>No coordinates set</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>

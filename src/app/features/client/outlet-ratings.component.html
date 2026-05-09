@@ -1,0 +1,12 @@
+<div class="ratings-layout">
+  <app-rating-sidebar
+    [ratings]="ratings()"
+    [activeFilter]="activeFilter()"
+    (filterChange)="activeFilter.set($event)"
+  />
+  <app-rating-feed
+    [ratings]="filteredRatings()"
+    [loading]="loading()"
+    (deleteRequest)="requestDelete($event)"
+  />
+</div>

@@ -1,0 +1,111 @@
+<div class="loc-dropdown" #dropdownRef>
+
+  <!-- TRIGGER -->
+  <button
+    class="loc-trigger"
+    type="button"
+    (click)="toggleOpen()"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="listbox">
+    <div class="trigger-left">
+      <svg class="pin-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 1.5A4.5 4.5 0 0 0 3.5 6c0 2.485 2.785 5.81 4.005 7.135a.656.656 0 0 0 .99 0C9.715 11.81 12.5 8.485 12.5 6A4.5 4.5 0 0 0 8 1.5ZM2 6a6 6 0 1 1 12 0c0 3.255-3.375 7.028-4.838 8.605a2.156 2.156 0 0 1-3.324 0C4.375 13.028 2 9.255 2 6Z"/>
+        <circle cx="8" cy="6" r="2"/>
+      </svg>
+      @if (selectedCount() === 0) {
+        <span>All Locations</span>
+      } @else if (selectedCount() === 1) {
+        <span>{{ locationService.selected()[0].name }}</span>
+      } @else {
+        @for (loc of locationService.selected().slice(0, 2); track loc.id) {
+          <span class="loc-badge">{{ loc.name }}</span>
+        }
+        @if (selectedCount() > 2) {
+          <span class="loc-count">+{{ selectedCount() - 2 }}</span>
+        }
+      }
+    </div>
+    <svg class="chevron" [class.open]="isOpen()" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+      <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <!-- PANEL -->
+  @if (isOpen()) {
+    <div class="loc-panel" role="listbox" aria-multiselectable="true">
+
+      <!-- Search -->
+      <div class="loc-search">
+        <input
+          #searchInput
+          type="text"
+          placeholder="Search locations…"
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"
+          (click)="$event.stopPropagation()"
+          aria-label="Search locations" />
+      </div>
+
+      <!-- List -->
+      <div class="loc-list">
+
+        <!-- All Locations -->
+        <div
+          class="loc-item"
+          [class.selected]="pendingSelected().length === 0"
+          (click)="pendingSelected.set([])"
+          role="option"
+          [attr.aria-selected]="pendingSelected().length === 0">
+          <div class="loc-cb" [class.checked]="pendingSelected().length === 0">
+            @if (pendingSelected().length === 0) {
+              <svg viewBox="0 0 10 8" fill="none" aria-hidden="true">
+                <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            }
+          </div>
+          <span class="loc-name" style="font-weight:600">All Locations</span>
+          <span class="loc-all-badge">{{ locationService.locations().length }} cities</span>
+        </div>
+
+        <div class="loc-sep"></div>
+
+        <!-- Individual locations -->
+        @for (loc of filteredLocations(); track trackById($index, loc)) {
+          <div
+            class="loc-item"
+            [class.selected]="isPending(loc)"
+            (click)="togglePending(loc)"
+            role="option"
+            [attr.aria-selected]="isPending(loc)">
+            <div class="loc-cb" [class.checked]="isPending(loc)">
+              @if (isPending(loc)) {
+                <svg viewBox="0 0 10 8" fill="none" aria-hidden="true">
+                  <path d="M1 4l3 3 5-6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              }
+            </div>
+            <div class="loc-info">
+              <div class="loc-name">
+                {{ loc.name }}
+                @if (loc.isNearby) {
+                  <span class="loc-gps">Near you</span>
+                }
+              </div>
+              <div class="loc-desc">{{ loc.description }}</div>
+            </div>
+          </div>
+        }
+
+        @if (filteredLocations().length === 0) {
+          <div class="loc-empty">No locations match "{{ searchQuery() }}"</div>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="loc-footer">
+        <button class="loc-clear" type="button" (click)="clearPending()">Clear</button>
+        <button class="loc-apply" type="button" (click)="apply()">Apply</button>
+      </div>
+    </div>
+  }
+</div>

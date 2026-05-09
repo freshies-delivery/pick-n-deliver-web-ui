@@ -1,0 +1,90 @@
+<div class="feed">
+
+  <!-- Header -->
+  <div class="rat-feed-hdr">
+    <div class="rfh-title">{{ ratings.length }} Review{{ ratings.length !== 1 ? 's' : '' }}</div>
+    <div class="rfh-sort">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <line x1="2" y1="5" x2="14" y2="5"/>
+        <line x1="4" y1="9" x2="12" y2="9"/>
+        <line x1="6" y1="13" x2="10" y2="13"/>
+      </svg>
+      <select [value]="sortBy()" (change)="onSortChange($event)">
+        <option value="newest">Newest first</option>
+        <option value="highest">Highest rated</option>
+        <option value="lowest">Lowest rated</option>
+      </select>
+    </div>
+  </div>
+
+  @if (loading) {
+    @for (i of skeletonRows; track i) {
+      <div class="review-card skeleton">
+        <div class="sk-row w50"></div>
+        <div class="sk-row w80" style="margin-top:8px"></div>
+        <div class="sk-row w65" style="margin-top:6px"></div>
+      </div>
+    }
+  } @else if (sortedRatings().length === 0) {
+    <div class="feed-empty">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2"/>
+        <path d="M14 24s2-3 6-3 6 3 6 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="15" cy="17" r="1.5" fill="currentColor"/>
+        <circle cx="25" cy="17" r="1.5" fill="currentColor"/>
+      </svg>
+      <p>No reviews yet</p>
+    </div>
+  } @else {
+    @for (rating of sortedRatings(); track rating.ratingId) {
+      <div class="review-card">
+
+        <!-- Card header -->
+        <div class="rc-header">
+          <div class="rc-user">
+            <div class="rc-avatar" [style.background]="avatarColor(rating.userId)">
+              {{ avatarInitials(rating.userId) }}
+            </div>
+            <div>
+              <div class="rc-name">User #{{ rating.userId }}</div>
+              @if (rating.createdAt) {
+                <div class="rc-date">{{ rating.createdAt | date:'MMM d, yyyy' }}</div>
+              }
+            </div>
+          </div>
+          <div class="rc-right">
+            <div class="rc-stars">
+              @for (s of stars(rating.score ?? 0); track s) {
+                <svg class="star" [class.filled]="s <= (rating.score ?? 0)" viewBox="0 0 16 16" width="13" height="13">
+                  <path d="M8 1l1.5 3.5L13 5l-2.5 2.5.5 3.5L8 9.5 5 11l.5-3.5L3 5l3.5-.5z" fill="currentColor"/>
+                </svg>
+              }
+              <span class="rc-score-lbl">{{ rating.score }}/5</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review text -->
+        @if (rating.comment) {
+          <div class="rc-review-text">"{{ rating.comment }}"</div>
+        } @else {
+          <div class="rc-review-text seeded">No written review provided</div>
+        }
+
+        <!-- Footer -->
+        <div class="rc-footer">
+          <span class="rc-meta-pill">Rating #{{ rating.ratingId }}</span>
+          <button class="rc-delete" type="button" (click)="deleteRequest.emit(rating)">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 13 6"/>
+              <path d="M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+              <path d="M4 6l1 8a1 1 0 001 1h4a1 1 0 001-1l1-8"/>
+            </svg>
+            Delete
+          </button>
+        </div>
+
+      </div>
+    }
+  }
+</div>

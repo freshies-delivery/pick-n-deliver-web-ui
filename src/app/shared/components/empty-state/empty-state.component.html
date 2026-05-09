@@ -1,0 +1,13 @@
+<div class="empty-wrap">
+  <div class="empty-icon">
+    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="8" width="40" height="40" rx="10" fill="rgba(99,102,241,0.10)"/>
+      <path d="M18 28h20M18 34h12M18 22h20" stroke="rgba(99,102,241,0.5)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h3 class="empty-title">{{ title }}</h3>
+  <p class="empty-msg">{{ message }}</p>
+  @if (ctaLabel) {
+    <button type="button" class="empty-cta" (click)="ctaClick.emit()">{{ ctaLabel }}</button>
+  }
+</div>

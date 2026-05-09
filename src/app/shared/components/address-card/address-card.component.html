@@ -1,0 +1,38 @@
+<div class="addr-card">
+  <div class="addr-top">
+    <div class="addr-labels">
+      @if (address.label) {
+        <span class="label-pill">{{ address.label }}</span>
+      }
+      @if (address.favorite) {
+        <span class="default-badge">Default</span>
+      }
+    </div>
+  </div>
+  <div class="addr-body">
+    @if (address.doorNo || address.buildingName) {
+      <div class="addr-line">{{ address.doorNo }}{{ address.doorNo && address.buildingName ? ', ' : '' }}{{ address.buildingName }}</div>
+    }
+    @if (address.addressLine1) { <div class="addr-line">{{ address.addressLine1 }}</div> }
+    @if (address.addressLine2) { <div class="addr-line">{{ address.addressLine2 }}</div> }
+    <div class="addr-line city">{{ address.city }}@if (address.state) {, {{ address.state }}}@if (address.zipCode) { – {{ address.zipCode }}}</div>
+    @if (address.country) { <div class="addr-line">{{ address.country }}</div> }
+    @if (address.instructions) {
+      <div class="addr-instructions">{{ address.instructions }}</div>
+    }
+  </div>
+  <div class="addr-footer">
+    @if (address.latitude && address.longitude) {
+      <span class="addr-coords">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <path d="M8 2C6 2 4.5 3.5 4.5 5.5c0 3 3.5 7.5 3.5 7.5s3.5-4.5 3.5-7.5C11.5 3.5 10 2 8 2z"/><circle cx="8" cy="5.5" r="1.5"/>
+        </svg>
+        {{ address.latitude | number:'1.4-4' }}, {{ address.longitude | number:'1.4-4' }}
+      </span>
+    }
+    <div class="addr-actions">
+      <button type="button" class="addr-btn" (click)="editClick.emit(address)">Edit</button>
+      <button type="button" class="addr-btn danger" (click)="deleteClick.emit(address)">Delete</button>
+    </div>
+  </div>
+</div>

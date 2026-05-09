@@ -1,0 +1,11 @@
+.ratings-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+@media (max-width: 720px) {
+  .ratings-layout {
+    flex-direction: column;
+  }
+}

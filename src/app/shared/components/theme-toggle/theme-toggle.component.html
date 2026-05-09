@@ -1,0 +1,26 @@
+<div class="theme-toggle" role="group" aria-label="Theme">
+  <button
+    [class.active]="theme() === 'dark'"
+    (click)="themeService.setTheme('dark')"
+    [attr.aria-pressed]="theme() === 'dark'"
+    type="button">
+    <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+      <path d="M6 2a4 4 0 1 0 0 8A4 4 0 0 0 6 2ZM0 6a6 6 0 1 1 12 0A6 6 0 0 1 0 6Z"
+            fill-rule="evenodd" clip-rule="evenodd" opacity=".4"/>
+      <path d="M6 8.5A2.5 2.5 0 1 0 6 3.5a2.5 2.5 0 0 0 0 5Z"/>
+    </svg>
+    Dark
+  </button>
+  <button
+    [class.active]="theme() === 'light'"
+    (click)="themeService.setTheme('light')"
+    [attr.aria-pressed]="theme() === 'light'"
+    type="button">
+    <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+      <circle cx="6" cy="6" r="2.5"/>
+      <path d="M6 0v1.5M6 10.5V12M12 6h-1.5M1.5 6H0M10.24 1.76l-1.06 1.06M2.82 9.18l-1.06 1.06M10.24 10.24l-1.06-1.06M2.82 2.82 1.76 1.76"
+            stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+    Light
+  </button>
+</div>

@@ -1,0 +1,67 @@
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(99,102,241,0.05) 0%,
+    rgba(99,102,241,0.13) 50%,
+    rgba(99,102,241,0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 6px;
+}
+
+.skel-row {
+  background: var(--bg2);
+  border: 1px solid rgba(99,102,241,0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.skel-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.skel-body { flex: 1; min-width: 0; }
+
+.skel-line {
+  height: 12px;
+  margin-bottom: 6px;
+  &.wide { width: 55%; }
+  &.medium { width: 35%; }
+}
+
+.skel-pills {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.skel-pill { width: 60px; height: 18px; border-radius: 100px; }
+
+.skel-stats {
+  display: flex;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.skel-stat { width: 40px; height: 32px; }
+
+.skel-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.skel-btn { width: 30px; height: 30px; border-radius: 7px; }

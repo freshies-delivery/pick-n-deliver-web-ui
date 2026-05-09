@@ -1,0 +1,70 @@
+<div class="list-item"
+     [class.has-bar]="accentBar"
+     [style.--bar-gradient]="categoryColor.bar"
+     (click)="rowClick.emit()">
+
+  <div class="li-avatar"
+       [style.background]="categoryColor.bg"
+       [style.color]="categoryColor.text">
+    {{ initials }}
+  </div>
+
+  <div class="li-info">
+    <div class="li-name">{{ name }}</div>
+    @if (description || location) {
+      <div class="li-desc">{{ description }}@if (description && location) { · }{{ location }}</div>
+    }
+    <div class="li-meta">
+      @if (category) {
+        <span class="li-pill"
+              [style.background]="categoryColor.pill"
+              [style.color]="categoryColor.text"
+              [style.border-color]="categoryColor.text + '55'">
+          {{ category }}
+        </span>
+      }
+      @if (status) {
+        <app-status-badge [status]="status" />
+      }
+      <span class="li-id">ID: {{ id }}</span>
+      @for (badge of badges; track badge) {
+        <span class="li-pill extra">{{ badge }}</span>
+      }
+    </div>
+  </div>
+
+  @if (stats?.length) {
+    <div class="li-stats">
+      @for (stat of stats!; track stat.label) {
+        <div class="li-stat">
+          <div class="li-stat-val" [style.color]="stat.color">{{ stat.value }}</div>
+          <div class="li-stat-lbl">{{ stat.label }}</div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="li-actions" (click)="stopProp($event)">
+    @if (showView) {
+      <button class="act-btn" type="button" title="View" (click)="viewClick.emit()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/>
+        </svg>
+      </button>
+    }
+    @if (showEdit) {
+      <button class="act-btn" type="button" title="Edit" (click)="editClick.emit()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 2l3 3-9 9H2v-3L11 2z"/>
+        </svg>
+      </button>
+    }
+    @if (showDelete) {
+      <button class="act-btn danger" type="button" title="Delete" (click)="deleteClick.emit()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8L13 4"/>
+        </svg>
+      </button>
+    }
+  </div>
+</div>

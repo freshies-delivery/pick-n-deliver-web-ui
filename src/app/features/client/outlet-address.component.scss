@@ -1,0 +1,11 @@
+.address-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+  .address-layout {
+    flex-direction: column;
+  }
+}

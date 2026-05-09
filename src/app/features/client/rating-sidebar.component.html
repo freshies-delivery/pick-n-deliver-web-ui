@@ -1,0 +1,66 @@
+<div class="sidebar">
+
+  <!-- Score card -->
+  <div class="rs-score-card">
+    <div class="rss-num">{{ avgScore }}</div>
+    <div class="rss-stars">
+      @for (s of starRange(); track s) {
+        <svg viewBox="0 0 16 16" width="16" height="16">
+          <path d="M8 1l1.5 3.5L13 5l-2.5 2.5.5 3.5L8 9.5 5 11l.5-3.5L3 5l3.5-.5z"
+                [attr.fill]="s <= roundedAvg ? '#FCD34D' : 'var(--bg4)'"/>
+        </svg>
+      }
+    </div>
+    <div class="rss-total">{{ totalCount }} reviews</div>
+  </div>
+
+  <!-- Bar breakdown -->
+  <div class="rs-bars">
+    @for (star of starLevels; track star) {
+      <div class="rs-bar-row">
+        <span class="rsbr-lbl">{{ star }}</span>
+        <div class="rsbr-track">
+          <div class="rsbr-fill"
+               [style.width.%]="percentFor(star)"
+               [class.s5]="star === 5"
+               [class.s4]="star === 4"
+               [class.s3]="star === 3"
+               [class.s2]="star === 2"
+               [class.s1]="star === 1">
+          </div>
+        </div>
+        <span class="rsbr-cnt">{{ countFor(star) }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Filter label -->
+  <div class="rs-filter-label">Filter by Stars</div>
+
+  <!-- All reviews filter -->
+  <div class="rs-filter-item"
+       [class.active]="activeFilter === 'all'"
+       (click)="filterChange.emit('all')">
+    <div class="rf-dot" style="background:#A5B4FC"></div>
+    <span class="rf-lbl">All Reviews</span>
+    <span class="rf-cnt">{{ totalCount }}</span>
+  </div>
+
+  <!-- Per-star filters -->
+  @for (star of starLevels; track star) {
+    <div class="rs-filter-item"
+         [class.active]="activeFilter === star"
+         (click)="filterChange.emit(activeFilter === star ? 'all' : star)">
+      <div class="rf-dot"
+           [class.s5]="star === 5"
+           [class.s4]="star === 4"
+           [class.s3]="star === 3"
+           [class.s2]="star === 2"
+           [class.s1]="star === 1">
+      </div>
+      <span class="rf-lbl">{{ star }}★</span>
+      <span class="rf-cnt">{{ countFor(star) }}</span>
+    </div>
+  }
+
+</div>

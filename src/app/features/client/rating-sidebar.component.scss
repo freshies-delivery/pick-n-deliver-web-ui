@@ -1,0 +1,158 @@
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px;
+  background: var(--bg3);
+  border-radius: 12px;
+  border: 1px solid var(--bdr);
+  overflow-y: auto;
+  max-height: calc(100vh - 260px);
+}
+
+// ─── Score Card ───────────────────────────────────────────────────────
+
+.rs-score-card {
+  background: var(--bg2);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 11px;
+  padding: 14px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.rss-num {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--t1);
+  line-height: 1;
+}
+
+.rss-stars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  margin-top: 6px;
+}
+
+.rss-total {
+  font-size: 10px;
+  color: var(--t3);
+  margin-top: 5px;
+}
+
+// ─── Bar rows ─────────────────────────────────────────────────────────
+
+.rs-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+
+.rs-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.rsbr-lbl {
+  font-size: 11px;
+  color: var(--t2);
+  width: 8px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.rsbr-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg4);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rsbr-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+
+  &.s5 { background: #4ADE80; }
+  &.s4 { background: #86EFAC; }
+  &.s3 { background: #FCD34D; }
+  &.s2 { background: #FCA5A5; }
+  &.s1 { background: var(--red); }
+}
+
+.rsbr-cnt {
+  font-size: 10.5px;
+  color: var(--t3);
+  width: 20px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+// ─── Filter label ─────────────────────────────────────────────────────
+
+.rs-filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 8px;
+}
+
+// ─── Filter items ─────────────────────────────────────────────────────
+
+.rs-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 160ms;
+  margin-bottom: 4px;
+
+  &:last-child { margin: 0; }
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.07);
+    border-color: rgba(99, 102, 241, 0.18);
+  }
+
+  &.active {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.28);
+  }
+}
+
+.rf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.s5 { background: #4ADE80; }
+  &.s4 { background: #86EFAC; }
+  &.s3 { background: #FCD34D; }
+  &.s2 { background: #FCA5A5; }
+  &.s1 { background: var(--red); }
+}
+
+.rf-lbl {
+  font-size: 11.5px;
+  color: var(--t1);
+  flex: 1;
+}
+
+.rf-cnt {
+  font-size: 10.5px;
+  color: var(--t3);
+  font-weight: 600;
+}

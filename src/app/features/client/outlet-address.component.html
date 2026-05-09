@@ -1,0 +1,16 @@
+@if (loading()) {
+  <app-skeleton-list [rows]="4" />
+} @else {
+  <div class="address-layout">
+    <app-address-detail-panel
+      [address]="address()"
+      [loading]="loading()"
+      (save)="saveAddress($event)"
+      (remove)="removeAddress()"
+    />
+    <app-map-panel
+      [address]="address()"
+      (coordsUpdate)="updateCoords($event)"
+    />
+  </div>
+}

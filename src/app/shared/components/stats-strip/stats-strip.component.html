@@ -1,0 +1,17 @@
+<div class="strip">
+  @for (s of stats; track s.label) {
+    <div class="strip-card">
+      <div class="strip-icon" [style.background]="s.iconBg">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round"
+             [style.color]="s.iconColor">
+          <path [attr.d]="s.iconPath"/>
+        </svg>
+      </div>
+      <div class="strip-body">
+        <div class="strip-value" [style.color]="s.valueColor">{{ s.value }}</div>
+        <div class="strip-label">{{ s.label }}</div>
+      </div>
+    </div>
+  }
+</div>

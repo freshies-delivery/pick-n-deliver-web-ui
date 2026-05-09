@@ -1,23 +1,259 @@
 <div class="page">
   <app-page-header
-    [breadcrumb]="'Client'"
-    [title]="'Client List'"
-    [subtitle]="'Manage all your clients'"
+    [breadcrumb]="'Client View'"
+    [title]="'Clients'"
+    [subtitle]="clients().length + ' clients'"
     [actions]="headerActions"
-  ></app-page-header>
+  />
 
-  <div class="page-content">
-    <div class="card">
-      <app-data-table
-        [columns]="columns"
-        [data]="clients()"
-        [loading]="loading()"
-        [emptyMessage]="'No clients available'"
-        (edit)="openEditDialog($event)"
-        (delete)="confirmDelete($event)"
-        (rowClick)="openOutlets($event)"
-      ></app-data-table>
+  <app-stats-strip [stats]="statsStrip()" />
+
+  <!-- Segment Tabs -->
+  <div class="seg-tabs-wrap">
+    <div class="seg-tabs">
+      <div class="seg-tab"
+           [class.active]="activeSegmentId() === 'all'"
+           (click)="selectSegment('all')">
+        <div class="st-dot" style="background:#6366F1"></div>
+        <span class="st-name">All Clients</span>
+        <span class="st-badge" style="background:#6366F1">{{ clients().length }}</span>
+      </div>
+
+      @for (seg of segments(); track seg.id) {
+        <div class="seg-tab"
+             [class.active]="activeSegmentId() === seg.id"
+             [style.--tc]="seg.color"
+             (click)="selectSegment(seg.id)">
+          <div class="st-dot" [style.background]="seg.color"></div>
+          <span class="st-name">{{ seg.name }}</span>
+          <span class="st-badge" [style.background]="seg.color">
+            {{ seg.clientIds?.length ?? '—' }}
+          </span>
+        </div>
+      }
+
+      <div class="seg-tab"
+           [class.active]="activeSegmentId() === 'unassigned'"
+           style="--tc:#6B7280"
+           (click)="selectSegment('unassigned')">
+        <div class="st-dot" style="background:#6B7280"></div>
+        <span class="st-name">Unassigned</span>
+        <span class="st-badge" style="background:#6B7280">{{ unassignedCount() }}</span>
+      </div>
     </div>
   </div>
-</div>
 
+  <!-- Active Segment Banner -->
+  @if (activeSegment(); as seg) {
+    <div class="seg-banner"
+         [style.background]="seg.color + '12'"
+         [style.border-color]="seg.color + '35'">
+      <div class="sb-icon" [style.background]="seg.color + '22'">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/>
+        </svg>
+      </div>
+      <div class="sb-info">
+        <div class="sb-title">{{ seg.name }}</div>
+        @if (seg.description) {
+          <div class="sb-desc">{{ seg.description }}</div>
+        }
+        <div class="sb-meta">
+          <span class="sb-pill"
+                [style.color]="seg.color"
+                [style.background]="seg.color + '15'"
+                [style.border-color]="seg.color + '30'">
+            {{ filteredClients().length }} clients
+          </span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Unassigned Banner -->
+  @if (activeSegmentId() === 'unassigned') {
+    <div class="unassigned-banner">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="8" cy="8" r="7"/>
+        <line x1="8" y1="5" x2="8" y2="8"/>
+        <circle cx="8" cy="11" r="0.5" fill="currentColor"/>
+      </svg>
+      <div>
+        <strong>{{ unassignedCount() }} clients</strong> not assigned to any segment.
+        Assign them to enable segment-level reporting.
+      </div>
+    </div>
+  }
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="6.5" cy="6.5" r="5"/>
+        <line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
+      </svg>
+      <input type="text"
+             placeholder="Search clients…"
+             [value]="searchQuery()"
+             (input)="searchQuery.set($any($event.target).value)" />
+    </div>
+    <button class="btn-ghost-sm" (click)="toggleAll()">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        @if (allExpanded()) {
+          <path d="M3 6l5 5 5-5"/>
+        } @else {
+          <path d="M13 10L8 5l-5 5"/>
+        }
+      </svg>
+      {{ allExpanded() ? 'Collapse All' : 'Expand All' }}
+    </button>
+  </div>
+
+  <!-- Client Feed -->
+  @if (loading()) {
+    <div class="client-list">
+      @for (i of shimmerRows; track i) {
+        <div class="client-block">
+          <div class="shimmer-row"></div>
+        </div>
+      }
+    </div>
+  } @else if (filteredClients().length === 0) {
+    <app-empty-state
+      title="No clients found"
+      [message]="searchQuery() ? 'Try a different search term.' : 'Add your first client to get started.'"
+      [ctaLabel]="searchQuery() ? undefined : 'Add Client'"
+      (ctaClick)="openCreateDialog()"
+    />
+  } @else {
+    <div class="client-list">
+      @for (client of filteredClients(); track client.clientId) {
+        <div class="client-block" [class.open]="isExpanded(client.clientId!)">
+
+          <!-- Client Header Row -->
+          <div class="client-row" (click)="toggleClient(client.clientId!)">
+            <div class="cr-bar" [style.background]="getClientSegmentColor(client.clientId!)"></div>
+
+            <div class="cr-avatar"
+                 [style.background]="getCatBg()"
+                 [style.color]="getCatText()">
+              {{ getInitials(client.name) }}
+            </div>
+
+            <div class="cr-info">
+              <div class="cr-name">{{ client.name }}</div>
+              @if (client.description) {
+                <div class="cr-desc">{{ client.description }}</div>
+              }
+            </div>
+
+            @if (activeSegmentId() === 'all') {
+              <span class="cr-segment-pill"
+                    [style.background]="getClientSegmentColor(client.clientId!) + '18'"
+                    [style.color]="getClientSegmentColor(client.clientId!)"
+                    [style.border-color]="getClientSegmentColor(client.clientId!) + '35'">
+                {{ getClientSegmentName(client.clientId!) }}
+              </span>
+            }
+
+            <div class="cr-actions" (click)="$event.stopPropagation()">
+              <button class="act-btn" title="Edit" (click)="openEditDialog(client, $event)">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11.5 2.5a2.121 2.121 0 013 3L5 15H2v-3L11.5 2.5z"/>
+                </svg>
+              </button>
+              <button class="act-btn danger" title="Delete" (click)="confirmDelete(client, $event)">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 13 6"/>
+                  <path d="M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                  <path d="M4 6l1 8a1 1 0 001 1h4a1 1 0 001-1l1-8"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="cr-chevron" [class.open]="isExpanded(client.clientId!)">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 6l4 4 4-4"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Outlets Panel -->
+          @if (isExpanded(client.clientId!)) {
+            <div class="outlets-panel" [@slideDown]>
+              <div class="op-header">
+                <div class="oph-left">
+                  <span class="oph-label">Outlets</span>
+                </div>
+                <button class="btn-add-outlet" (click)="openAddOutlet(client, $event)">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="8" y1="2" x2="8" y2="14"/>
+                    <line x1="2" y1="8" x2="14" y2="8"/>
+                  </svg>
+                  Add Outlet
+                </button>
+              </div>
+
+              @if (isLoadingOutlets(client.clientId!)) {
+                <div class="outlets-shimmer">
+                  @for (i of shimmerRows; track i) {
+                    <div class="outlet-shimmer-row"></div>
+                  }
+                </div>
+              } @else if (getOutlets(client.clientId!).length === 0) {
+                <div class="outlets-empty">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  No outlets yet for this client
+                  <button class="btn-add-first" (click)="openAddOutlet(client, $event)">Add first outlet</button>
+                </div>
+              } @else {
+                @for (outlet of getOutlets(client.clientId!); track outlet.outletId) {
+                  <div class="outlet-row" (click)="goToOutlet(client, outlet, $event)">
+                    <div class="or-dot" [style.background]="getCatBar(outlet.type)"></div>
+                    <div class="or-info">
+                      <span class="or-name">{{ outlet.name }}</span>
+                      @if (outlet.description) {
+                        <span class="or-desc">{{ outlet.description }}</span>
+                      }
+                    </div>
+                    @if (outlet.type) {
+                      <span class="or-type">{{ outlet.type }}</span>
+                    }
+                    <div class="or-actions" (click)="$event.stopPropagation()">
+                      <button class="oa-btn danger" title="Delete" (click)="confirmDeleteOutlet(outlet, $event)">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 13 6"/>
+                          <path d="M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                          <path d="M4 6l1 8a1 1 0 001 1h4a1 1 0 001-1l1-8"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <svg class="or-arrow" width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                      <path d="M6 4l4 4-4 4"/>
+                    </svg>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Unassigned hint on 'all' view -->
+      @if (activeSegmentId() === 'all' && unassignedCount() > 0) {
+        <div class="unassigned-hint">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="8" cy="8" r="7"/>
+            <line x1="8" y1="5" x2="8" y2="8"/>
+            <circle cx="8" cy="11" r="0.5" fill="currentColor"/>
+          </svg>
+          <div><strong>{{ unassignedCount() }} clients</strong> not assigned to any segment</div>
+          <button class="btn-unassigned" (click)="selectSegment('unassigned')">View Unassigned</button>
+        </div>
+      }
+    </div>
+  }
+</div>

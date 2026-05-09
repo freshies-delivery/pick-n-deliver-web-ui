@@ -1,195 +1,192 @@
 <aside class="sidebar">
-  <div class="brand">Pick N Deliver</div>
-  <div class="hierarchy-summary">{{ summary() }}</div>
-  <div class="user-summary">{{ userSummary() }}</div>
+  <!-- Brand -->
+  <div class="brand">
+    <div class="logo-mark">
+      <svg width="32" height="32" viewBox="0 0 20 20" fill="none">
+        <rect width="20" height="20" rx="9" fill="url(#lg)"/>
+        <rect x="3" y="3" width="14" height="14" rx="2.5" fill="rgba(255,255,255,0.15)"/>
+        <path d="M6 9l2.5 2.5L12 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 12.5h3M5 14.5h5" stroke="rgba(255,255,255,0.55)" stroke-width="1.3" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6366F1"/><stop offset="1" stop-color="#A855F7"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <span class="brand-text">Swift<span class="brand-gradient">ly</span></span>
+  </div>
 
-  <nav class="tree-nav" aria-label="Hierarchy Navigation">
-    <button
-      type="button"
-      class="menu-item"
-      [class.active]="isRouteExact('/dashboard')"
-      (click)="navigateOverview()"
-    >
-      <mat-icon>dashboard</mat-icon>
-      <span>Overview</span>
-    </button>
+  <nav class="nav" aria-label="Main navigation">
 
-    <button type="button" class="menu-item" (click)="toggle('clientView')">
-      <mat-icon>{{ expanded().clientView ? 'expand_more' : 'chevron_right' }}</mat-icon>
-      <mat-icon>domain</mat-icon>
-      <span>Client View</span>
-    </button>
+    <!-- Overview -->
+    <div class="nav-item" [class.active]="isRouteExact('/dashboard')" (click)="navigateOverview()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+      </div>
+      <span class="nav-label">Overview</span>
+    </div>
 
-    @if (expanded().clientView) {
-      <button
-        type="button"
-        class="menu-item child"
-        [class.active]="isRouteActive('/dashboard/clients')"
-        (click)="navigateClientRoot()"
-      >
-        <mat-icon>groups</mat-icon>
-        <span>Client List</span>
-      </button>
+    <!-- Client View section -->
+    <div class="nav-section-label">Client View</div>
 
-      <button
-        type="button"
-        class="menu-item child"
-        [class.disabled]="!hasClient()"
-        [class.active]="hasClient() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets')"
-        (click)="navigateOutletList()"
-      >
-        <mat-icon>storefront</mat-icon>
-        <span>Outlet List</span>
-      </button>
-
-      <button
-        type="button"
-        class="menu-item child"
-        [class.disabled]="!hasOutlet()"
-        (click)="toggle('outletDetails')"
-      >
-        <mat-icon>{{ expanded().outletDetails ? 'expand_more' : 'chevron_right' }}</mat-icon>
-        <mat-icon>info</mat-icon>
-        <span>Outlet Details</span>
-      </button>
-
-      @if (expanded().outletDetails) {
-        <button
-          type="button"
-          class="menu-item sub-child"
-          [class.disabled]="!hasOutlet()"
-          [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories')"
-          (click)="navigateCategories()"
-        >
-          <mat-icon>category</mat-icon>
-          <span>Categories</span>
-        </button>
-
-        <button
-          type="button"
-          class="menu-item sub-child"
-          [class.disabled]="!hasCategory()"
-          [class.active]="
-            hasCategory() &&
-            isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories/' + hierarchy().categoryId + '/items')
-          "
-          (click)="navigateItems()"
-        >
-          <mat-icon>restaurant_menu</mat-icon>
-          <span>Items</span>
-        </button>
-
-        <button
-          type="button"
-          class="menu-item sub-child"
-          [class.disabled]="!hasOutlet()"
-          [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/ratings')"
-          (click)="navigateRatings()"
-        >
-          <mat-icon>star</mat-icon>
-          <span>Ratings</span>
-        </button>
+    <div class="nav-item" [class.active]="isRouteActive('/dashboard/clients')" (click)="navigateClientRoot()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="5" height="5" rx="1.5"/><rect x="9" y="2" width="5" height="5" rx="1.5"/>
+          <rect x="2" y="9" width="5" height="5" rx="1.5"/><rect x="9" y="9" width="5" height="5" rx="1.5"/>
+        </svg>
+      </div>
+      <span class="nav-label">Client List</span>
+      @if (clientCount() > 0) {
+        <span class="nav-badge">{{ clientCount() }}</span>
       }
+    </div>
+
+    <div class="nav-item nav-item--child" [class.active]="hasClient() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets')"
+         [class.disabled]="!hasClient()" (click)="navigateOutletList()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 13V6l6-4 6 4v7"/><path d="M6 13v-3h4v3"/>
+        </svg>
+      </div>
+      <span class="nav-label">Outlet List</span>
+    </div>
+
+    <!-- Outlet Details sub-section -->
+    <div class="nav-item nav-item--child" [class.disabled]="!hasOutlet()" (click)="toggle('outletDetails')">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 2"/>
+        </svg>
+      </div>
+      <span class="nav-label">Outlet Details</span>
+      <svg class="chevron" [class.open]="expanded().outletDetails" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M3 4.5l3 3 3-3"/>
+      </svg>
+    </div>
+
+    @if (expanded().outletDetails) {
+      <div class="nav-item nav-item--child nav-item--sub"
+           [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories')"
+           [class.disabled]="!hasOutlet()" (click)="navigateCategories()">
+        <div class="nav-icon">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4h10M3 8h7M3 12h5"/></svg>
+        </div>
+        <span class="nav-label">Categories</span>
+      </div>
+
+      <div class="nav-item nav-item--child nav-item--sub"
+           [class.active]="hasCategory() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories/' + hierarchy().categoryId + '/items')"
+           [class.disabled]="!hasCategory()" (click)="navigateItems()">
+        <div class="nav-icon">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="4" height="4" rx="1"/><rect x="10" y="2" width="4" height="4" rx="1"/>
+            <rect x="2" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/>
+          </svg>
+        </div>
+        <span class="nav-label">Items</span>
+      </div>
+
+      <div class="nav-item nav-item--child nav-item--sub"
+           [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/ratings')"
+           [class.disabled]="!hasOutlet()" (click)="navigateRatings()">
+        <div class="nav-icon">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/>
+          </svg>
+        </div>
+        <span class="nav-label">Ratings</span>
+      </div>
     }
 
-    <button type="button" class="menu-item section-toggle" (click)="toggle('userView')">
-      <mat-icon>{{ expanded().userView ? 'expand_more' : 'chevron_right' }}</mat-icon>
-      <mat-icon>person</mat-icon>
-      <span>User View</span>
-    </button>
+    <!-- User View section -->
+    <div class="nav-section-label">User View</div>
 
-    @if (expanded().userView) {
-      <button
-        type="button"
-        class="menu-item child"
-        [class.active]="isRouteActive('/dashboard/users')"
-        (click)="navigateUserList()"
-      >
-        <mat-icon>groups</mat-icon>
-        <span>User List</span>
-      </button>
+    <div class="nav-item" [class.active]="isRouteActive('/dashboard/users')" (click)="navigateUserList()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="5.5" r="2.5"/><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5"/>
+        </svg>
+      </div>
+      <span class="nav-label">User List</span>
+    </div>
 
-      <button
-        type="button"
-        class="menu-item sub-child"
-        [class.disabled]="!hasUser()"
-        [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/orders')"
-        (click)="navigateUserOrders()"
-      >
-        <mat-icon>receipt_long</mat-icon>
-        <span>Orders</span>
-      </button>
+    <div class="nav-item nav-item--child"
+         [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/orders')"
+         [class.disabled]="!hasUser()" (click)="navigateUserOrders()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 10h4"/>
+        </svg>
+      </div>
+      <span class="nav-label">Orders</span>
+    </div>
 
-      <button
-        type="button"
-        class="menu-item sub-child"
-        [class.disabled]="!hasUser()"
-        [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/addresses')"
-        (click)="navigateUserAddresses()"
-      >
-        <mat-icon>home</mat-icon>
-        <span>Addresses</span>
-      </button>
+    <div class="nav-item nav-item--child"
+         [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/addresses')"
+         [class.disabled]="!hasUser()" (click)="navigateUserAddresses()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M8 2C6 2 4.5 3.5 4.5 5.5c0 3 3.5 7.5 3.5 7.5s3.5-4.5 3.5-7.5C11.5 3.5 10 2 8 2z"/><circle cx="8" cy="5.5" r="1.5"/>
+        </svg>
+      </div>
+      <span class="nav-label">Addresses</span>
+    </div>
 
-      <button
-        type="button"
-        class="menu-item sub-child"
-        [class.disabled]="!hasUser()"
-        [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/ratings')"
-        (click)="navigateUserRatings()"
-      >
-        <mat-icon>reviews</mat-icon>
-        <span>Ratings</span>
-      </button>
-    }
+    <div class="nav-item nav-item--child"
+         [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/ratings')"
+         [class.disabled]="!hasUser()" (click)="navigateUserRatings()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/>
+        </svg>
+      </div>
+      <span class="nav-label">Ratings</span>
+    </div>
 
-    <button type="button" class="menu-item section-toggle" (click)="toggle('adminPanel')">
-      <mat-icon>{{ expanded().adminPanel ? 'expand_more' : 'chevron_right' }}</mat-icon>
-      <mat-icon>admin_panel_settings</mat-icon>
-      <span>Admin Panel</span>
-    </button>
+    <!-- Admin Panel section -->
+    <div class="nav-section-label">Admin Panel</div>
 
-    @if (expanded().adminPanel) {
-      <button
-        type="button"
-        class="menu-item child"
-        [class.active]="isRouteActive('/dashboard/admin/segments')"
-        (click)="navigateSegments()"
-      >
-        <mat-icon>segment</mat-icon>
-        <span>Segments</span>
-      </button>
+    <div class="nav-item nav-item--child" [class.active]="isRouteActive('/dashboard/admin/segments')" (click)="navigateSegments()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="4" cy="8" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="12" r="2"/>
+          <path d="M6 8h3M10.3 5.1L6.7 6.9M10.3 10.9L6.7 9.1"/>
+        </svg>
+      </div>
+      <span class="nav-label">Segments</span>
+    </div>
 
-      <button
-        type="button"
-        class="menu-item child"
-        [class.active]="isRouteActive('/dashboard/admin/config')"
-        (click)="navigateConfig()"
-      >
-        <mat-icon>tune</mat-icon>
-        <span>Config (Key-Value)</span>
-      </button>
+    <div class="nav-item nav-item--child" [class.active]="isRouteActive('/dashboard/admin/config')" (click)="navigateConfig()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h3"/>
+        </svg>
+      </div>
+      <span class="nav-label">Config</span>
+    </div>
 
-      <button
-        type="button"
-        class="menu-item child"
-        [class.active]="isRouteActive('/dashboard/admin/offers')"
-        (click)="navigateOffers()"
-      >
-        <mat-icon>local_offer</mat-icon>
-        <span>Offers</span>
-      </button>
+    <div class="nav-item nav-item--child" [class.active]="isRouteActive('/dashboard/admin/offers')" (click)="navigateOffers()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 8h2l2-5 2 10 2-7 1 2h3"/>
+        </svg>
+      </div>
+      <span class="nav-label">Offers</span>
+    </div>
 
-      <button
-        type="button"
-        class="menu-item child"
-        [class.active]="isRouteActive('/dashboard/admin/notifications')"
-        (click)="navigateNotifications()"
-      >
-        <mat-icon>notifications</mat-icon>
-        <span>Notifications</span>
-      </button>
-    }
+    <div class="nav-item nav-item--child" [class.active]="isRouteActive('/dashboard/admin/notifications')" (click)="navigateNotifications()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 7A5 5 0 103 7c0 2 .5 3 1 3.5H2l1 2h10l1-2h-2C13.5 10 13 9 13 7z"/>
+        </svg>
+      </div>
+      <span class="nav-label">Notifications</span>
+      @if (unreadCount() > 0) {
+        <span class="nav-badge alert">{{ unreadCount() }}</span>
+      }
+    </div>
+
   </nav>
 </aside>
-

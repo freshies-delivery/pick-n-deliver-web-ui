@@ -2,8 +2,20 @@
   <app-page-header
     [breadcrumb]="'Admin'"
     [title]="'Overview'"
-    [subtitle]="'Platform performance at a glance'"
+    [subtitle]="pageSubtitle()"
   ></app-page-header>
+
+  <!-- Location context pills -->
+  @if (!isAllLocations()) {
+    <div class="loc-context">
+      @for (loc of selectedLocations(); track loc.id) {
+        <span class="loc-pill">{{ loc.name }}</span>
+      }
+      <button class="loc-clear-btn" type="button" (click)="locationService.clearSelected()">
+        Clear filter
+      </button>
+    </div>
+  }
 
   @if (loading()) {
     <div class="loading-state">
@@ -14,6 +26,25 @@
 
   @if (!loading() && stats()) {
     <div class="page-content">
+
+      <!-- Location filter notice -->
+      @if (!isAllLocations()) {
+        <div class="loc-notice">
+          <svg class="notice-pin" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 1.5A4.5 4.5 0 0 0 3.5 6c0 2.485 2.785 5.81 4.005 7.135a.656.656 0 0 0 .99 0C9.715 11.81 12.5 8.485 12.5 6A4.5 4.5 0 0 0 8 1.5ZM2 6a6 6 0 1 1 12 0c0 3.255-3.375 7.028-4.838 8.605a2.156 2.156 0 0 1-3.324 0C4.375 13.028 2 9.255 2 6Z"/>
+            <circle cx="8" cy="6" r="2"/>
+          </svg>
+          <div class="notice-body">
+            @if (selectedLocations().length === 1) {
+              <strong>Showing breakdown by area within {{ selectedLocations()[0].name }}</strong>
+            } @else {
+              <strong>Aggregated view across {{ selectedLocations().length }} cities</strong>
+            }
+            <div class="notice-sub">Revenue, orders, and outlets are filtered to selected scope</div>
+          </div>
+          <button type="button" (click)="locationService.clearSelected()">Clear</button>
+        </div>
+      }
 
       <!-- Stat Cards -->
       <div class="stat-grid">
@@ -62,7 +93,7 @@
         </div>
       </div>
 
-      <!-- Charts Row -->
+      <!-- Charts Row 1 -->
       <div class="chart-row">
         <div class="card chart-card wide">
           <h3>Daily Orders — Last 7 Days</h3>
@@ -76,6 +107,7 @@
         </div>
       </div>
 
+      <!-- Charts Row 2 -->
       <div class="chart-row two-col">
         <div class="card chart-card">
           <h3>Orders by Category</h3>
@@ -89,7 +121,7 @@
         </div>
 
         <div class="card chart-card">
-          <h3>Revenue by City</h3>
+          <h3>Revenue — {{ getRevenueSectionLabel() }}</h3>
           <div class="chart-wrap">
             <canvas baseChart
               [data]="barChartData()"
@@ -150,8 +182,9 @@
             <div class="metric-item">
               <div class="metric-label">Avg Delivery Time</div>
               <div class="metric-value">{{ metrics()!.avgDeliveryTimeMins }} min</div>
-              <div class="metric-trend" [class.up]="metrics()!.avgDeliveryTimeMins < metrics()!.avgDeliveryTimePrevMins"
-                                        [class.down]="metrics()!.avgDeliveryTimeMins > metrics()!.avgDeliveryTimePrevMins">
+              <div class="metric-trend"
+                [class.up]="metrics()!.avgDeliveryTimeMins < metrics()!.avgDeliveryTimePrevMins"
+                [class.down]="metrics()!.avgDeliveryTimeMins > metrics()!.avgDeliveryTimePrevMins">
                 {{ trendLabel(metrics()!.avgDeliveryTimeMins, metrics()!.avgDeliveryTimePrevMins, ' min') }}
               </div>
               <div class="sparkline">
@@ -164,8 +197,9 @@
             <div class="metric-item">
               <div class="metric-label">On-Time Rate</div>
               <div class="metric-value">{{ metrics()!.onTimeRatePercent }}%</div>
-              <div class="metric-trend" [class.up]="metrics()!.onTimeRatePercent > metrics()!.onTimeRatePrevPercent"
-                                        [class.down]="metrics()!.onTimeRatePercent < metrics()!.onTimeRatePrevPercent">
+              <div class="metric-trend"
+                [class.up]="metrics()!.onTimeRatePercent > metrics()!.onTimeRatePrevPercent"
+                [class.down]="metrics()!.onTimeRatePercent < metrics()!.onTimeRatePrevPercent">
                 {{ trendLabel(metrics()!.onTimeRatePercent, metrics()!.onTimeRatePrevPercent, '%') }}
               </div>
               <div class="sparkline">
@@ -178,8 +212,9 @@
             <div class="metric-item">
               <div class="metric-label">Failed Deliveries</div>
               <div class="metric-value">{{ metrics()!.failedDeliveryRatePercent }}%</div>
-              <div class="metric-trend" [class.up]="metrics()!.failedDeliveryRatePercent < metrics()!.failedDeliveryRatePrevPercent"
-                                        [class.down]="metrics()!.failedDeliveryRatePercent > metrics()!.failedDeliveryRatePrevPercent">
+              <div class="metric-trend"
+                [class.up]="metrics()!.failedDeliveryRatePercent < metrics()!.failedDeliveryRatePrevPercent"
+                [class.down]="metrics()!.failedDeliveryRatePercent > metrics()!.failedDeliveryRatePrevPercent">
                 {{ trendLabel(metrics()!.failedDeliveryRatePercent, metrics()!.failedDeliveryRatePrevPercent, '%') }}
               </div>
               <div class="sparkline">

@@ -2,22 +2,50 @@
   <app-page-header
     [breadcrumb]="'Client / Outlets'"
     [title]="'Outlet List'"
-    [subtitle]="'Manage outlets for the selected client'"
+    [subtitle]="outlets().length + ' outlets'"
     [actions]="headerActions"
-  ></app-page-header>
+  />
 
-  <div class="page-content">
-    <div class="card">
-      <app-data-table
-        [columns]="columns"
-        [data]="outlets()"
-        [loading]="loading()"
-        [emptyMessage]="'No outlets found for this client'"
-        (edit)="openEditDialog($event)"
-        (delete)="confirmDelete($event)"
-        (rowClick)="openDetails($event)"
-      ></app-data-table>
-    </div>
-  </div>
+  <app-stats-strip [stats]="statsStrip()" />
+
+  <app-page-toolbar
+    searchPlaceholder="Search outlets…"
+    (searchChange)="searchQuery.set($event); currentPage.set(1)"
+  />
+
+  @if (loading()) {
+    <app-skeleton-list [rows]="6" />
+  } @else if (filteredOutlets().length === 0) {
+    <app-empty-state
+      title="No outlets found"
+      [message]="searchQuery() ? 'Try a different search term.' : 'Add the first outlet for this client.'"
+      [ctaLabel]="searchQuery() ? undefined : 'Add Outlet'"
+      (ctaClick)="openCreateDialog()"
+    />
+  } @else {
+    @for (outlet of pagedOutlets(); track outlet.outletId) {
+      <app-rich-list-item
+        [id]="outlet.outletId!"
+        [name]="outlet.name"
+        [description]="outlet.type"
+        [category]="outlet.type ?? 'Food & Dining'"
+        status="active"
+        [stats]="[
+          { value: '—', label: 'Today' },
+          { value: '—', label: 'This month' },
+          { value: '—', label: 'Rating' }
+        ]"
+        (rowClick)="openDetails(outlet)"
+        (editClick)="openEditDialog(outlet)"
+        (deleteClick)="confirmDelete(outlet)"
+      />
+    }
+
+    <app-pagination
+      [total]="filteredOutlets().length"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage()"
+      (pageChange)="currentPage.set($event)"
+    />
+  }
 </div>
-

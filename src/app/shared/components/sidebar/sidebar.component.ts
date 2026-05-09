@@ -1,15 +1,16 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { HierarchyStateService } from '../../../core/services/hierarchy-state.service';
 import { UserContextService } from '../../../core/services/user-context.service';
+import { ClientService } from '../../../features/client/services/client.service';
+import { NotificationService } from '../../../features/admin/notification.service';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
@@ -18,6 +19,8 @@ export class SidebarComponent {
   private readonly router = inject(Router);
   private readonly hierarchyState = inject(HierarchyStateService);
   private readonly userContext = inject(UserContextService);
+  private readonly clientService = inject(ClientService);
+  private readonly notificationService = inject(NotificationService);
 
   readonly hierarchy = toSignal(this.hierarchyState.hierarchy$, {
     initialValue: this.hierarchyState.state
@@ -35,21 +38,13 @@ export class SidebarComponent {
     adminPanel: false
   });
 
-  readonly summary = computed(() => {
-    const state = this.hierarchy();
-    const client = state.clientName ?? (state.clientId ? `#${state.clientId}` : 'None');
-    const outlet = state.outletName ?? (state.outletId ? `#${state.outletId}` : 'None');
-    const category = state.categoryName ?? (state.categoryId ? `#${state.categoryId}` : 'None');
-    return `Client: ${client}  |  Outlet: ${outlet}  |  Category: ${category}`;
-  });
+  readonly clientCount = signal(0);
+  readonly unreadCount = signal(0);
 
   readonly hasClient = computed(() => !!this.hierarchy().clientId);
   readonly hasOutlet = computed(() => !!this.hierarchy().outletId);
   readonly hasCategory = computed(() => !!this.hierarchy().categoryId);
   readonly hasUser = computed(() => !!this.user().userId);
-  readonly userSummary = computed(
-    () => `User: ${this.user().userName ?? (this.user().userId ? `#${this.user().userId}` : 'None')}`
-  );
 
   constructor() {
     this.userContext.syncFromRoute(this.router.routerState.snapshot.root);
@@ -60,33 +55,19 @@ export class SidebarComponent {
       )
       .subscribe(() => {
         this.userContext.syncFromRoute(this.router.routerState.snapshot.root);
-        this.autoExpandFromUrl();
       });
-    this.autoExpandFromUrl();
-  }
 
-  private autoExpandFromUrl(): void {
-    const url = this.router.url;
-    if (url.includes('/dashboard/admin/')) {
-      this.expanded.update((e) => ({ ...e, adminPanel: true }));
-    }
-    if (url.includes('/dashboard/clients/') && url.includes('/outlets/')) {
-      this.expanded.update((e) => ({ ...e, clientView: true, outletDetails: true }));
-    }
-    if (url.startsWith('/dashboard/users/')) {
-      this.expanded.update((e) => ({ ...e, userView: true }));
-    }
+    this.clientService.list().subscribe((clients) => this.clientCount.set(clients.length));
+    this.notificationService.list().subscribe((n) =>
+      this.unreadCount.set(n.filter((x) => x.status === 'scheduled').length)
+    );
   }
 
   toggle(section: keyof ReturnType<typeof this.expanded>): void {
     this.expanded.update((current) => ({ ...current, [section]: !current[section] }));
   }
 
-  // ── Client View ─────────────────────────────────────────────────────────────
-
-  navigateClientRoot(): void {
-    this.router.navigate(['/dashboard/clients']);
-  }
+  navigateClientRoot(): void { this.router.navigate(['/dashboard/clients']); }
 
   navigateOutletList(): void {
     const { clientId } = this.hierarchy();
@@ -103,9 +84,7 @@ export class SidebarComponent {
   navigateItems(): void {
     const { clientId, outletId, categoryId } = this.hierarchy();
     if (!clientId || !outletId || !categoryId) return;
-    this.router.navigate([
-      '/dashboard/clients', clientId, 'outlets', outletId, 'categories', categoryId, 'items'
-    ]);
+    this.router.navigate(['/dashboard/clients', clientId, 'outlets', outletId, 'categories', categoryId, 'items']);
   }
 
   navigateRatings(): void {
@@ -114,11 +93,7 @@ export class SidebarComponent {
     this.router.navigate(['/dashboard/clients', clientId, 'outlets', outletId, 'ratings']);
   }
 
-  // ── User View ────────────────────────────────────────────────────────────────
-
-  navigateUserList(): void {
-    this.router.navigate(['/dashboard/users']);
-  }
+  navigateUserList(): void { this.router.navigate(['/dashboard/users']); }
 
   navigateUserOrders(): void {
     const { userId } = this.user();
@@ -138,35 +113,12 @@ export class SidebarComponent {
     this.router.navigate(['/dashboard/users', userId, 'ratings']);
   }
 
-  // ── Overview & Admin Panel ───────────────────────────────────────────────────
+  navigateOverview(): void { this.router.navigate(['/dashboard']); }
+  navigateSegments(): void { this.router.navigate(['/dashboard/admin/segments']); }
+  navigateConfig(): void { this.router.navigate(['/dashboard/admin/config']); }
+  navigateOffers(): void { this.router.navigate(['/dashboard/admin/offers']); }
+  navigateNotifications(): void { this.router.navigate(['/dashboard/admin/notifications']); }
 
-  navigateOverview(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
-  navigateSegments(): void {
-    this.router.navigate(['/dashboard/admin/segments']);
-  }
-
-  navigateConfig(): void {
-    this.router.navigate(['/dashboard/admin/config']);
-  }
-
-  navigateOffers(): void {
-    this.router.navigate(['/dashboard/admin/offers']);
-  }
-
-  navigateNotifications(): void {
-    this.router.navigate(['/dashboard/admin/notifications']);
-  }
-
-  // ── Active state ─────────────────────────────────────────────────────────────
-
-  isRouteActive(prefix: string): boolean {
-    return this.router.url.startsWith(prefix);
-  }
-
-  isRouteExact(path: string): boolean {
-    return this.router.url === path || this.router.url === path + '/';
-  }
+  isRouteActive(prefix: string): boolean { return this.router.url.startsWith(prefix); }
+  isRouteExact(path: string): boolean { return this.router.url === path || this.router.url === path + '/'; }
 }

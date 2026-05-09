@@ -1,8 +1,8 @@
-@use '../../../../theme' as theme;
-
 .layout {
   min-height: 100vh;
   display: flex;
+  background: var(--bg);
+  transition: background 0.2s ease;
 }
 
 .main {
@@ -14,6 +14,6 @@
 
 .content {
   flex: 1;
-  padding: 0;
-  background: theme.$bg-secondary;
+  background: var(--bg);
+  transition: background 0.2s ease;
 }

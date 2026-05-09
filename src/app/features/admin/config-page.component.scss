@@ -1,128 +1,223 @@
-.empty {
-  padding: 48px;
-  text-align: center;
-  color: #6b7280;
+.config-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 24px 32px;
 }
 
 .config-group {
-  margin-bottom: 24px;
+  border: 1px solid var(--bdr);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg2);
 }
 
 .group-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  text-transform: capitalize;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f3f4f6;
-
-  .material-icons { font-size: 18px; color: #9ca3af; }
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--bdr);
+  background: var(--bg3);
 }
 
-.config-table {
-  width: 100%;
-  border-collapse: collapse;
+.group-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(99, 102, 241, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: #818CF8;
+  }
+}
+
+.group-name {
   font-size: 13px;
-
-  th {
-    text-align: left;
-    padding: 8px 12px;
-    color: #6b7280;
-    font-weight: 600;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #f9fafb;
-    color: #374151;
-    vertical-align: middle;
-  }
-
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #fafafa; }
-
-  code {
-    font-family: 'Menlo', 'Monaco', monospace;
-    font-size: 12px;
-    color: #6366f1;
-  }
+  font-weight: 600;
+  color: var(--t1);
+  flex: 1;
 }
 
-.desc-col { max-width: 280px; color: #6b7280; }
-.date-col { white-space: nowrap; color: #9ca3af; }
+.group-count {
+  font-size: 11px;
+  color: var(--t3);
+  background: var(--bg4);
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.config-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.config-row {
+  display: grid;
+  grid-template-columns: 1fr 200px 160px 80px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--bdr);
+  transition: background 0.15s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--bg3); }
+}
+
+.config-key-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.config-key {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #A5B4FC;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: rgba(99, 102, 241, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-desc {
+  font-size: 11px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.config-value-col {
+  display: flex;
+  align-items: center;
+}
 
 .value-chip {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 4px;
-  background: #f3f4f6;
-  font-weight: 500;
   font-size: 12px;
+  color: var(--t1);
+  background: var(--bg3);
+  border: 1px solid var(--bdr);
+  padding: 4px 8px;
+  border-radius: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
 
-  &.bool-true  { background: #dcfce7; color: #16a34a; }
-  &.bool-false { background: #fee2e2; color: #dc2626; }
-}
+  &.bool-true {
+    color: var(--green);
+    background: rgba(52, 199, 89, 0.08);
+    border-color: rgba(52, 199, 89, 0.2);
+  }
 
-.type-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #ede9fe;
-  color: #7c3aed;
-  font-size: 11px;
-  font-weight: 500;
+  &.bool-false {
+    color: var(--red);
+    background: rgba(255, 59, 48, 0.08);
+    border-color: rgba(255, 59, 48, 0.2);
+  }
 }
 
 .value-input {
-  border: 1px solid #3B82F6;
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid #6366F1;
   border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 13px;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: var(--t1);
   outline: none;
-  width: 120px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+}
 
-  &:focus { box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.config-meta-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.type-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: inline-block;
+
+  &.type-string  { background: rgba(99,102,241,0.1); color: #A5B4FC; }
+  &.type-number  { background: rgba(245,158,11,0.1); color: #FCD34D; }
+  &.type-boolean { background: rgba(34,197,94,0.1);  color: #4ADE80; }
+}
+
+.config-date {
+  font-size: 10px;
+  color: var(--t3);
+}
+
+.config-actions-col {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
 }
 
 .btn-edit {
-  background: none;
-  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--t2);
   cursor: pointer;
-  color: #9ca3af;
-  padding: 4px;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
 
-  &:hover { color: #374151; background: #f3f4f6; }
+  svg { width: 13px; height: 13px; }
 
-  .material-icons { font-size: 16px; vertical-align: middle; }
+  &:hover {
+    background: rgba(99,102,241,0.1);
+    border-color: rgba(99,102,241,0.3);
+    color: #818CF8;
+  }
 }
 
 .btn-save {
-  background: #22C55E;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #6366F1;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
-  margin-right: 4px;
 
-  &:hover { background: #16a34a; }
+  &:hover { background: #4F52D6; }
 }
 
 .btn-cancel {
-  background: #f3f4f6;
-  color: #374151;
-  border: none;
+  padding: 5px 10px;
   border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 12px;
+  background: transparent;
+  color: var(--t2);
+  border: 1px solid var(--bdr);
+  font-size: 11px;
   cursor: pointer;
 
-  &:hover { background: #e5e7eb; }
+  &:hover { background: var(--bg3); }
 }

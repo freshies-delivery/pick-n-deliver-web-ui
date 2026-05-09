@@ -4,48 +4,82 @@
 @import '@angular/material/prebuilt-themes/azure-blue.css';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-// Swiftly design system tokens
-:root {
-  --bg: #080B0F;
-  --surface: #0F1419;
-  --card: #161D26;
-  --accent: #22C55E;
-  --accent-hover: #4ADE80;
-  --text: #F4F6F0;
-  --muted: #7A8A9A;
-  --border: rgba(255, 255, 255, 0.07);
+// ── Design Tokens ────────────────────────────────────────────────────────────
+
+[data-theme="dark"] {
+  --bg:         #0A0A0F;
+  --bg2:        #111116;
+  --bg3:        #1A1A22;
+  --bg4:        #22222D;
+  --bg5:        #2A2A38;
+  --t1:         #F5F5F7;
+  --t2:         #A1A1AA;
+  --t3:         #52525B;
+  --bdr:        rgba(255, 255, 255, 0.08);
+  --bdr2:       rgba(255, 255, 255, 0.15);
+  --a:          #2997FF;
+  --a-hover:    #34AADC;
+  --green:      #32D74B;
+  --red:        #FF453A;
+  --yellow:     #FFD60A;
+  --purple:     #BF5AF2;
+  --orange:     #FF9F0A;
+  --card-hover: rgba(255, 255, 255, 0.04);
 }
 
-* {
-  box-sizing: border-box;
+[data-theme="light"] {
+  --bg:         #F5F5F7;
+  --bg2:        #FFFFFF;
+  --bg3:        #F2F2F7;
+  --bg4:        #E8E8ED;
+  --bg5:        #D1D1D6;
+  --t1:         #1D1D1F;
+  --t2:         #6E6E73;
+  --t3:         #AEAEB2;
+  --bdr:        rgba(0, 0, 0, 0.08);
+  --bdr2:       rgba(0, 0, 0, 0.15);
+  --a:          #0071E3;
+  --a-hover:    #0077ED;
+  --green:      #34C759;
+  --red:        #FF3B30;
+  --yellow:     #FF9500;
+  --purple:     #AF52DE;
+  --orange:     #FF9500;
+  --card-hover: rgba(0, 0, 0, 0.03);
 }
 
-html,
-body {
+// ── Base ─────────────────────────────────────────────────────────────────────
+
+* { box-sizing: border-box; }
+
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
 body {
-  background: theme.$bg-secondary;
-  color: theme.$text-primary;
+  background: var(--bg);
+  color: var(--t1);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.2s ease, color 0.2s ease;
 }
+
+// ── Card ─────────────────────────────────────────────────────────────────────
 
 .card {
-  background: theme.$bg-primary;
-  border-radius: 10px;
-  border: 1px solid theme.$border-color;
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: 12px;
   padding: 20px;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover { background: var(--bg3); }
 }
 
-.card:hover {
-  border-color: #d1d5db;
-}
+// ── Layout ───────────────────────────────────────────────────────────────────
 
 .page {
   padding: 24px 32px;
@@ -54,15 +88,11 @@ body {
 .page-content {
   margin-top: 24px;
   width: 100%;
+
+  & > * + * { margin-top: 24px; }
 }
 
-.page-content > * + * {
-  margin-top: 24px;
-}
-
-.tabs {
-  margin-bottom: 16px;
-}
+.tabs { margin-bottom: 16px; }
 
 .page-header {
   display: flex;
@@ -84,11 +114,13 @@ body {
 
 .subtitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--t2);
 }
 
+// ── Buttons ──────────────────────────────────────────────────────────────────
+
 .primary-btn {
-  background: #000;
+  background: var(--a);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -96,13 +128,12 @@ body {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease;
+
+  &:hover { background: var(--a-hover); }
 }
 
-.primary-btn:hover {
-  background: #1f1f1f;
-  transform: translateY(-1px);
-}
+// ── Badges ───────────────────────────────────────────────────────────────────
 
 .badge {
   display: inline-flex;
@@ -115,32 +146,36 @@ body {
 }
 
 .badge-success {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(50, 215, 75, 0.15);
+  color: var(--green);
 }
 
 .badge-danger {
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(255, 69, 58, 0.15);
+  color: var(--red);
 }
+
+// ── Material overrides ───────────────────────────────────────────────────────
 
 button.mat-mdc-icon-button {
-  opacity: 0.6;
-  transition: all 0.2s ease;
-}
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
 
-button.mat-mdc-icon-button:hover {
-  opacity: 1;
-  transform: scale(1.05);
+  &:hover { opacity: 1; }
 }
 
 .mat-mdc-dialog-container {
   border-radius: 8px !important;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2) !important;
 }
 
 .mdc-data-table__row:last-child .mdc-data-table__cell {
   border-bottom: 0;
 }
 
+// ── Animations ───────────────────────────────────────────────────────────────
 
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}

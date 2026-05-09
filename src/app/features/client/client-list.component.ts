@@ -1,53 +1,133 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit,
+  ChangeDetectionStrategy,
+  WritableSignal, computed, signal
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { finalize } from 'rxjs';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { DecimalPipe } from '@angular/common';
+import { forkJoin, finalize } from 'rxjs';
 
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import {
-  DialogFieldConfig,
-  GenericFormDialogComponent
-} from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
-import { ColumnConfig, DataTableComponent } from '../../shared/components/data-table/data-table.component';
-import { PageHeaderAction, PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { DialogFieldConfig, GenericFormDialogComponent } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
+import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
+import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
+import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { ClientDto, ClientService } from './services/client.service';
+import { OutletDto, OutletService } from './services/outlet.service';
+import { Segment, SegmentService } from '../admin/segment.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
 import { FabActionService } from '../../core/services/fab-action.service';
+import { getCategoryColor, getInitials } from '../../shared/constants/category-colors.constant';
+
+/** Segment extended with optional client IDs (if the API supports it) */
+interface SegmentWithClients extends Segment {
+  clientIds?: number[];
+}
 
 @Component({
   selector: 'app-client-list',
   standalone: true,
-  imports: [PageHeaderComponent, DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageHeaderComponent, StatsStripComponent,
+    SkeletonListComponent, EmptyStateComponent,
+    StatusBadgeComponent, DecimalPipe
+  ],
   templateUrl: './client-list.component.html',
-  styleUrl: './client-list.component.scss'
+  styleUrl: './client-list.component.scss',
+  animations: [
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-6px)' }),
+        animate('180ms ease', style({ opacity: 1, transform: 'translateY(0)' }))
+      ]),
+      transition(':leave', [
+        animate('140ms ease', style({ opacity: 0, transform: 'translateY(-4px)' }))
+      ])
+    ])
+  ]
 })
 export class ClientListComponent implements OnInit, OnDestroy {
-  readonly loading = signal(false);
+  readonly loading = signal(true);
   readonly clients = signal<ClientDto[]>([]);
+  readonly segments = signal<SegmentWithClients[]>([]);
+  readonly activeSegmentId = signal<string>('all');
+  readonly expandedClients = signal<Set<number>>(new Set());
+  readonly searchQuery = signal('');
+  readonly allExpanded = signal(false);
 
-  readonly columns: ColumnConfig[] = [
-    { key: 'clientId', label: 'ID' },
-    { key: 'name', label: 'Name' },
-    { key: 'description', label: 'Description' }
+  private readonly outletsCache = new Map<number, WritableSignal<OutletDto[]>>();
+  private readonly loadingOutlets = new Map<number, WritableSignal<boolean>>();
+
+  readonly filteredClients = computed(() => {
+    const q   = this.searchQuery().toLowerCase();
+    const sid = this.activeSegmentId();
+    let list  = this.clients();
+
+    if (sid !== 'all' && sid !== 'unassigned') {
+      const seg = this.segments().find(s => s.id === sid);
+      if (seg?.clientIds?.length) {
+        list = list.filter(c => seg.clientIds!.includes(c.clientId!));
+      } else {
+        list = [];
+      }
+    }
+    if (sid === 'unassigned') {
+      const assigned = new Set(
+        this.segments().flatMap(s => s.clientIds ?? [])
+      );
+      list = list.filter(c => !assigned.has(c.clientId!));
+    }
+    if (q) {
+      list = list.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        (c.description?.toLowerCase().includes(q) ?? false)
+      );
+    }
+    return list;
+  });
+
+  readonly activeSegment = computed(() =>
+    this.segments().find(s => s.id === this.activeSegmentId()) ?? null
+  );
+
+  readonly unassignedCount = computed(() => {
+    const assigned = new Set(
+      this.segments().flatMap(s => s.clientIds ?? [])
+    );
+    return this.clients().filter(c => !assigned.has(c.clientId!)).length;
+  });
+
+  readonly statsStrip = computed((): StripStat[] => {
+    const total      = this.clients().length;
+    const unassigned = this.unassignedCount();
+    const assigned   = total - unassigned;
+    return [
+      { value: total,                    label: 'Total Clients', iconPath: 'M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z',                              iconBg: 'rgba(99,102,241,0.15)',  iconColor: '#818CF8' },
+      { value: assigned,                 label: 'Assigned',      iconPath: 'M13 4L6 11 3 8',                                                              iconBg: 'rgba(34,197,94,0.12)',   iconColor: '#86EFAC', valueColor: '#86EFAC' },
+      { value: this.segments().length,   label: 'Segments',      iconPath: 'M6 2H2v4h4V2zM14 2h-4v4h4V2zM6 10H2v4h4v-4zM14 10h-4v4h4v-4z',              iconBg: 'rgba(245,158,11,0.12)',  iconColor: '#FCD34D', valueColor: '#FCD34D' },
+      { value: unassigned,               label: 'Unassigned',    iconPath: 'M12 9v3m0 0v3m0-3h3m-3 0H9m3-9a9 9 0 110 18A9 9 0 0112 3z',                 iconBg: 'rgba(244,63,94,0.12)',   iconColor: '#FCA5A5', valueColor: '#FCA5A5' },
+    ];
+  });
+
+  readonly headerActions: PageHeaderAction[] = [
+    { label: 'Add Client', icon: 'add', type: 'primary', action: () => this.openCreateDialog() }
   ];
 
   readonly fields: DialogFieldConfig[] = [
-    { key: 'name', label: 'Name', type: 'text', required: true },
+    { key: 'name',        label: 'Name',        type: 'text',     required: true },
     { key: 'description', label: 'Description', type: 'textarea' }
-  ];
-
-  readonly headerActions: PageHeaderAction[] = [
-    {
-      label: 'Add Client',
-      icon: 'add',
-      type: 'primary',
-      action: () => this.openCreateDialog()
-    }
   ];
 
   constructor(
     private readonly clientService: ClientService,
+    private readonly outletService: OutletService,
+    private readonly segmentService: SegmentService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly router: Router,
@@ -58,108 +138,184 @@ export class ClientListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.fabActionService.registerAction('createClient', () => this.openCreateDialog());
     this.fabActionService.setFabAction(() => this.openCreateDialog());
-    this.loadClients();
+    this.load();
   }
 
   ngOnDestroy(): void {
     this.fabActionService.unregisterAction('createClient');
   }
 
-  loadClients(): void {
+  load(): void {
     this.loading.set(true);
-    this.clientService
-      .list()
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (clients) => this.clients.set(clients),
-        error: () => this.snackBar.open('Unable to load clients', 'Close', { duration: 3000 })
-      });
+    forkJoin({
+      clients:  this.clientService.list(),
+      segments: this.segmentService.list()
+    }).pipe(finalize(() => this.loading.set(false))).subscribe({
+      next: ({ clients, segments }) => {
+        this.clients.set(clients);
+        this.segments.set(segments as SegmentWithClients[]);
+      },
+      error: () => this.snackBar.open('Unable to load data', 'Close', { duration: 3000 })
+    });
   }
 
-  openCreateDialog(): void {
-    this.dialog
-      .open(GenericFormDialogComponent<ClientDto>, {
-        data: {
-          title: 'Add Client',
-          fields: this.fields
-        }
-      })
-      .afterClosed()
-      .subscribe((value: Partial<ClientDto> | undefined) => {
-        if (!value) {
-          return;
-        }
+  selectSegment(segId: string): void {
+    this.activeSegmentId.set(segId);
+    this.expandedClients.set(new Set());
+    this.allExpanded.set(false);
+  }
 
+  toggleClient(clientId: number): void {
+    const set = new Set(this.expandedClients());
+    if (set.has(clientId)) {
+      set.delete(clientId);
+    } else {
+      set.add(clientId);
+      this.loadOutletsForClient(clientId);
+    }
+    this.expandedClients.set(set);
+  }
+
+  private loadOutletsForClient(clientId: number): void {
+    if (this.outletsCache.has(clientId)) return;
+    const outletsSig  = signal<OutletDto[]>([]);
+    const loadingSig  = signal(true);
+    this.outletsCache.set(clientId, outletsSig);
+    this.loadingOutlets.set(clientId, loadingSig);
+    this.outletService.list(clientId).pipe(finalize(() => loadingSig.set(false))).subscribe({
+      next: outlets => outletsSig.set(outlets)
+    });
+  }
+
+  isExpanded(clientId: number): boolean {
+    return this.expandedClients().has(clientId);
+  }
+
+  getOutlets(clientId: number): OutletDto[] {
+    return this.outletsCache.get(clientId)?.() ?? [];
+  }
+
+  isLoadingOutlets(clientId: number): boolean {
+    return this.loadingOutlets.get(clientId)?.() ?? false;
+  }
+
+  toggleAll(): void {
+    const next = !this.allExpanded();
+    this.allExpanded.set(next);
+    if (next) {
+      const ids = new Set(this.expandedClients());
+      this.filteredClients().forEach(c => {
+        if (c.clientId) {
+          ids.add(c.clientId);
+          this.loadOutletsForClient(c.clientId);
+        }
+      });
+      this.expandedClients.set(ids);
+    } else {
+      this.expandedClients.set(new Set());
+    }
+  }
+
+  getClientSegmentName(clientId: number): string {
+    const seg = this.segments().find(s => s.clientIds?.includes(clientId));
+    return seg?.name ?? 'Unassigned';
+  }
+
+  getClientSegmentColor(clientId: number): string {
+    const seg = this.segments().find(s => s.clientIds?.includes(clientId));
+    return seg?.color ?? '#44446A';
+  }
+
+  getCatBg(cat?: string):    string { return getCategoryColor(cat).bg; }
+  getCatText(cat?: string):  string { return getCategoryColor(cat).text; }
+  getCatBar(cat?: string):   string { return getCategoryColor(cat).bar; }
+  getInitials(name: string): string { return getInitials(name); }
+
+  openCreateDialog(): void {
+    this.dialog.open(GenericFormDialogComponent<ClientDto>, { data: { title: 'Add Client', fields: this.fields } })
+      .afterClosed().subscribe((value: Partial<ClientDto> | undefined) => {
+        if (!value) return;
         this.clientService.create(value as ClientDto).subscribe({
-          next: () => {
-            this.snackBar.open('Client created', 'Close', { duration: 2500 });
-            this.loadClients();
-          },
+          next: () => { this.snackBar.open('Client created', 'Close', { duration: 2500 }); this.load(); },
           error: () => this.snackBar.open('Failed to create client', 'Close', { duration: 3000 })
         });
       });
   }
 
-  openEditDialog(client: ClientDto): void {
-    this.dialog
-      .open(GenericFormDialogComponent<ClientDto>, {
-        data: {
-          title: `Edit ${client.name}`,
-          fields: this.fields,
-          initialValue: client
-        }
-      })
-      .afterClosed()
-      .subscribe((value: Partial<ClientDto> | undefined) => {
-        if (!value || !client.clientId) {
-          return;
-        }
-
-        this.clientService.update(client.clientId, { ...client, ...value }).subscribe({
-          next: () => {
-            this.snackBar.open('Client updated', 'Close', { duration: 2500 });
-            this.loadClients();
-          },
-          error: () => this.snackBar.open('Failed to update client', 'Close', { duration: 3000 })
-        });
+  openEditDialog(client: ClientDto, event: Event): void {
+    event.stopPropagation();
+    this.dialog.open(GenericFormDialogComponent<ClientDto>, {
+      data: { title: `Edit ${client.name}`, fields: this.fields, initialValue: client }
+    }).afterClosed().subscribe((value: Partial<ClientDto> | undefined) => {
+      if (!value || !client.clientId) return;
+      this.clientService.update(client.clientId, { ...client, ...value }).subscribe({
+        next: () => { this.snackBar.open('Client updated', 'Close', { duration: 2500 }); this.load(); },
+        error: () => this.snackBar.open('Failed to update client', 'Close', { duration: 3000 })
       });
+    });
   }
 
-  confirmDelete(client: ClientDto): void {
-    if (!client.clientId) {
-      return;
-    }
-
-    this.dialog
-      .open(ConfirmDialogComponent, {
-        data: {
-          title: 'Delete Client',
-          message: `Are you sure you want to delete ${client.name}?`
-        }
-      })
-      .afterClosed()
-      .subscribe((confirmed: boolean) => {
-        if (!confirmed) {
-          return;
-        }
-
-        this.clientService.delete(client.clientId!).subscribe({
-          next: () => {
-            this.snackBar.open('Client deleted', 'Close', { duration: 2500 });
-            this.loadClients();
-          },
-          error: () => this.snackBar.open('Failed to delete client', 'Close', { duration: 3000 })
-        });
+  confirmDelete(client: ClientDto, event: Event): void {
+    event.stopPropagation();
+    if (!client.clientId) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Delete Client', message: `Delete ${client.name}?` }
+    }).afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.clientService.delete(client.clientId!).subscribe({
+        next: () => { this.snackBar.open('Client deleted', 'Close', { duration: 2500 }); this.load(); },
+        error: () => this.snackBar.open('Failed to delete client', 'Close', { duration: 3000 })
       });
+    });
   }
 
-  openOutlets(client: ClientDto): void {
-    if (!client.clientId) {
-      return;
-    }
-
-    this.hierarchyState.setClient(client.clientId, client.name ?? null);
-    this.router.navigate(['/dashboard/clients', client.clientId, 'outlets']);
+  goToOutlet(client: ClientDto, outlet: OutletDto, event?: Event): void {
+    event?.stopPropagation();
+    if (!outlet.outletId || !client.clientId) return;
+    this.hierarchyState.setClient(client.clientId, client.name);
+    this.hierarchyState.setOutlet(outlet.outletId, outlet.name);
+    this.router.navigate(['/dashboard/clients', client.clientId, 'outlets', outlet.outletId]);
   }
+
+  openAddOutlet(client: ClientDto, event: Event): void {
+    event.stopPropagation();
+    const outletFields: DialogFieldConfig[] = [
+      { key: 'name',        label: 'Name',        type: 'text',     required: true },
+      { key: 'description', label: 'Description', type: 'textarea' },
+      { key: 'type',        label: 'Type',        type: 'text' },
+    ];
+    this.dialog.open(GenericFormDialogComponent<OutletDto>, {
+      data: { title: `Add Outlet — ${client.name}`, fields: outletFields }
+    }).afterClosed().subscribe((value: Partial<OutletDto> | undefined) => {
+      if (!value || !client.clientId) return;
+      this.outletService.create({ ...value, clientId: client.clientId } as OutletDto).subscribe({
+        next: () => {
+          this.snackBar.open('Outlet created', 'Close', { duration: 2500 });
+          this.outletsCache.delete(client.clientId!);
+          this.loadOutletsForClient(client.clientId!);
+        },
+        error: () => this.snackBar.open('Failed to create outlet', 'Close', { duration: 3000 })
+      });
+    });
+  }
+
+  confirmDeleteOutlet(outlet: OutletDto, event: Event): void {
+    event.stopPropagation();
+    if (!outlet.outletId) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Delete Outlet', message: `Delete ${outlet.name}?` }
+    }).afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed || !outlet.outletId || !outlet.clientId) return;
+      this.outletService.delete(outlet.outletId).subscribe({
+        next: () => {
+          this.snackBar.open('Outlet deleted', 'Close', { duration: 2500 });
+          this.outletsCache.delete(outlet.clientId!);
+          this.loadOutletsForClient(outlet.clientId!);
+        },
+        error: () => this.snackBar.open('Failed to delete outlet', 'Close', { duration: 3000 })
+      });
+    });
+  }
+
+  readonly shimmerRows = [1, 2, 3];
 }
-

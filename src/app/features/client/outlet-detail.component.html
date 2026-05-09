@@ -1,111 +1,39 @@
 <div class="page outlet-detail-page" @fadeIn>
-  <div class="page-header">
-    <div class="header-left">
-      <div class="breadcrumb">Client / Outlets / Outlet Detail</div>
-      <h1>Outlet {{ outletId() }}</h1>
-      <p class="subtitle">Manage categories, items, and ratings</p>
-    </div>
+  <app-page-header
+    [breadcrumb]="'Client / Outlets / Detail'"
+    [title]="'Outlet ' + outletId()"
+    [subtitle]="'Manage categories, address, and ratings'"
+    [actions]="headerActions"
+  />
 
-    <div class="header-right">
-      <button class="primary-btn" type="button" (click)="openAddCategoryFromHeader()">+ Add Category</button>
-    </div>
+  <div class="tab-bar">
+    @for (tab of tabs; track tab.key) {
+      <button
+        type="button"
+        class="tab"
+        [class.active]="activeTab() === tab.key"
+        [attr.aria-selected]="activeTab() === tab.key"
+        (click)="setTab(tab.key)"
+      >
+        {{ tab.label }}
+      </button>
+    }
   </div>
 
-  <div class="page-content">
-    <div class="card detail-card">
-    <div class="tabs-nav" role="tablist" aria-label="Outlet sections">
-      @for (tab of tabs; track tab.key) {
-        <button
-          type="button"
-          class="tab"
-          [class.active]="activeTab() === tab.key"
-          [attr.aria-selected]="activeTab() === tab.key"
-          (click)="setTab(tab.key)"
-        >
-          {{ tab.label }}
-        </button>
-      }
-    </div>
+  <div class="tab-content">
+    @if (activeTab() === 'address') {
+      <app-outlet-address [outletId]="outletId()" />
+    }
 
-    <div class="tab-body">
-      @if (activeTab() === 'address') {
-        <section class="section-pane">
-          <div class="actions-row">
-            <button mat-stroked-button type="button" class="secondary-btn" (click)="openAddressDialog()">
-              {{ outletAddress() ? 'Edit Address' : 'Add Address' }}
-            </button>
+    @if (activeTab() === 'categories') {
+      <app-category-list
+        [outletId]="outletId()"
+        (openItems)="openCategoryItems($event)"
+      />
+    }
 
-            @if (outletAddress()) {
-              <button mat-stroked-button type="button" class="secondary-btn delete-outline" (click)="deleteAddress()">
-                Delete
-              </button>
-            }
-          </div>
-
-          @if (loadingAddress()) {
-            <p class="status-text">Loading address...</p>
-          } @else {
-            @if (outletAddress(); as address) {
-              <div class="address-grid">
-                <div class="address-item"><span>Door No</span><strong>{{ address.doorNo || '-' }}</strong></div>
-                <div class="address-item"><span>Building</span><strong>{{ address.buildingName || '-' }}</strong></div>
-                <div class="address-item"><span>Address 1</span><strong>{{ address.addressLine1 || '-' }}</strong></div>
-                <div class="address-item"><span>Address 2</span><strong>{{ address.addressLine2 || '-' }}</strong></div>
-                <div class="address-item"><span>City</span><strong>{{ address.city || '-' }}</strong></div>
-                <div class="address-item"><span>State</span><strong>{{ address.state || '-' }}</strong></div>
-                <div class="address-item"><span>Zip</span><strong>{{ address.zipCode || '-' }}</strong></div>
-                <div class="address-item"><span>Country</span><strong>{{ address.country || '-' }}</strong></div>
-              </div>
-            } @else {
-              <p class="empty">No address configured for this outlet.</p>
-            }
-          }
-        </section>
-      }
-
-      @if (activeTab() === 'categories') {
-        <section class="section-pane">
-          <app-category-list [outletId]="outletId()" (openItems)="openCategoryItems($event)"></app-category-list>
-        </section>
-      }
-
-      @if (activeTab() === 'ratings') {
-        <section class="section-pane">
-          <div class="actions-row">
-            <button mat-stroked-button type="button" class="secondary-btn" (click)="openCreateRatingDialog()">
-              + Add Rating
-            </button>
-            <button mat-stroked-button type="button" class="secondary-btn" (click)="openCreateCommentDialog()">
-              + Add Comment
-            </button>
-          </div>
-
-          <h3 class="section-title">Ratings</h3>
-          <app-data-table
-            [columns]="ratingColumns"
-            [data]="ratings()"
-            [loading]="loadingRatings()"
-            [emptyMessage]="'No ratings for this outlet'"
-            [clickableRows]="false"
-            (edit)="openEditRatingDialog($event)"
-            (delete)="deleteRating($event)"
-          ></app-data-table>
-
-          <h3 class="section-title section-gap">Rating Comments</h3>
-          <app-data-table
-            [columns]="commentColumns"
-            [data]="ratingComments()"
-            [loading]="loadingRatings()"
-            [emptyMessage]="'No comments found'"
-            [clickableRows]="false"
-            (edit)="openEditCommentDialog($event)"
-            (delete)="deleteComment($event)"
-          ></app-data-table>
-        </section>
-      }
-    </div>
-    </div>
+    @if (activeTab() === 'ratings') {
+      <app-outlet-ratings [outletId]="outletId()" />
+    }
   </div>
 </div>
-
-

@@ -1,10 +1,180 @@
-<app-data-table
-  [columns]="columns"
-  [data]="categories()"
-  [loading]="loading()"
-  [emptyMessage]="'No categories available'"
-  (edit)="openEditDialog($event)"
-  (delete)="confirmDelete($event)"
-  (rowClick)="openItems.emit($event)"
-></app-data-table>
+<div class="cat-wrap">
 
+  <!-- Toolbar -->
+  <div class="cat-toolbar">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="6.5" cy="6.5" r="5"/>
+        <line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
+      </svg>
+      <input type="text"
+             placeholder="Search categories or items…"
+             [value]="catSearch()"
+             (input)="catSearch.set($any($event.target).value)" />
+    </div>
+    <button class="btn-primary" (click)="openCreateDialog()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="8" y1="2" x2="8" y2="14"/>
+        <line x1="2" y1="8" x2="14" y2="8"/>
+      </svg>
+      Add Category
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-wrap">
+      @for (i of shimmerRows; track i) {
+        <div class="shimmer-block"></div>
+      }
+    </div>
+  } @else if (categories().length === 0) {
+    <app-empty-state
+      title="No categories yet"
+      message="Add your first category to get started."
+      ctaLabel="Add Category"
+      (ctaClick)="openCreateDialog()"
+    />
+  } @else {
+
+    <!-- Stats strip -->
+    <div class="cat-stats-strip">
+      <div class="cs-card">
+        <div class="cs-val">{{ categories().length }}</div>
+        <div class="cs-lbl">Categories</div>
+      </div>
+      <div class="cs-card">
+        <div class="cs-val green">{{ totalItems() | number }}</div>
+        <div class="cs-lbl">Total Items</div>
+      </div>
+    </div>
+
+    <!-- Menu layout -->
+    <div class="menu-layout">
+
+      <!-- Left: Category nav -->
+      <div class="cat-nav">
+        @for (cat of categories(); track cat.categoryId) {
+          <div class="cn-item"
+               [class.active]="activeCatId() === cat.categoryId"
+               (click)="scrollToCategory(cat.categoryId!)">
+            <span class="cn-name">{{ cat.name }}</span>
+            <div class="cn-count">{{ cat.itemIds?.length ?? 0 }}</div>
+          </div>
+        }
+      </div>
+
+      <!-- Right: Category sections -->
+      <div class="menu-content" id="menuContent" (scroll)="onMenuScroll($event)">
+        @for (cat of categories(); track cat.categoryId) {
+          <div [id]="'cat-' + cat.categoryId" class="cat-section">
+
+            <!-- Section header -->
+            <div class="cat-sec-hdr">
+              <div class="cat-sec-title">{{ cat.name }}</div>
+              <div class="cat-sec-meta">
+                @if (cat.description) {
+                  <span class="cat-sec-count">{{ cat.description }}</span>
+                }
+                <button class="btn-add-item" (click)="openAddItem(cat.categoryId!, $event)">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="8" y1="2" x2="8" y2="14"/>
+                    <line x1="2" y1="8" x2="14" y2="8"/>
+                  </svg>
+                  Add Item
+                </button>
+                <div class="cat-sec-actions">
+                  <button class="act-sm" title="Edit" (click)="openEditDialog(cat, $event)">
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11.5 2.5a2.121 2.121 0 013 3L5 15H2v-3L11.5 2.5z"/>
+                    </svg>
+                  </button>
+                  <button class="act-sm danger" title="Delete" (click)="confirmDelete(cat, $event)">
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 13 6"/>
+                      <path d="M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                      <path d="M4 6l1 8a1 1 0 001 1h4a1 1 0 001-1l1-8"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Loading items -->
+            @if (isLoadingItems(cat.categoryId!)) {
+              @for (i of shimmerRows; track i) {
+                <div class="shimmer-row"></div>
+              }
+            } @else if (getItems(cat.categoryId!).length === 0) {
+              <div class="items-empty">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="5" height="5"/><rect x="9" y="2" width="5" height="5"/>
+                  <rect x="2" y="9" width="5" height="5"/><rect x="9" y="9" width="5" height="5"/>
+                </svg>
+                No items yet ·
+                <span class="link" (click)="openAddItem(cat.categoryId!, $event)">Add first item</span>
+              </div>
+            } @else {
+              @for (item of getItems(cat.categoryId!); track item.itemId) {
+                <div class="item-row">
+
+                  <!-- Thumbnail -->
+                  <div class="ir-img" [style.background]="getCatBg(cat.name)">
+                    <div class="ir-initials" [style.color]="getCatText(cat.name)">
+                      {{ getInitials(item.name) }}
+                    </div>
+                    <div class="ir-avail-dot"
+                         [style.background]="item.available ? '#22C55E' : '#F43F5E'"></div>
+                  </div>
+
+                  <!-- Info -->
+                  <div class="ir-info">
+                    <div class="ir-name">{{ item.name }}</div>
+                    @if (item.description) {
+                      <div class="ir-desc">{{ item.description }}</div>
+                    }
+                    <div class="ir-meta">
+                      @if (item.price != null) {
+                        <span class="ir-price">₹{{ item.price | number:'1.0-2' }}</span>
+                      }
+                      @if (item.type) {
+                        <span class="ir-type">{{ item.type }}</span>
+                      }
+                      @if (!item.available) {
+                        <span class="ir-badge unavail">Unavailable</span>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Right: toggle + actions -->
+                  <div class="ir-right">
+                    <div class="avail-toggle"
+                         [class.on]="item.available"
+                         (click)="toggleAvailability(item, $event)"
+                         title="{{ item.available ? 'Mark unavailable' : 'Mark available' }}">
+                      <div class="avail-thumb"></div>
+                    </div>
+                    <div class="ir-actions">
+                      <button class="ia-btn" title="Edit" (click)="openEditItem(item, $event)">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11.5 2.5a2.121 2.121 0 013 3L5 15H2v-3L11.5 2.5z"/>
+                        </svg>
+                      </button>
+                      <button class="ia-btn danger" title="Delete" (click)="confirmDeleteItem(item, cat.categoryId!, $event)">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 13 6"/>
+                          <path d="M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                          <path d="M4 6l1 8a1 1 0 001 1h4a1 1 0 001-1l1-8"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

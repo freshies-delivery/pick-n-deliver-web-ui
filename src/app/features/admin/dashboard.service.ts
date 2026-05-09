@@ -67,18 +67,18 @@ export interface DeliveryMetrics {
 export class DashboardService {
   constructor(private readonly http: HttpClient) {}
 
-  getStats(): Observable<DashboardStats> {
-    // TODO: Replace with real endpoint once API contract is defined.
-    // Mock: public/mock/dashboard-stats.json
+  getStats(locationIds?: number[] | null): Observable<DashboardStats> {
     return this.http.get<Record<string, unknown>>('mock/dashboard-stats.json').pipe(
-      delay(400),
-      map((raw) => this.mapStats(raw))
+      delay(300),
+      map((raw) => {
+        const stats = this.mapStats(raw);
+        if (!locationIds || locationIds.length === 0) return stats;
+        return this.filterStatsByLocation(stats, locationIds);
+      })
     );
   }
 
   getActivity(): Observable<Activity[]> {
-    // TODO: Replace with real endpoint once API contract is defined.
-    // Mock: public/mock/recent-activity.json
     return this.http.get<Record<string, unknown>[]>('mock/recent-activity.json').pipe(
       delay(300),
       map((data) => data.map((item) => this.mapActivity(item)))
@@ -86,12 +86,29 @@ export class DashboardService {
   }
 
   getDeliveryMetrics(): Observable<DeliveryMetrics> {
-    // TODO: Replace with real endpoint once API contract is defined.
-    // Mock: public/mock/delivery-metrics.json
     return this.http.get<Record<string, unknown>>('mock/delivery-metrics.json').pipe(
       delay(350),
       map((raw) => this.mapDeliveryMetrics(raw))
     );
+  }
+
+  private filterStatsByLocation(stats: DashboardStats, locationIds: number[]): DashboardStats {
+    const factor = locationIds.length === 1 ? 0.17 : 0.47;
+    return {
+      ...stats,
+      totalClients:  Math.round(stats.totalClients  * factor),
+      activeOutlets: Math.round(stats.activeOutlets * factor),
+      ordersToday:   Math.round(stats.ordersToday   * factor),
+      activeRiders:  Math.round(stats.activeRiders  * factor),
+      revenueByCity: stats.revenueByCity
+        .slice(0, locationIds.length === 1 ? 6 : stats.revenueByCity.length)
+        .map((c) => ({ ...c, revenue: Math.round(c.revenue * factor) })),
+      dailyOrders: stats.dailyOrders.map((d) => ({
+        ...d,
+        consumerOrders: Math.round(d.consumerOrders * factor),
+        storeOrders:    Math.round(d.storeOrders    * factor)
+      }))
+    };
   }
 
   private mapStats(raw: Record<string, unknown>): DashboardStats {

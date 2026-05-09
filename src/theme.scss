@@ -1,16 +1,19 @@
-$bg-primary: #ffffff;
-$bg-secondary: #f6f6f6;
-$bg-dark: #0a0a0a;
+// SCSS aliases that point to CSS custom properties.
+// Components using @use '...theme' as theme still work; the
+// compiled output will reference the correct CSS var at runtime.
 
-$text-primary: #000000;
-$text-secondary: #6b7280;
+$bg-primary:   var(--bg2);
+$bg-secondary: var(--bg3);
+$bg-dark:      var(--bg);
 
-$border-color: #e5e5e5;
+$text-primary:   var(--t1);
+$text-secondary: var(--t2);
 
-$accent-primary: #000000;
-$accent-hover: #1f1f1f;
+$border-color: var(--bdr);
 
-$success: #16a34a;
-$error: #dc2626;
-$warning: #f59e0b;
+$accent-primary: var(--a);
+$accent-hover:   var(--a-hover);
 
+$success: var(--green);
+$error:   var(--red);
+$warning: var(--yellow);

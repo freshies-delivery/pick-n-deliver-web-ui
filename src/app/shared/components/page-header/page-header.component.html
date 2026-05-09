@@ -1,28 +1,31 @@
 <div class="page-header">
   <div class="header-left">
-    @if (breadcrumb) {
-      <div class="breadcrumb">{{ breadcrumb }}</div>
+    @if (breadcrumb || sectionLabel) {
+      <div class="section-label">{{ sectionLabel ?? breadcrumb }}</div>
     }
-    <h1>{{ title }}</h1>
+    <h1 class="page-title">{{ title }}</h1>
     @if (subtitle) {
-      <p class="subtitle">{{ subtitle }}</p>
+      <p class="page-subtitle">{{ subtitle }}</p>
     }
   </div>
 
-  <div class="header-right">
-    @for (btn of actions; track btn.label) {
-      <button
-        type="button"
-        [class.primary-btn]="(btn.type || 'primary') === 'primary'"
-        [class.secondary-btn]="btn.type === 'secondary'"
-        (click)="btn.action()"
-      >
-        @if (btn.icon) {
-          <mat-icon>{{ btn.icon }}</mat-icon>
-        }
-        {{ btn.label }}
-      </button>
-    }
-  </div>
+  @if (actions.length > 0) {
+    <div class="header-actions">
+      @for (btn of actions; track btn.label) {
+        <button type="button"
+                class="hdr-btn"
+                [class.primary]="getVariant(btn) === 'primary'"
+                [class.outline]="getVariant(btn) === 'outline'"
+                [class.ghost]="getVariant(btn) === 'ghost'"
+                (click)="btn.action()">
+          @if (btn.icon) {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3v10M3 8h10"/>
+            </svg>
+          }
+          {{ btn.label }}
+        </button>
+      }
+    </div>
+  }
 </div>
-

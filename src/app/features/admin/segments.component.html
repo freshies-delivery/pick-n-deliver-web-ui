@@ -1,38 +1,54 @@
 <div class="page">
   <app-page-header
-    [breadcrumb]="'Admin Panel'"
+    [breadcrumb]="'Admin / Segments'"
     [title]="'Segments'"
-    [subtitle]="'User segments for targeted campaigns'"
-  ></app-page-header>
+    [subtitle]="segments().length + ' segments'"
+  />
 
-  <div class="page-content">
+  <app-stats-strip [stats]="statsStrip()" />
+
+  <app-page-toolbar
+    searchPlaceholder="Search segments…"
+    [filterOptions]="filterOptions()"
+    [activeFilter]="activeFilter()"
+    (searchChange)="searchQuery.set($event); currentPage.set(1)"
+    (filterChange)="activeFilter.set($event); currentPage.set(1)"
+  />
+
+  <div class="list-body">
     @if (loading()) {
-      <div class="empty">Loading segments…</div>
-    } @else if (segments().length === 0) {
-      <div class="empty">No segments found.</div>
+      <app-skeleton-list [rows]="6" />
+    } @else if (filteredSegments().length === 0) {
+      <app-empty-state
+        title="No segments found"
+        message="Try adjusting your search or filter to find what you're looking for."
+      />
     } @else {
-      <div class="segment-grid">
-        @for (seg of segments(); track seg.id) {
-          <div class="segment-card">
-            <div class="seg-header">
-              <span class="seg-dot" [style.background]="seg.color"></span>
-              <span class="seg-name">{{ seg.name }}</span>
-              <span class="seg-badge" [class.active]="seg.isActive" [class.inactive]="!seg.isActive">
-                {{ seg.isActive ? 'Active' : 'Inactive' }}
-              </span>
-            </div>
-            <p class="seg-desc">{{ seg.description }}</p>
-            <div class="seg-criteria">
-              <span class="material-icons">filter_list</span>
-              {{ seg.criteriaReadable }}
-            </div>
-            <div class="seg-footer">
-              <span class="seg-count">{{ seg.userCount | number }} users</span>
-              <span class="seg-date">Since {{ seg.createdAt | date:'MMM d, yyyy' }}</span>
-            </div>
-          </div>
+      <div class="segments-list">
+        @for (seg of pagedSegments(); track seg.id) {
+          <app-rich-list-item
+            [id]="seg.id"
+            [name]="seg.name"
+            [description]="seg.description"
+            [category]="seg.isActive ? 'active' : 'inactive'"
+            [status]="seg.isActive ? 'active' : 'inactive'"
+            [stats]="segmentStats(seg)"
+            [badges]="[seg.criteriaReadable]"
+            [avatarInitials]="seg.name.charAt(0)"
+            [showEdit]="false"
+            [showDelete]="false"
+            [accentBar]="true"
+            [style.--bar-gradient]="'linear-gradient(135deg, ' + seg.color + ', ' + seg.color + '88)'"
+          />
         }
       </div>
+
+      <app-pagination
+        [total]="filteredSegments().length"
+        [pageSize]="pageSize"
+        [currentPage]="currentPage()"
+        (pageChange)="currentPage.set($event)"
+      />
     }
   </div>
 </div>

@@ -1,15 +1,24 @@
 import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { BreadcrumbsComponent } from '../breadcrumbs/breadcrumbs.component';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { LocationDropdownComponent } from '../location-dropdown/location-dropdown.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, BreadcrumbsComponent],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    BreadcrumbsComponent,
+    ThemeToggleComponent,
+    LocationDropdownComponent
+  ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

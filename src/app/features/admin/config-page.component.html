@@ -1,63 +1,79 @@
 <div class="page">
   <app-page-header
-    [breadcrumb]="'Admin Panel'"
+    [breadcrumb]="'Admin / Config'"
     [title]="'Configuration'"
-    [subtitle]="'Manage platform key-value settings'"
-  ></app-page-header>
+    [subtitle]="entries().length + ' settings'"
+  />
 
-  <div class="page-content">
-    @if (loading()) {
-      <div class="empty">Loading configuration…</div>
-    } @else {
+  <app-page-toolbar
+    searchPlaceholder="Search settings…"
+    (searchChange)="searchQuery.set($event)"
+  />
+
+  @if (loading()) {
+    <app-skeleton-list [rows]="6" />
+  } @else {
+    <div class="config-body">
       @for (group of groups; track group) {
-        <div class="card config-group">
+        <div class="config-group">
           <div class="group-header">
-            <span class="material-icons">tune</span>
-            {{ group | titlecase }}
+            <div class="group-icon">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path [attr.d]="groupIcon(group)" />
+              </svg>
+            </div>
+            <span class="group-name">{{ group | titlecase }}</span>
+            <span class="group-count">{{ entriesForGroup(group).length }}</span>
           </div>
-          <table class="config-table">
-            <thead>
-              <tr>
-                <th>Key</th>
-                <th>Value</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th>Last Updated</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (entry of entriesForGroup(group); track entry.id) {
-                <tr>
-                  <td><code>{{ entry.key }}</code></td>
-                  <td>
-                    @if (editingId() === entry.id) {
-                      <input class="value-input" [(ngModel)]="editValue" (keyup.enter)="saveEdit(entry)" (keyup.escape)="cancelEdit()" />
-                    } @else {
-                      <span class="value-chip" [class.bool-true]="entry.value === 'true'" [class.bool-false]="entry.value === 'false'">
-                        {{ entry.value }}
-                      </span>
-                    }
-                  </td>
-                  <td><span class="type-badge">{{ entry.type }}</span></td>
-                  <td class="desc-col">{{ entry.description }}</td>
-                  <td class="date-col">{{ entry.lastUpdated | date:'MMM d, yyyy' }}</td>
-                  <td>
-                    @if (editingId() === entry.id) {
-                      <button class="btn-save" (click)="saveEdit(entry)">Save</button>
-                      <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
-                    } @else {
-                      <button class="btn-edit" (click)="startEdit(entry)">
-                        <span class="material-icons">edit</span>
-                      </button>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+
+          <div class="config-rows">
+            @for (entry of entriesForGroup(group); track entry.id) {
+              <div class="config-row">
+                <div class="config-key-col">
+                  <code class="config-key">{{ entry.key }}</code>
+                  <span class="config-desc">{{ entry.description }}</span>
+                </div>
+
+                <div class="config-value-col">
+                  @if (editingId() === entry.id) {
+                    <input
+                      class="value-input"
+                      [(ngModel)]="editValue"
+                      (keyup.enter)="saveEdit(entry)"
+                      (keyup.escape)="cancelEdit()"
+                      autofocus
+                    />
+                  } @else {
+                    <span
+                      class="value-chip"
+                      [class.bool-true]="entry.value === 'true'"
+                      [class.bool-false]="entry.value === 'false'"
+                    >{{ entry.value }}</span>
+                  }
+                </div>
+
+                <div class="config-meta-col">
+                  <span class="type-badge" [class]="'type-' + entry.type">{{ entry.type }}</span>
+                  <span class="config-date">{{ entry.lastUpdated | date:'MMM d, yyyy' }}</span>
+                </div>
+
+                <div class="config-actions-col">
+                  @if (editingId() === entry.id) {
+                    <button class="btn-save" type="button" (click)="saveEdit(entry)">Save</button>
+                    <button class="btn-cancel" type="button" (click)="cancelEdit()">Cancel</button>
+                  } @else {
+                    <button class="btn-edit" type="button" (click)="startEdit(entry)" title="Edit value">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 2l3 3-9 9H2v-3L11 2z"/>
+                      </svg>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
         </div>
       }
-    }
-  </div>
+    </div>
+  }
 </div>

@@ -1,0 +1,70 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'User View / Users'"
+    [title]="'Activity'"
+    [subtitle]="'Event history for ' + userLabel()"
+  />
+
+  <!-- Tab Navigation -->
+  <div class="user-tabs">
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'activity']" routerLinkActive="active">Activity</a>
+  </div>
+
+  <div class="page-content">
+    <!-- Stats Strip -->
+    @if (stats()) {
+      <app-stats-strip [stats]="statsStrip()" />
+    }
+
+    <!-- Date Range Selector -->
+    <div class="range-bar">
+      <span class="range-label">Show:</span>
+      @for (r of [['7d','7 Days'],['30d','30 Days'],['90d','90 Days'],['all','All Time']]; track r[0]) {
+        <button
+          class="range-pill"
+          type="button"
+          [class.active]="dateRange() === r[0]"
+          (click)="dateRange.set($any(r[0]))">
+          {{ r[1] }}
+        </button>
+      }
+    </div>
+
+    <!-- Timeline -->
+    @if (loading()) {
+      <app-skeleton-list [rows]="6" />
+    } @else if (activities().length === 0) {
+      <div class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+        </svg>
+        <p>No activity found for this period</p>
+      </div>
+    } @else {
+      <div class="timeline-wrap">
+        @for (group of groupKeys(); track group) {
+          <div class="date-group">
+            <div class="date-label">{{ group }}</div>
+            @for (event of eventsForGroup(group); track event.id) {
+              <div class="timeline-row">
+                <div class="tl-icon-wrap">
+                  <div class="tl-dot" [style.background]="activityColor(event)"></div>
+                  <div class="tl-line"></div>
+                </div>
+                <div class="tl-content">
+                  <div class="tl-title">{{ event.title }}</div>
+                  @if (event.detail) {
+                    <div class="tl-detail">{{ event.detail }}</div>
+                  }
+                  <div class="tl-time">{{ formatTime(event.timestamp) }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

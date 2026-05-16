@@ -5,6 +5,19 @@
     [subtitle]="pageSubtitle()"
   ></app-page-header>
 
+  <!-- Date Range Selector -->
+  <div class="date-range-bar">
+    @for (r of DATE_RANGES; track r.key) {
+      <button
+        class="dr-pill"
+        type="button"
+        [class.active]="dateRange() === r.key"
+        (click)="dateRange.set(r.key)">
+        {{ r.label }}
+      </button>
+    }
+  </div>
+
   <!-- Location context pills -->
   @if (!isAllLocations()) {
     <div class="loc-context">
@@ -167,6 +180,67 @@
                   <td><span class="cat-badge">{{ outlet.category }}</span></td>
                   <td>{{ outlet.ordersToday }}</td>
                   <td><span class="rating">★ {{ outlet.rating }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Outlet Performance Table -->
+      <div class="card">
+        <h3>Outlet Performance</h3>
+        <div class="perf-table-wrap">
+          <table class="perf-table">
+            <thead>
+              <tr>
+                <th (click)="sortBy('name')">
+                  Outlet
+                  @if (sortCol() === 'name') {
+                    <svg class="sort-icon" viewBox="0 0 10 10" fill="currentColor">
+                      <path [attr.d]="sortDir() === 'asc' ? 'M5 2l3 5H2z' : 'M5 8l3-5H2z'"/>
+                    </svg>
+                  }
+                </th>
+                <th>City</th>
+                <th (click)="sortBy('ordersToday')">
+                  Orders Today
+                  @if (sortCol() === 'ordersToday') {
+                    <svg class="sort-icon" viewBox="0 0 10 10" fill="currentColor">
+                      <path [attr.d]="sortDir() === 'asc' ? 'M5 2l3 5H2z' : 'M5 8l3-5H2z'"/>
+                    </svg>
+                  }
+                </th>
+                <th (click)="sortBy('rating')">
+                  Rating
+                  @if (sortCol() === 'rating') {
+                    <svg class="sort-icon" viewBox="0 0 10 10" fill="currentColor">
+                      <path [attr.d]="sortDir() === 'asc' ? 'M5 2l3 5H2z' : 'M5 8l3-5H2z'"/>
+                    </svg>
+                  }
+                </th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (outlet of sortedOutlets(); track outlet.rank) {
+                <tr class="perf-row">
+                  <td>
+                    <div class="outlet-cell">
+                      <span class="outlet-rank">{{ outlet.rank }}</span>
+                      <span class="outlet-name">{{ outlet.name }}</span>
+                    </div>
+                  </td>
+                  <td class="city-cell">{{ outletCity(outlet.rank) }}</td>
+                  <td>
+                    <span class="orders-val">{{ outlet.ordersToday }}</span>
+                  </td>
+                  <td>
+                    <span class="rating-val">★ {{ outlet.rating }}</span>
+                  </td>
+                  <td>
+                    <span class="cat-badge">{{ outlet.category }}</span>
+                  </td>
                 </tr>
               }
             </tbody>

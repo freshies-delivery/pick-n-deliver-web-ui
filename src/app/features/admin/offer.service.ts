@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
+import { apiUrl } from '../../core/api.config';
 
 export interface Offer {
   id: string;
@@ -22,7 +23,21 @@ export interface Offer {
 
 @Injectable({ providedIn: 'root' })
 export class OfferService {
+  private readonly endpoint = apiUrl('/api/offers');
+
   constructor(private readonly http: HttpClient) {}
+
+  create(body: Record<string, unknown>): Observable<Offer> {
+    return this.http.post<Record<string, unknown>>(this.endpoint, body).pipe(map(r => this.map(r)));
+  }
+
+  update(id: string, body: Record<string, unknown>): Observable<Offer> {
+    return this.http.put<Record<string, unknown>>(`${this.endpoint}/${id}`, body).pipe(map(r => this.map(r)));
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.endpoint}/${id}`);
+  }
 
   list(): Observable<Offer[]> {
     // TODO: Replace with real endpoint once API contract is defined.

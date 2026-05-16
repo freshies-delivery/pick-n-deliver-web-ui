@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { BaseChartDirective } from 'ng2-charts';
@@ -23,10 +23,49 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
   readonly locationService = inject(LocationService);
 
-  readonly loading = signal(true);
-  readonly stats = signal<DashboardStats | null>(null);
+  readonly loading  = signal(true);
+  readonly stats    = signal<DashboardStats | null>(null);
   readonly activity = signal<Activity[]>([]);
-  readonly metrics = signal<DeliveryMetrics | null>(null);
+  readonly metrics  = signal<DeliveryMetrics | null>(null);
+  readonly dateRange= signal<'today' | 'week' | 'month'>('today');
+  readonly sortCol  = signal<string>('ordersToday');
+  readonly sortDir  = signal<'asc' | 'desc'>('desc');
+
+  readonly DATE_RANGES: { key: 'today' | 'week' | 'month'; label: string }[] = [
+    { key: 'today', label: 'Today' },
+    { key: 'week',  label: 'This Week' },
+    { key: 'month', label: 'This Month' },
+  ];
+
+  readonly OUTLET_CITIES: Record<number, string> = {
+    1: 'Chennai', 2: 'Bengaluru', 3: 'Mumbai', 4: 'Delhi', 5: 'Hyderabad',
+    6: 'Chennai', 7: 'Bengaluru', 8: 'Mumbai', 9: 'Delhi', 10: 'Hyderabad',
+  };
+
+  readonly sortedOutlets = computed(() => {
+    const outlets = this.stats()?.topOutlets ?? [];
+    const col = this.sortCol();
+    const dir = this.sortDir();
+    return [...outlets].sort((a, b) => {
+      const av = (a as unknown as Record<string, unknown>)[col] as number | string ?? 0;
+      const bv = (b as unknown as Record<string, unknown>)[col] as number | string ?? 0;
+      const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+      return dir === 'asc' ? cmp : -cmp;
+    });
+  });
+
+  sortBy(col: string): void {
+    if (this.sortCol() === col) {
+      this.sortDir.update(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortCol.set(col);
+      this.sortDir.set('desc');
+    }
+  }
+
+  outletCity(rank: number): string {
+    return this.OUTLET_CITIES[rank] ?? 'Chennai';
+  }
 
   lineChartData = signal<ChartData<'line'>>({ labels: [], datasets: [] });
   doughnutChartData = signal<ChartData<'doughnut'>>({ labels: [], datasets: [] });

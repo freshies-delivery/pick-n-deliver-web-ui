@@ -1,7 +1,17 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: 24px;
+}
+
 .cat-wrap {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  overflow: hidden;
   min-height: 0;
 }
 
@@ -118,6 +128,8 @@
   border-radius: 12px;
   overflow: hidden;
   background: var(--bg2);
+  flex: 1;
+  min-height: 0;
 }
 
 /* ── Category nav (left) ──────────────────────────────────────────────── */
@@ -129,8 +141,6 @@
   overflow-y: auto;
   background: var(--bg3);
   padding: 8px 0;
-  max-height: calc(100vh - 320px);
-  min-height: 200px;
 }
 
 .cn-item {
@@ -172,8 +182,6 @@
 .menu-content {
   flex: 1;
   overflow-y: auto;
-  max-height: calc(100vh - 320px);
-  min-height: 200px;
 }
 
 /* ── Category section ─────────────────────────────────────────────────── */

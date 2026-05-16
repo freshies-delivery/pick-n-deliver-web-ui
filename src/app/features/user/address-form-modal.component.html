@@ -1,0 +1,135 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="lg" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 1C6.24 1 4 3.24 4 6c0 4 5 11 5 11s5-7 5-11c0-2.76-2.24-5-5-5z"/>
+    <circle cx="9" cy="6" r="2"/>
+  </svg>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <!-- Type & Label -->
+    <div class="form-section-label">Address Type</div>
+
+    <div class="addr-type-group">
+      @for (at of addrTypes; track at.value) {
+        <label class="addr-type-option" [class.selected]="form.get('type')?.value === at.value">
+          <input type="radio" formControlName="type" [value]="at.value" />
+          {{ at.label }}
+        </label>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Custom Label <span class="optional">(optional)</span></label>
+      <input formControlName="label" class="form-input" placeholder="e.g. Mom's House" />
+    </div>
+
+    <!-- Address -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Address Details</div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Door No</label>
+        <input formControlName="door_no" class="form-input" placeholder="e.g. 12A" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Building Name</label>
+        <input formControlName="building_name" class="form-input" placeholder="e.g. Forum Mall" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Address Line 1</label>
+      <input formControlName="address_line1" class="form-input" placeholder="Street address" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Address Line 2 <span class="optional">(optional)</span></label>
+      <input formControlName="address_line2" class="form-input" placeholder="Apt, floor, landmark" />
+    </div>
+
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label class="form-label">City</label>
+        <input formControlName="city" class="form-input" placeholder="Chennai" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">State</label>
+        <input formControlName="state" class="form-input" placeholder="Tamil Nadu" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Zip Code</label>
+        <input formControlName="zip_code" class="form-input" placeholder="600001" />
+      </div>
+    </div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Country</label>
+        <input formControlName="country" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Delivery Instructions <span class="optional">(optional)</span></label>
+        <input formControlName="instructions" class="form-input" placeholder="e.g. Ring bell twice" />
+      </div>
+    </div>
+
+    <!-- Receiver -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Receiver <span class="optional" style="text-transform:none;font-weight:400">(optional)</span></div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Receiver Name</label>
+        <input formControlName="receiver_name" class="form-input" placeholder="e.g. Priya Sharma" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Receiver Phone</label>
+        <input formControlName="receiver_phone" class="form-input" placeholder="+91 98765 43210" type="tel" />
+      </div>
+    </div>
+
+    <!-- Location Pin -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Location Pin</div>
+    <span class="form-hint">GPS coordinates for accurate delivery routing.</span>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Latitude</label>
+        <input formControlName="latitude" class="form-input" type="number" placeholder="e.g. 13.0827" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Longitude</label>
+        <input formControlName="longitude" class="form-input" type="number" placeholder="e.g. 80.2707" />
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <button class="btn-locate" type="button" (click)="locateMe()" [disabled]="locating()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/>
+        </svg>
+        {{ locating() ? 'Locating…' : 'Use My Location' }}
+      </button>
+
+      <div class="toggle-wrap fav-toggle">
+        <div>
+          <div class="toggle-title">Set as Favourite</div>
+          <div class="toggle-desc">Pin this as default delivery address</div>
+        </div>
+        <div class="toggle-switch" [class.on]="form.get('is_favorite')?.value" (click)="toggleFavorite()">
+          <div class="toggle-thumb"></div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+  <button footer class="btn-save" type="button" (click)="save()">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    {{ isEdit() ? 'Save Changes' : 'Add Address' }}
+  </button>
+
+</app-modal>

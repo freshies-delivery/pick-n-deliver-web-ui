@@ -33,6 +33,11 @@ export const CLIENT_ROUTES: Routes = [
     canActivate: [HierarchyGuard]
   },
   {
+    path: ':clientId/outlets/:outletId/dashboard',
+    component: OutletDetailComponent,
+    canActivate: [HierarchyGuard]
+  },
+  {
     path: ':clientId/outlets/:outletId/categories/:categoryId/items',
     component: ItemListComponent,
     canActivate: [HierarchyGuard],

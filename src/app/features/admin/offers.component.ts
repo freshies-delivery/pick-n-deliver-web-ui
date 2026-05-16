@@ -1,8 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
 import { PageToolbarComponent, FilterOption } from '../../shared/components/page-toolbar/page-toolbar.component';
 import { RichListItemComponent, ListStat } from '../../shared/components/rich-list-item/rich-list-item.component';
@@ -10,6 +10,8 @@ import { SkeletonListComponent } from '../../shared/components/skeleton-list/ske
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { Offer, OfferService } from './offer.service';
+import { ModalService } from '../../core/services/modal.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-offers',
@@ -102,13 +104,54 @@ export class OffersComponent implements OnInit {
     { value: 'expired', label: 'Expired', count: this.offers().filter(o => o.status === 'expired').length }
   ]);
 
+  private readonly modalService = inject(ModalService);
+  private readonly toastService = inject(ToastService);
+
+  readonly headerActions: PageHeaderAction[] = [
+    { label: 'Create Offer', icon: 'add', type: 'primary', action: () => this.openCreate() }
+  ];
+
   constructor(private readonly offerService: OfferService) {}
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
     this.offerService.list()
       .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (offers) => this.offers.set(offers)
+      .subscribe({ next: (offers) => this.offers.set(offers) });
+  }
+
+  openCreate(): void {
+    this.modalService.openAddOffer().subscribe(value => {
+      if (!value) return;
+      this.offerService.create(value).subscribe({
+        next: () => { this.toastService.success('Offer created'); this.load(); },
+        error: () => this.toastService.error('Failed to create offer'),
+      });
+    });
+  }
+
+  openEdit(offer: Offer): void {
+    this.modalService.openEditOffer(offer as unknown as Record<string, unknown>).subscribe(value => {
+      if (!value) return;
+      this.offerService.update(offer.id, value).subscribe({
+        next: () => { this.toastService.success('Offer updated'); this.load(); },
+        error: () => this.toastService.error('Failed to update offer'),
+      });
+    });
+  }
+
+  confirmDelete(offer: Offer): void {
+    this.modalService.openConfirm({ title: 'Delete Offer', message: `Delete offer "${offer.name}" (${offer.code})?` })
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.offerService.delete(offer.id).subscribe({
+          next: () => { this.toastService.success('Offer deleted'); this.load(); },
+          error: () => this.toastService.error('Failed to delete offer'),
+        });
       });
   }
 

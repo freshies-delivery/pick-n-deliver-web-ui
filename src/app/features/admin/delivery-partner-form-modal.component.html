@@ -1,0 +1,74 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="sm" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="5.5" cy="14" r="1.5"/>
+    <circle cx="12.5" cy="14" r="1.5"/>
+    <path d="M1 3h10v8H1z"/>
+    <path d="M11 6h3l3 3v2.5h-6V6z"/>
+  </svg>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <div class="form-section-label">Partner Details</div>
+
+    <div class="form-group">
+      <label class="form-label">Full Name <span class="required">*</span></label>
+      <input formControlName="name" class="form-input" placeholder="e.g. Ravi Kumar"
+        [class.ng-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+        [class.ng-touched]="form.get('name')?.touched" />
+      @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+        <span class="form-error">Name is required</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Phone Number <span class="required">*</span></label>
+      <input formControlName="phone" class="form-input" placeholder="+91 98765 43210" type="tel"
+        [class.ng-invalid]="form.get('phone')?.invalid && form.get('phone')?.touched"
+        [class.ng-touched]="form.get('phone')?.touched" />
+      @if (form.get('phone')?.hasError('required') && form.get('phone')?.touched) {
+        <span class="form-error">Phone is required</span>
+      }
+      @if (form.get('phone')?.hasError('pattern') && form.get('phone')?.touched) {
+        <span class="form-error">Enter a valid phone number</span>
+      }
+    </div>
+
+    <div class="form-divider"></div>
+    <div class="form-section-label">Vehicle</div>
+
+    <div class="form-group">
+      <label class="form-label">Vehicle Type <span class="required">*</span></label>
+      <select formControlName="vehicle_type" class="form-select">
+        @for (vt of vehicleTypes; track vt.value) {
+          <option [value]="vt.value">{{ vt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Vehicle Number <span class="optional">(optional)</span></label>
+      <input formControlName="vehicle_no" class="form-input" placeholder="e.g. KA 01 AB 1234" />
+    </div>
+
+    <div class="form-divider"></div>
+    <div class="form-section-label">Status</div>
+
+    <div class="toggle-wrap">
+      <div>
+        <div class="toggle-title">Active</div>
+        <div class="toggle-desc">Partner is available for deliveries</div>
+      </div>
+      <div class="toggle-switch" [class.on]="form.get('is_active')?.value" (click)="toggle()">
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+
+  </form>
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    {{ isEdit() ? 'Save Changes' : 'Add Partner' }}
+  </button>
+
+</app-modal>

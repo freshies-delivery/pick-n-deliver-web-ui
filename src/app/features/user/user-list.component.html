@@ -1,23 +1,56 @@
 <div class="page">
   <app-page-header
     [breadcrumb]="'User View'"
-    [title]="'Users'"
-    [subtitle]="'Manage users — click a row to view orders'"
+    [title]="'User List'"
+    [subtitle]="users().length + ' registered users'"
     [actions]="headerActions"
-  ></app-page-header>
+  />
 
   <div class="page-content">
-    <div class="card">
-      <app-data-table
-        [columns]="columns"
-        [data]="users()"
-        [loading]="loading()"
-        [emptyMessage]="'No users found. Add one to get started.'"
-        (edit)="openEditDialog($event)"
-        (delete)="confirmDelete($event)"
-        (rowClick)="openUserOrders($event)"
-      ></app-data-table>
-    </div>
+    <app-stats-strip [stats]="statsStrip()" />
+
+    <app-page-toolbar
+      [searchPlaceholder]="'Search by name, email or phone…'"
+      [filterOptions]="filterOptions()"
+      [activeFilter]="activeFilter()"
+      (searchChange)="searchQuery.set($event); currentPage.set(1)"
+      (filterChange)="activeFilter.set($event); currentPage.set(1)"
+    />
+
+    @if (loading()) {
+      <app-skeleton-list [rows]="8" />
+    } @else if (filteredUsers().length === 0) {
+      <app-empty-state
+        [title]="'No users found'"
+        [message]="'Try adjusting your search or add a new user'"
+      />
+    } @else {
+      <div class="list-wrap">
+        @for (user of pagedUsers(); track user.userId) {
+          <app-rich-list-item
+            [id]="user.userId ?? 0"
+            [name]="user.name ?? 'Unknown'"
+            [description]="user.email ?? ''"
+            [location]="user.phone ?? ''"
+            [avatarInitials]="userInitials(user)"
+            [stats]="userStats(user)"
+            [showView]="true"
+            [showEdit]="true"
+            [showDelete]="true"
+            (rowClick)="openUserOrders(user)"
+            (viewClick)="openUserOrders(user)"
+            (editClick)="openEditDialog(user)"
+            (deleteClick)="confirmDelete(user)"
+          />
+        }
+      </div>
+
+      <app-pagination
+        [currentPage]="currentPage()"
+        [total]="filteredUsers().length"
+        [pageSize]="pageSize"
+        (pageChange)="currentPage.set($event)"
+      />
+    }
   </div>
 </div>
-

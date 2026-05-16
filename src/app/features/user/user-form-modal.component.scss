@@ -1,0 +1,9 @@
+form { display: flex; flex-direction: column; gap: 14px; }
+
+.locked-hint {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: #F59E0B;
+  &::before {
+    content: '⚠'; font-size: 10px;
+  }
+}

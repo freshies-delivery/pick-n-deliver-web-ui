@@ -6,6 +6,8 @@ export interface StatusConfig {
 }
 
 export const STATUS_CONFIG: Record<string, StatusConfig> = {
+  preparing: { label: 'Preparing',  bg: 'rgba(245,158,11,0.10)',  color: '#FCD34D', border: 'rgba(245,158,11,0.25)' },
+  ready:     { label: 'Ready',      bg: 'rgba(99,102,241,0.10)',  color: '#A5B4FC', border: 'rgba(99,102,241,0.25)' },
   active:    { label: 'Active',     bg: 'rgba(34,197,94,0.10)',   color: '#86EFAC', border: 'rgba(34,197,94,0.25)' },
   inactive:  { label: 'Inactive',   bg: 'rgba(244,63,94,0.10)',   color: '#FCA5A5', border: 'rgba(244,63,94,0.25)' },
   pending:   { label: 'Pending',    bg: 'rgba(245,158,11,0.10)',  color: '#FCD34D', border: 'rgba(245,158,11,0.25)' },

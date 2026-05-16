@@ -1,3 +1,11 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .panel {
   background: var(--bg2);
   border: 1px solid var(--bdr);
@@ -8,6 +16,7 @@
   gap: 16px;
   flex: 1;
   min-width: 0;
+  overflow-y: auto;
 }
 
 .panel-header {

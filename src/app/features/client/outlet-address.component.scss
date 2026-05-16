@@ -1,11 +1,21 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: 24px;
+}
+
 .address-layout {
+  flex: 1;
   display: flex;
   gap: 20px;
-  align-items: flex-start;
+  overflow: hidden;
 }
 
 @media (max-width: 900px) {
   .address-layout {
     flex-direction: column;
+    overflow-y: auto;
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
+import { apiUrl } from '../../core/api.config';
 
 export interface NotificationEntry {
   id: string;
@@ -21,7 +22,17 @@ export interface NotificationEntry {
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
+  private readonly endpoint = apiUrl('/api/notifications');
+
   constructor(private readonly http: HttpClient) {}
+
+  send(body: Record<string, unknown>): Observable<NotificationEntry> {
+    return this.http.post<Record<string, unknown>>(this.endpoint, body).pipe(map(r => this.map(r)));
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.endpoint}/${id}`);
+  }
 
   list(): Observable<NotificationEntry[]> {
     // TODO: Replace with real endpoint once API contract is defined.

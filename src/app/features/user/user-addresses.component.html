@@ -4,26 +4,58 @@
     [title]="'Addresses'"
     [subtitle]="'Delivery addresses for ' + userLabel()"
     [actions]="headerActions"
-  ></app-page-header>
+  />
 
+  <!-- Tab Navigation -->
   <div class="user-tabs">
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
-    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'activity']" routerLinkActive="active">Activity</a>
   </div>
 
   <div class="page-content">
-    <div class="card">
-      <app-data-table
-        [columns]="columns"
-        [data]="addresses()"
-        [loading]="loading()"
-        [clickableRows]="false"
-        [emptyMessage]="'No addresses found for this user'"
-        (edit)="openEditDialog($event)"
-        (delete)="confirmDelete($event)"
-      ></app-data-table>
-    </div>
+    @if (loading()) {
+      <app-skeleton-list [rows]="4" />
+    } @else if (addresses().length === 0) {
+      <app-empty-state
+        [title]="'No saved addresses'"
+        [message]="'This user has not saved any delivery addresses yet'"
+      />
+    } @else {
+      <div class="addr-list">
+        @for (addr of addresses(); track addr.addressId) {
+          <div class="addr-card"
+               [class.selected]="selectedId() === addr.addressId"
+               (click)="selectAddress(addr.addressId ?? 0)">
+
+            <div class="addr-card-top">
+              <span class="addr-type-pill" [class]="addrLabel(addr)">
+                {{ addr.label ?? 'Other' }}
+              </span>
+              @if (addr.favorite) {
+                <span class="addr-default-badge">Default</span>
+              }
+            </div>
+
+            <div class="addr-lines">{{ addrLines(addr) }}</div>
+
+            <div class="addr-card-actions">
+              <button class="addr-btn" type="button" (click)="$event.stopPropagation(); openEditDialog(addr)">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <path d="M11 5l4 4M3 17l4-1 9-9a2.8 2.8 0 0 0-4-4L3 13v4z"/>
+                </svg>
+                Edit
+              </button>
+              <button class="addr-btn danger" type="button" (click)="$event.stopPropagation(); confirmDelete(addr)">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <path d="M3 6h14M8 6V4h4v2M5 6l1 11h8l1-11"/>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>
-

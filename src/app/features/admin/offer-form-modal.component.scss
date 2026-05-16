@@ -1,0 +1,63 @@
+form { display: flex; flex-direction: column; gap: 14px; }
+
+.input-with-action {
+  display: flex; gap: 8px;
+  .form-input { flex: 1; min-width: 0; }
+}
+
+.code-input { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+
+.btn-generate {
+  padding: 0 14px; border-radius: 8px; white-space: nowrap;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);
+  color: #818CF8; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s; letter-spacing: 0.02em;
+  &:hover { background: rgba(99,102,241,0.2); }
+}
+
+.offer-type-group {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+
+.offer-type-option {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 8px;
+  border: 1px solid rgba(99,102,241,0.2);
+  background: rgba(99,102,241,0.05);
+  color: var(--t2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+
+  input[type="radio"] { display: none; }
+
+  &.selected {
+    border-color: rgba(99,102,241,0.6);
+    background: rgba(99,102,241,0.15);
+    color: #A5B4FC;
+  }
+  &:hover:not(.selected) { background: rgba(99,102,241,0.1); }
+}
+
+.input-prefix-wrap {
+  position: relative;
+  .input-prefix {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--t3); font-size: 13px; pointer-events: none;
+  }
+  .with-prefix { padding-left: 26px; }
+}
+
+.buy-get-row {
+  display: flex; align-items: flex-end; gap: 12px;
+}
+
+.buy-get-sep {
+  font-size: 13px; color: var(--t3); padding-bottom: 10px; white-space: nowrap;
+}
+
+.free-delivery-note {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px; border-radius: 10px;
+  background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2);
+  font-size: 13px; color: #86EFAC;
+  svg { width: 16px; height: 16px; flex-shrink: 0; }
+}

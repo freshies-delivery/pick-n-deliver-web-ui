@@ -1,0 +1,96 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="lg" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 3l12 12M6.5 4a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm5 5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/>
+  </svg>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <div class="form-section-label">Offer Details</div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Offer Name <span class="required">*</span></label>
+        <input formControlName="offer_name" class="form-input" placeholder="e.g. Summer Sale"
+          [class.ng-invalid]="form.get('offer_name')?.invalid && form.get('offer_name')?.touched"
+          [class.ng-touched]="form.get('offer_name')?.touched" />
+        @if (form.get('offer_name')?.hasError('required') && form.get('offer_name')?.touched) {
+          <span class="form-error">Name is required</span>
+        }
+      </div>
+      <div class="form-group">
+        <label class="form-label">Promo Code <span class="required">*</span></label>
+        <div class="input-with-action">
+          <input formControlName="offer_code" class="form-input code-input" placeholder="e.g. SUMMER25"
+            [class.ng-invalid]="form.get('offer_code')?.invalid && form.get('offer_code')?.touched"
+            [class.ng-touched]="form.get('offer_code')?.touched" />
+          <button type="button" class="btn-generate" (click)="generateCode()">Generate</button>
+        </div>
+        @if (form.get('offer_code')?.hasError('pattern') && form.get('offer_code')?.touched) {
+          <span class="form-error">Only A–Z, 0–9, underscore</span>
+        }
+        @if (form.get('offer_code')?.hasError('required') && form.get('offer_code')?.touched) {
+          <span class="form-error">Code is required</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description <span class="optional">(optional)</span></label>
+      <textarea formControlName="offer_description" class="form-textarea" rows="2" placeholder="Brief description shown to users"></textarea>
+    </div>
+
+    <div class="form-divider"></div>
+    <div class="form-section-label">Offer Type</div>
+
+    <div class="offer-type-group">
+      @for (ot of offerTypes; track ot.value) {
+        <label class="offer-type-option" [class.selected]="form.get('offer_type')?.value === ot.value">
+          <input type="radio" formControlName="offer_type" [value]="ot.value" />
+          {{ ot.label }}
+        </label>
+      }
+    </div>
+
+    @if (!isFreeDelivery) {
+      <div class="form-group">
+        <label class="form-label">{{ currentTypeConfig.discountLabel }} <span class="required">*</span></label>
+        @if (isBuyXGetY) {
+          <div class="buy-get-row">
+            <div class="form-group" style="flex:1">
+              <label class="form-label" style="font-size:10px">Buy Qty</label>
+              <input formControlName="buy_qty" class="form-input" type="number" min="1" placeholder="2" />
+            </div>
+            <span class="buy-get-sep">→ Get</span>
+            <div class="form-group" style="flex:1">
+              <label class="form-label" style="font-size:10px">Free Qty</label>
+              <input formControlName="get_qty" class="form-input" type="number" min="1" placeholder="1" />
+            </div>
+          </div>
+        } @else {
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">{{ form.get('offer_type')?.value === 'PERCENTAGE' ? '%' : '₹' }}</span>
+            <input formControlName="offer_discount" class="form-input with-prefix" type="number" min="0"
+              [max]="form.get('offer_type')?.value === 'PERCENTAGE' ? 100 : null" placeholder="0"
+              [class.ng-invalid]="form.get('offer_discount')?.invalid && form.get('offer_discount')?.touched"
+              [class.ng-touched]="form.get('offer_discount')?.touched" />
+          </div>
+        }
+      </div>
+    }
+
+    @if (isFreeDelivery) {
+      <div class="free-delivery-note">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"><path d="M3 8l4 4 6-6"/></svg>
+        Delivery charge will be waived for users with this code
+      </div>
+    }
+
+  </form>
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    {{ isEdit() ? 'Save Changes' : 'Create Offer' }}
+  </button>
+
+</app-modal>

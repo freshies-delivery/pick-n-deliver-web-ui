@@ -1,4 +1,14 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 .outlet-detail-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
   padding: 0;
 }
 
@@ -13,6 +23,7 @@
   position: sticky;
   top: 52px;
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .tab {
@@ -48,5 +59,9 @@
 }
 
 .tab-content {
-  padding: 24px;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
 }

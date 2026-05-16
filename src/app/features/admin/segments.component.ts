@@ -1,8 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
 import { PageToolbarComponent, FilterOption } from '../../shared/components/page-toolbar/page-toolbar.component';
 import { RichListItemComponent, ListStat } from '../../shared/components/rich-list-item/rich-list-item.component';
@@ -10,6 +10,8 @@ import { SkeletonListComponent } from '../../shared/components/skeleton-list/ske
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { Segment, SegmentService } from './segment.service';
+import { ModalService } from '../../core/services/modal.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-segments',
@@ -103,13 +105,54 @@ export class SegmentsComponent implements OnInit {
     { value: 'inactive', label: 'Inactive', count: this.segments().filter(s => !s.isActive).length }
   ]);
 
+  private readonly modalService = inject(ModalService);
+  private readonly toastService = inject(ToastService);
+
+  readonly headerActions: PageHeaderAction[] = [
+    { label: 'Create Segment', icon: 'add', type: 'primary', action: () => this.openCreate() }
+  ];
+
   constructor(private readonly segmentService: SegmentService) {}
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
     this.segmentService.list()
       .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (segments) => this.segments.set(segments)
+      .subscribe({ next: (segments) => this.segments.set(segments) });
+  }
+
+  openCreate(): void {
+    this.modalService.openAddSegment().subscribe(value => {
+      if (!value) return;
+      this.segmentService.create(value as Record<string, unknown>).subscribe({
+        next: () => { this.toastService.success('Segment created'); this.load(); },
+        error: () => this.toastService.error('Failed to create segment'),
+      });
+    });
+  }
+
+  openEdit(seg: Segment): void {
+    this.modalService.openEditSegment(seg as unknown as Record<string, unknown>).subscribe(value => {
+      if (!value) return;
+      this.segmentService.update(seg.id, value).subscribe({
+        next: () => { this.toastService.success('Segment updated'); this.load(); },
+        error: () => this.toastService.error('Failed to update segment'),
+      });
+    });
+  }
+
+  confirmDelete(seg: Segment): void {
+    this.modalService.openConfirm({ title: 'Delete Segment', message: `Delete "${seg.name}"? This cannot be undone.` })
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.segmentService.delete(seg.id).subscribe({
+          next: () => { this.toastService.success('Segment deleted'); this.load(); },
+          error: () => this.toastService.error('Failed to delete segment'),
+        });
       });
   }
 

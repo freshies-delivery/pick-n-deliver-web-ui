@@ -1,0 +1,85 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="lg" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="9" r="7"/>
+    <path d="M9 6v3l2 2"/>
+  </svg>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <!-- Basic Details -->
+    <div class="form-section-label">Item Details</div>
+
+    <div class="form-group">
+      <label class="form-label">Item Name <span class="required">*</span></label>
+      <input formControlName="name" class="form-input" placeholder="e.g. Masala Dosa"
+        [class.ng-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+        [class.ng-touched]="form.get('name')?.touched" />
+      @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+        <span class="form-error">Name is required</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description <span class="optional">(optional)</span></label>
+      <textarea formControlName="description" class="form-textarea" rows="2" placeholder="Brief description"></textarea>
+    </div>
+
+    <!-- Food Type -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Food Type</div>
+
+    <div class="food-type-group">
+      @for (ft of foodTypes; track ft.value) {
+        <label class="food-type-option" [class.selected]="form.get('type')?.value === ft.value">
+          <input type="radio" formControlName="type" [value]="ft.value" />
+          <span class="dot" [style.background]="ft.color"></span>
+          {{ ft.label }}
+        </label>
+      }
+    </div>
+
+    <!-- Price & Availability -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Pricing & Availability</div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Price <span class="optional">(optional)</span></label>
+        <div class="input-prefix-wrap">
+          <span class="input-prefix">₹</span>
+          <input formControlName="price" class="form-input with-prefix" type="number" min="0" placeholder="0.00" />
+        </div>
+      </div>
+      <div class="form-group availability-group">
+        <label class="form-label">Availability</label>
+        <div class="toggle-wrap" style="margin-top: 4px;">
+          <div>
+            <div class="toggle-title">Available for Order</div>
+            <div class="toggle-desc">Customers can add this item to cart</div>
+          </div>
+          <div class="toggle-switch" [class.on]="form.get('available')?.value" (click)="toggle()">
+            <div class="toggle-thumb"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Image -->
+  <div class="form-divider"></div>
+  <div class="form-section-label">Item Image</div>
+
+  <app-image-search
+    [initialQuery]="form.get('name')?.value ?? ''"
+    (imageSelected)="onImage($event)"
+    (imageCleared)="clearImage()"
+  />
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    {{ isEdit() ? 'Save Changes' : 'Add Item' }}
+  </button>
+
+</app-modal>

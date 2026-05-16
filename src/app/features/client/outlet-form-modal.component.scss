@@ -1,0 +1,12 @@
+form { display: flex; flex-direction: column; gap: 14px; }
+
+.btn-locate {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 8px;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);
+  color: #818CF8; font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: background 0.2s;
+  &:hover:not(:disabled) { background: rgba(99,102,241,0.2); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  svg { width: 14px; height: 14px; flex-shrink: 0; }
+}

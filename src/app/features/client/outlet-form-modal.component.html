@@ -1,0 +1,170 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="lg" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 7V15h12V7"/><path d="M1 7h16"/><path d="M6 15V10h6v5"/><path d="M7 4l2-3 2 3"/>
+  </svg>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <!-- Outlet Details -->
+    <div class="form-section-label">Outlet Details</div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Outlet Name <span class="required">*</span></label>
+        <input formControlName="name" class="form-input" placeholder="e.g. Brigade Road Branch"
+          [class.ng-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+          [class.ng-touched]="form.get('name')?.touched" />
+        @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+          <span class="form-error">Name is required</span>
+        }
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select formControlName="type" class="form-select">
+          <option value="">— Select type —</option>
+          @for (t of outletTypes; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description <span class="optional">(optional)</span></label>
+      <textarea formControlName="description" class="form-textarea" rows="2" placeholder="Brief description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Outlet URI <span class="optional">(optional)</span></label>
+      <input formControlName="outlet_uri" class="form-input" placeholder="auto-generated-from-name" />
+      <span class="form-hint">Leave blank to auto-generate from name</span>
+    </div>
+
+    <!-- Settings -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Settings</div>
+
+    <div class="toggle-wrap">
+      <div>
+        <div class="toggle-title">Vegetarian Only</div>
+        <div class="toggle-desc">Only serves vegetarian food</div>
+      </div>
+      <div class="toggle-switch" [class.on]="form.get('is_veg')?.value" (click)="toggle('is_veg')">
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+
+    <div class="toggle-wrap">
+      <div>
+        <div class="toggle-title">Pickup Available</div>
+        <div class="toggle-desc">Allow customers to pick up orders</div>
+      </div>
+      <div class="toggle-switch" [class.on]="form.get('is_pickup_available')?.value" (click)="toggle('is_pickup_available')">
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Address</div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Door No</label>
+        <input formControlName="door_no" class="form-input" placeholder="e.g. 12A" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Building Name</label>
+        <input formControlName="building_name" class="form-input" placeholder="e.g. Forum Mall" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Address Line 1 <span class="required">*</span></label>
+      <input formControlName="address_line1" class="form-input" placeholder="Street address"
+        [class.ng-invalid]="form.get('address_line1')?.invalid && form.get('address_line1')?.touched"
+        [class.ng-touched]="form.get('address_line1')?.touched" />
+      @if (form.get('address_line1')?.hasError('required') && form.get('address_line1')?.touched) {
+        <span class="form-error">Address is required</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Address Line 2 <span class="optional">(optional)</span></label>
+      <input formControlName="address_line2" class="form-input" placeholder="Apt, suite, floor" />
+    </div>
+
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label class="form-label">City <span class="required">*</span></label>
+        <input formControlName="city" class="form-input" placeholder="Chennai"
+          [class.ng-invalid]="form.get('city')?.invalid && form.get('city')?.touched"
+          [class.ng-touched]="form.get('city')?.touched" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">State <span class="required">*</span></label>
+        <input formControlName="state" class="form-input" placeholder="Tamil Nadu"
+          [class.ng-invalid]="form.get('state')?.invalid && form.get('state')?.touched"
+          [class.ng-touched]="form.get('state')?.touched" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Zip Code <span class="required">*</span></label>
+        <input formControlName="zip_code" class="form-input" placeholder="600001"
+          [class.ng-invalid]="form.get('zip_code')?.invalid && form.get('zip_code')?.touched"
+          [class.ng-touched]="form.get('zip_code')?.touched" />
+      </div>
+    </div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Country</label>
+        <input formControlName="country" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Delivery Instructions <span class="optional">(optional)</span></label>
+        <input formControlName="instructions" class="form-input" placeholder="e.g. Use back entrance" />
+      </div>
+    </div>
+
+    <!-- Location Pin -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Location Pin</div>
+    <span class="form-hint">Set GPS coordinates for the map. Can be set later in the Address tab.</span>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="form-label">Latitude</label>
+        <input formControlName="latitude" class="form-input" type="number" placeholder="e.g. 13.0827" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Longitude</label>
+        <input formControlName="longitude" class="form-input" type="number" placeholder="e.g. 80.2707" />
+      </div>
+    </div>
+
+    <button class="btn-locate" type="button" (click)="locateMe()" [disabled]="locating()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/>
+      </svg>
+      {{ locating() ? 'Locating…' : 'Use My Location' }}
+    </button>
+
+  </form>
+
+  <!-- Outlet Image -->
+  <div class="form-divider"></div>
+  <div class="form-section-label">Outlet Image</div>
+
+  <app-image-search
+    [initialQuery]="form.get('name')?.value ?? ''"
+    (imageSelected)="onImage($event)"
+    (imageCleared)="clearImage()"
+  />
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    {{ isEdit() ? 'Save Changes' : 'Add Outlet' }}
+  </button>
+
+</app-modal>

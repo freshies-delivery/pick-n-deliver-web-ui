@@ -56,6 +56,14 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -162,6 +170,250 @@ button.mat-mdc-icon-button {
   transition: opacity 0.2s ease;
 
   &:hover { opacity: 1; }
+}
+
+// ── Swiftly Modal (MatDialog overrides) ──────────────────────────────────────
+
+.swiftly-modal-backdrop {
+  background: rgba(6, 6, 15, 0.78) !important;
+  backdrop-filter: blur(5px);
+}
+
+.swiftly-modal-panel {
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-surface,
+  .mdc-dialog__surface {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 16px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  .mat-mdc-dialog-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px !important;
+  }
+}
+
+// ── Shared Form Fields (used inside modals) ───────────────────────────────────
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #6666AA;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .required { color: #F43F5E; }
+  .optional  { color: #2A2A55; font-weight: 500; text-transform: none; letter-spacing: 0; }
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  background: #0A0B14;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: #EEEEFF;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 180ms;
+
+  &::placeholder { color: #44446A; }
+  &:focus        { border-color: rgba(99, 102, 241, 0.5); }
+  &.ng-invalid.ng-touched { border-color: rgba(244, 63, 94, 0.5); }
+  &:disabled     { opacity: 0.5; cursor: not-allowed; }
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 76px;
+  line-height: 1.6;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236666AA' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+
+  option { background: #0E0F19; color: #EEEEFF; }
+}
+
+.form-error {
+  font-size: 10.5px;
+  color: #F43F5E;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-hint { font-size: 10.5px; color: #44446A; line-height: 1.4; }
+
+.form-row {
+  display: grid;
+  gap: 12px;
+
+  &.cols-2 { grid-template-columns: 1fr 1fr; }
+  &.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+.form-divider {
+  height: 1px;
+  background: rgba(99, 102, 241, 0.1);
+  margin: 2px 0;
+}
+
+.form-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #2A2A55;
+  padding-bottom: 2px;
+}
+
+// ── Modal Buttons ────────────────────────────────────────────────────────────
+
+.btn-cancel {
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.08);
+  color: #6666AA;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  transition: all 180ms;
+
+  &:hover { background: rgba(99, 102, 241, 0.14); color: #EEEEFF; }
+}
+
+.btn-save {
+  padding: 8px 18px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366F1, #A855F7);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 180ms;
+
+  svg { width: 13px; height: 13px; }
+  &:hover    { opacity: 0.88; }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+.btn-danger-save {
+  @extend .btn-save;
+  background: linear-gradient(135deg, #F43F5E, #EC4899);
+}
+
+// ── Toggle Switch ────────────────────────────────────────────────────────────
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #0A0B14;
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 9px;
+}
+
+.toggle-title { font-size: 12.5px; font-weight: 600; color: #EEEEFF; }
+.toggle-desc  { font-size: 10.5px; color: #44446A; margin-top: 1px; }
+
+.toggle-switch {
+  width: 40px;
+  height: 22px;
+  border-radius: 100px;
+  background: #14162A;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  position: relative;
+  cursor: pointer;
+  transition: all 220ms;
+  flex-shrink: 0;
+
+  .toggle-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #44446A;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: all 220ms;
+  }
+
+  &.on {
+    background: rgba(34, 197, 94, 0.25);
+    border-color: rgba(34, 197, 94, 0.4);
+
+    .toggle-thumb { background: #22C55E; left: 20px; }
+  }
+}
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+
+.swiftly-toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.swiftly-toast {
+  background: #0E0F19;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 280px;
+  max-width: 360px;
+  pointer-events: all;
+  border-left: 3px solid;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  animation: toastIn 200ms ease forwards;
+
+  &.success { border-left-color: #22C55E; }
+  &.error   { border-left-color: #F43F5E; }
+  &.warning { border-left-color: #F59E0B; }
+  &.info    { border-left-color: #6366F1; }
+}
+
+@keyframes toastIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
 
 .mat-mdc-dialog-container {

@@ -1,17 +1,13 @@
 import {
   Component, OnDestroy, OnInit,
   ChangeDetectionStrategy,
-  WritableSignal, computed, signal
+  WritableSignal, computed, signal, inject
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { DecimalPipe } from '@angular/common';
 import { forkJoin, finalize } from 'rxjs';
 
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { DialogFieldConfig, GenericFormDialogComponent } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
 import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
@@ -22,6 +18,8 @@ import { OutletDto, OutletService } from './services/outlet.service';
 import { Segment, SegmentService } from '../admin/segment.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
 import { FabActionService } from '../../core/services/fab-action.service';
+import { ModalService } from '../../core/services/modal.service';
+import { ToastService } from '../../core/services/toast.service';
 import { getCategoryColor, getInitials } from '../../shared/constants/category-colors.constant';
 
 /** Segment extended with optional client IDs (if the API supports it) */
@@ -119,17 +117,13 @@ export class ClientListComponent implements OnInit, OnDestroy {
     { label: 'Add Client', icon: 'add', type: 'primary', action: () => this.openCreateDialog() }
   ];
 
-  readonly fields: DialogFieldConfig[] = [
-    { key: 'name',        label: 'Name',        type: 'text',     required: true },
-    { key: 'description', label: 'Description', type: 'textarea' }
-  ];
+  private readonly modalService  = inject(ModalService);
+  private readonly toastService  = inject(ToastService);
 
   constructor(
     private readonly clientService: ClientService,
     private readonly outletService: OutletService,
     private readonly segmentService: SegmentService,
-    private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar,
     private readonly router: Router,
     private readonly hierarchyState: HierarchyStateService,
     private readonly fabActionService: FabActionService
@@ -155,7 +149,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
         this.clients.set(clients);
         this.segments.set(segments as SegmentWithClients[]);
       },
-      error: () => this.snackBar.open('Unable to load data', 'Close', { duration: 3000 })
+      error: () => this.toastService.error('Unable to load data')
     });
   }
 
@@ -232,25 +226,22 @@ export class ClientListComponent implements OnInit, OnDestroy {
   getInitials(name: string): string { return getInitials(name); }
 
   openCreateDialog(): void {
-    this.dialog.open(GenericFormDialogComponent<ClientDto>, { data: { title: 'Add Client', fields: this.fields } })
-      .afterClosed().subscribe((value: Partial<ClientDto> | undefined) => {
-        if (!value) return;
-        this.clientService.create(value as ClientDto).subscribe({
-          next: () => { this.snackBar.open('Client created', 'Close', { duration: 2500 }); this.load(); },
-          error: () => this.snackBar.open('Failed to create client', 'Close', { duration: 3000 })
-        });
+    this.modalService.openAddClient().subscribe(value => {
+      if (!value) return;
+      this.clientService.create(value as ClientDto).subscribe({
+        next: () => { this.toastService.success('Client created'); this.load(); },
+        error: () => this.toastService.error('Failed to create client')
       });
+    });
   }
 
   openEditDialog(client: ClientDto, event: Event): void {
     event.stopPropagation();
-    this.dialog.open(GenericFormDialogComponent<ClientDto>, {
-      data: { title: `Edit ${client.name}`, fields: this.fields, initialValue: client }
-    }).afterClosed().subscribe((value: Partial<ClientDto> | undefined) => {
+    this.modalService.openEditClient(client).subscribe(value => {
       if (!value || !client.clientId) return;
       this.clientService.update(client.clientId, { ...client, ...value }).subscribe({
-        next: () => { this.snackBar.open('Client updated', 'Close', { duration: 2500 }); this.load(); },
-        error: () => this.snackBar.open('Failed to update client', 'Close', { duration: 3000 })
+        next: () => { this.toastService.success('Client updated'); this.load(); },
+        error: () => this.toastService.error('Failed to update client')
       });
     });
   }
@@ -258,15 +249,14 @@ export class ClientListComponent implements OnInit, OnDestroy {
   confirmDelete(client: ClientDto, event: Event): void {
     event.stopPropagation();
     if (!client.clientId) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Client', message: `Delete ${client.name}?` }
-    }).afterClosed().subscribe((confirmed: boolean) => {
-      if (!confirmed) return;
-      this.clientService.delete(client.clientId!).subscribe({
-        next: () => { this.snackBar.open('Client deleted', 'Close', { duration: 2500 }); this.load(); },
-        error: () => this.snackBar.open('Failed to delete client', 'Close', { duration: 3000 })
+    this.modalService.openConfirm({ title: 'Delete Client', message: `Delete ${client.name}?` })
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.clientService.delete(client.clientId!).subscribe({
+          next: () => { this.toastService.success('Client deleted'); this.load(); },
+          error: () => this.toastService.error('Failed to delete client')
+        });
       });
-    });
   }
 
   goToOutlet(client: ClientDto, outlet: OutletDto, event?: Event): void {
@@ -279,22 +269,16 @@ export class ClientListComponent implements OnInit, OnDestroy {
 
   openAddOutlet(client: ClientDto, event: Event): void {
     event.stopPropagation();
-    const outletFields: DialogFieldConfig[] = [
-      { key: 'name',        label: 'Name',        type: 'text',     required: true },
-      { key: 'description', label: 'Description', type: 'textarea' },
-      { key: 'type',        label: 'Type',        type: 'text' },
-    ];
-    this.dialog.open(GenericFormDialogComponent<OutletDto>, {
-      data: { title: `Add Outlet — ${client.name}`, fields: outletFields }
-    }).afterClosed().subscribe((value: Partial<OutletDto> | undefined) => {
+    if (!client.clientId) return;
+    this.modalService.openAddOutlet(client.clientId, client.name).subscribe(value => {
       if (!value || !client.clientId) return;
       this.outletService.create({ ...value, clientId: client.clientId } as OutletDto).subscribe({
         next: () => {
-          this.snackBar.open('Outlet created', 'Close', { duration: 2500 });
+          this.toastService.success('Outlet created');
           this.outletsCache.delete(client.clientId!);
           this.loadOutletsForClient(client.clientId!);
         },
-        error: () => this.snackBar.open('Failed to create outlet', 'Close', { duration: 3000 })
+        error: () => this.toastService.error('Failed to create outlet')
       });
     });
   }
@@ -302,19 +286,18 @@ export class ClientListComponent implements OnInit, OnDestroy {
   confirmDeleteOutlet(outlet: OutletDto, event: Event): void {
     event.stopPropagation();
     if (!outlet.outletId) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Outlet', message: `Delete ${outlet.name}?` }
-    }).afterClosed().subscribe((confirmed: boolean) => {
-      if (!confirmed || !outlet.outletId || !outlet.clientId) return;
-      this.outletService.delete(outlet.outletId).subscribe({
-        next: () => {
-          this.snackBar.open('Outlet deleted', 'Close', { duration: 2500 });
-          this.outletsCache.delete(outlet.clientId!);
-          this.loadOutletsForClient(outlet.clientId!);
-        },
-        error: () => this.snackBar.open('Failed to delete outlet', 'Close', { duration: 3000 })
+    this.modalService.openConfirm({ title: 'Delete Outlet', message: `Delete ${outlet.name}?` })
+      .subscribe(confirmed => {
+        if (!confirmed || !outlet.outletId || !outlet.clientId) return;
+        this.outletService.delete(outlet.outletId).subscribe({
+          next: () => {
+            this.toastService.success('Outlet deleted');
+            this.outletsCache.delete(outlet.clientId!);
+            this.loadOutletsForClient(outlet.clientId!);
+          },
+          error: () => this.toastService.error('Failed to delete outlet')
+        });
       });
-    });
   }
 
   readonly shimmerRows = [1, 2, 3];

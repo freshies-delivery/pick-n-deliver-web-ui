@@ -1,0 +1,75 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="sm" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="6" r="3.5"/>
+    <path d="M2 16c0-3.3 3.1-6 7-6s7 2.7 7 6"/>
+  </svg>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <div class="form-section-label">User Details</div>
+
+    <div class="form-group">
+      <label class="form-label">Full Name <span class="required">*</span></label>
+      <input formControlName="name" class="form-input" placeholder="e.g. Priya Sharma"
+        [class.ng-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+        [class.ng-touched]="form.get('name')?.touched" />
+      @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+        <span class="form-error">Name is required</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email Address <span class="required">*</span></label>
+      <input formControlName="email" class="form-input" placeholder="user@example.com" type="email"
+        [class.ng-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+        [class.ng-touched]="form.get('email')?.touched" />
+      @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+        <span class="form-error">Email is required</span>
+      }
+      @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+        <span class="form-error">Enter a valid email address</span>
+      }
+      @if (isEdit()) {
+        <span class="form-hint locked-hint">Contact support to change email</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Phone <span class="required">*</span></label>
+      <input formControlName="phone" class="form-input" placeholder="+91 98765 43210" type="tel"
+        [class.ng-invalid]="form.get('phone')?.invalid && form.get('phone')?.touched"
+        [class.ng-touched]="form.get('phone')?.touched" />
+      @if (form.get('phone')?.hasError('required') && form.get('phone')?.touched) {
+        <span class="form-error">Phone is required</span>
+      }
+      @if (form.get('phone')?.hasError('pattern') && form.get('phone')?.touched) {
+        <span class="form-error">Enter a valid phone number</span>
+      }
+      @if (isEdit()) {
+        <span class="form-hint locked-hint">Contact support to change phone</span>
+      }
+    </div>
+
+    <div class="form-divider"></div>
+    <div class="form-section-label">Linked Offer <span class="optional">(optional)</span></div>
+
+    <div class="form-group">
+      <label class="form-label">Assign Active Offer</label>
+      <select formControlName="offer_id" class="form-select">
+        <option [value]="null">— None —</option>
+        @for (offer of offers(); track offer.id) {
+          <option [value]="offer.id">{{ offer.name }} ({{ offer.code }})</option>
+        }
+      </select>
+      <span class="form-hint">Only active offers are shown</span>
+    </div>
+
+  </form>
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    {{ isEdit() ? 'Save Changes' : 'Add User' }}
+  </button>
+
+</app-modal>

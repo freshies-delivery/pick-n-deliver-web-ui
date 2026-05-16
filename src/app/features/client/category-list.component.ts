@@ -1,18 +1,16 @@
 import {
   Component, EventEmitter, Input, OnChanges, Output,
   SimpleChanges, signal, computed, WritableSignal,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy, inject
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { DialogFieldConfig, GenericFormDialogComponent } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { CategoryDto, CategoryService } from './services/category.service';
 import { ItemDto, ItemService } from './services/item.service';
+import { ModalService } from '../../core/services/modal.service';
+import { ToastService } from '../../core/services/toast.service';
 import { getCategoryColor, getInitials } from '../../shared/constants/category-colors.constant';
 
 @Component({
@@ -39,25 +37,14 @@ export class CategoryListComponent implements OnChanges {
     this.categories().reduce((sum, c) => sum + (c.itemIds?.length ?? 0), 0)
   );
 
-  readonly catFields: DialogFieldConfig[] = [
-    { key: 'name',        label: 'Name',        type: 'text',     required: true },
-    { key: 'description', label: 'Description', type: 'textarea' }
-  ];
-
-  readonly itemFields: DialogFieldConfig[] = [
-    { key: 'name',        label: 'Name',        type: 'text',     required: true },
-    { key: 'description', label: 'Description', type: 'textarea' },
-    { key: 'price',       label: 'Price',       type: 'text' },
-    { key: 'type',        label: 'Type',        type: 'text' }
-  ];
-
   readonly shimmerRows = [1, 2, 3];
+
+  private readonly modalService = inject(ModalService);
+  private readonly toastService = inject(ToastService);
 
   constructor(
     private readonly categoryService: CategoryService,
     private readonly itemService: ItemService,
-    private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -79,7 +66,7 @@ export class CategoryListComponent implements OnChanges {
             cats.forEach(c => { if (c.categoryId) this.loadItems(c.categoryId); });
           }
         },
-        error: () => this.snackBar.open('Unable to load categories', 'Close', { duration: 3000 })
+        error: () => this.toastService.error('Unable to load categories')
       });
   }
 
@@ -138,26 +125,23 @@ export class CategoryListComponent implements OnChanges {
   // ── Category CRUD ────────────────────────────────────────────────────
 
   openCreateDialog(): void {
-    this.dialog.open(GenericFormDialogComponent<CategoryDto>, {
-      data: { title: 'Add Category', fields: this.catFields }
-    }).afterClosed().subscribe((value: Partial<CategoryDto> | undefined) => {
+    const outletId = this.outletId;
+    this.modalService.openAddCategory(outletId, '').subscribe(value => {
       if (!value) return;
-      this.categoryService.create({ ...value, outletId: this.outletId } as CategoryDto).subscribe({
-        next: () => { this.snackBar.open('Category created', 'Close', { duration: 2500 }); this.loadCategories(); },
-        error: () => this.snackBar.open('Failed to create category', 'Close', { duration: 3000 })
+      this.categoryService.create({ ...value, outletId } as CategoryDto).subscribe({
+        next: () => { this.toastService.success('Category created'); this.loadCategories(); },
+        error: () => this.toastService.error('Failed to create category')
       });
     });
   }
 
   openEditDialog(cat: CategoryDto, event?: Event): void {
     event?.stopPropagation();
-    this.dialog.open(GenericFormDialogComponent<CategoryDto>, {
-      data: { title: `Edit ${cat.name}`, fields: this.catFields, initialValue: cat }
-    }).afterClosed().subscribe((value: Partial<CategoryDto> | undefined) => {
+    this.modalService.openEditCategory(cat).subscribe(value => {
       if (!value || !cat.categoryId) return;
       this.categoryService.update(cat.categoryId, { ...cat, ...value }).subscribe({
-        next: () => { this.snackBar.open('Category updated', 'Close', { duration: 2500 }); this.loadCategories(); },
-        error: () => this.snackBar.open('Failed to update category', 'Close', { duration: 3000 })
+        next: () => { this.toastService.success('Category updated'); this.loadCategories(); },
+        error: () => this.toastService.error('Failed to update category')
       });
     });
   }
@@ -165,49 +149,46 @@ export class CategoryListComponent implements OnChanges {
   confirmDelete(cat: CategoryDto, event?: Event): void {
     event?.stopPropagation();
     if (!cat.categoryId) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Category', message: `Delete "${cat.name}"?` }
-    }).afterClosed().subscribe((confirmed: boolean) => {
-      if (!confirmed) return;
-      this.categoryService.delete(cat.categoryId!).subscribe({
-        next: () => { this.snackBar.open('Category deleted', 'Close', { duration: 2500 }); this.loadCategories(); },
-        error: () => this.snackBar.open('Failed to delete category', 'Close', { duration: 3000 })
+    this.modalService.openConfirm({ title: 'Delete Category', message: `Delete "${cat.name}"?` })
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.categoryService.delete(cat.categoryId!).subscribe({
+          next: () => { this.toastService.success('Category deleted'); this.loadCategories(); },
+          error: () => this.toastService.error('Failed to delete category')
+        });
       });
-    });
   }
 
   // ── Item CRUD ────────────────────────────────────────────────────────
 
   openAddItem(catId: number, event: Event): void {
     event.stopPropagation();
-    this.dialog.open(GenericFormDialogComponent<ItemDto>, {
-      data: { title: 'Add Item', fields: this.itemFields }
-    }).afterClosed().subscribe((value: Partial<ItemDto> | undefined) => {
+    const cat = this.categories().find(c => c.categoryId === catId);
+    this.modalService.openAddItem(this.outletId, catId, cat?.name ?? '').subscribe(value => {
       if (!value) return;
       this.itemService.create({ ...value, categoryId: catId, outletId: this.outletId } as ItemDto).subscribe({
         next: () => {
-          this.snackBar.open('Item created', 'Close', { duration: 2500 });
+          this.toastService.success('Item created');
           this.itemsCache.delete(catId);
           this.loadItems(catId);
         },
-        error: () => this.snackBar.open('Failed to create item', 'Close', { duration: 3000 })
+        error: () => this.toastService.error('Failed to create item')
       });
     });
   }
 
   openEditItem(item: ItemDto, event: Event): void {
     event.stopPropagation();
-    this.dialog.open(GenericFormDialogComponent<ItemDto>, {
-      data: { title: `Edit ${item.name}`, fields: this.itemFields, initialValue: item }
-    }).afterClosed().subscribe((value: Partial<ItemDto> | undefined) => {
+    const cat = this.categories().find(c => c.categoryId === item.categoryId);
+    this.modalService.openEditItem(item, cat?.name ?? '').subscribe(value => {
       if (!value || !item.itemId) return;
       this.itemService.update(item.itemId, { ...item, ...value }).subscribe({
         next: () => {
-          this.snackBar.open('Item updated', 'Close', { duration: 2500 });
+          this.toastService.success('Item updated');
           const catId = item.categoryId;
           if (catId) { this.itemsCache.delete(catId); this.loadItems(catId); }
         },
-        error: () => this.snackBar.open('Failed to update item', 'Close', { duration: 3000 })
+        error: () => this.toastService.error('Failed to update item')
       });
     });
   }
@@ -215,19 +196,18 @@ export class CategoryListComponent implements OnChanges {
   confirmDeleteItem(item: ItemDto, catId: number, event: Event): void {
     event.stopPropagation();
     if (!item.itemId) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Item', message: `Delete "${item.name}"?` }
-    }).afterClosed().subscribe((confirmed: boolean) => {
-      if (!confirmed) return;
-      this.itemService.delete(item.itemId!).subscribe({
-        next: () => {
-          this.snackBar.open('Item deleted', 'Close', { duration: 2500 });
-          this.itemsCache.delete(catId);
-          this.loadItems(catId);
-        },
-        error: () => this.snackBar.open('Failed to delete item', 'Close', { duration: 3000 })
+    this.modalService.openConfirm({ title: 'Delete Item', message: `Delete "${item.name}"?` })
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.itemService.delete(item.itemId!).subscribe({
+          next: () => {
+            this.toastService.success('Item deleted');
+            this.itemsCache.delete(catId);
+            this.loadItems(catId);
+          },
+          error: () => this.toastService.error('Failed to delete item')
+        });
       });
-    });
   }
 
   toggleAvailability(item: ItemDto, event: Event): void {

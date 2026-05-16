@@ -1,0 +1,129 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="lg" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 2a5 5 0 015 5c0 3 1.5 4.5 1.5 4.5H2.5S4 10 4 7a5 5 0 015-5z"/>
+    <path d="M7 14a2 2 0 004 0"/>
+  </svg>
+
+  <div class="notif-layout">
+
+    <!-- Form column -->
+    <form [formGroup]="form" (ngSubmit)="save()" class="notif-form">
+
+      <div class="form-section-label">Message</div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label class="form-label">Title <span class="required">*</span></label>
+          <span class="char-count" [class.near-limit]="titleLen() > titleMax * 0.85">{{ titleLen() }}/{{ titleMax }}</span>
+        </div>
+        <input formControlName="title" class="form-input" placeholder="e.g. Special offer just for you!"
+          [class.ng-invalid]="form.get('title')?.invalid && form.get('title')?.touched"
+          [class.ng-touched]="form.get('title')?.touched" />
+        @if (form.get('title')?.hasError('required') && form.get('title')?.touched) {
+          <span class="form-error">Title is required</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label class="form-label">Message <span class="required">*</span></label>
+          <span class="char-count" [class.near-limit]="messageLen() >= warnAt">{{ messageLen() }}/{{ messageMax }}</span>
+        </div>
+        <textarea formControlName="message" class="form-textarea" rows="4" placeholder="Write your notification message here…"
+          [class.ng-invalid]="form.get('message')?.invalid && form.get('message')?.touched"
+          [class.ng-touched]="form.get('message')?.touched"></textarea>
+        @if (isSMS) {
+          <span class="form-hint sms-hint">
+            SMS: keep under 160 characters for a single segment (currently {{ messageLen() }})
+          </span>
+        }
+        @if (form.get('message')?.hasError('required') && form.get('message')?.touched) {
+          <span class="form-error">Message is required</span>
+        }
+      </div>
+
+      <div class="form-divider"></div>
+      <div class="form-section-label">Channel</div>
+
+      <div class="channel-group">
+        @for (ch of channels; track ch.value) {
+          <label class="channel-option" [class.selected]="form.get('notification_type')?.value === ch.value">
+            <input type="radio" formControlName="notification_type" [value]="ch.value" />
+            {{ ch.label }}
+          </label>
+        }
+      </div>
+
+      <div class="form-divider"></div>
+      <div class="form-section-label">Audience</div>
+
+      <div class="target-group">
+        <label class="target-option" [class.selected]="form.get('target_type')?.value === 'ALL'">
+          <input type="radio" formControlName="target_type" value="ALL" />
+          <span class="target-name">All Users</span>
+          <span class="target-desc">Send to every registered user</span>
+        </label>
+        <label class="target-option" [class.selected]="form.get('target_type')?.value === 'segment'">
+          <input type="radio" formControlName="target_type" value="segment" />
+          <span class="target-name">Segment</span>
+          <span class="target-desc">Target a specific audience group</span>
+        </label>
+      </div>
+
+      @if (isSegment) {
+        <div class="form-group">
+          <label class="form-label">Select Segment</label>
+          <select formControlName="segment_id" class="form-select">
+            <option [value]="null">— Choose segment —</option>
+            @for (seg of segments(); track seg.id) {
+              <option [value]="seg.id">{{ seg.name }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <div class="form-divider"></div>
+      <div class="form-section-label">Schedule <span class="optional">(optional)</span></div>
+
+      <div class="form-group">
+        <label class="form-label">Send At</label>
+        <input formControlName="schedule_at" class="form-input" type="datetime-local" />
+        <span class="form-hint">Leave blank to send immediately</span>
+      </div>
+
+    </form>
+
+    <!-- Phone preview -->
+    @if (isPush) {
+      <div class="phone-preview-wrap">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-status-bar">
+              <span>9:41</span>
+              <span>●●●</span>
+            </div>
+            <div class="push-card">
+              <div class="push-app-row">
+                <div class="push-app-icon"></div>
+                <span class="push-app-name">Swiftly</span>
+                <span class="push-time">now</span>
+              </div>
+              <div class="push-title">{{ previewTitle }}</div>
+              <div class="push-body">{{ previewMessage }}</div>
+            </div>
+          </div>
+        </div>
+        <span class="preview-label">Preview</span>
+      </div>
+    }
+
+  </div>
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    Send Notification
+  </button>
+
+</app-modal>

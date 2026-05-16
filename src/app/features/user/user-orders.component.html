@@ -3,24 +3,116 @@
     [breadcrumb]="'User View / Users'"
     [title]="'Orders'"
     [subtitle]="'Orders for ' + userLabel()"
-  ></app-page-header>
+  />
 
+  <!-- Tab Navigation -->
   <div class="user-tabs">
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
-    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'activity']" routerLinkActive="active">Activity</a>
   </div>
 
   <div class="page-content">
-    <div class="card">
-      <app-data-table
-        [columns]="columns"
-        [data]="orders()"
-        [loading]="loading()"
-        [clickableRows]="false"
-        [emptyMessage]="'No orders found for this user'"
-      ></app-data-table>
-    </div>
+    <!-- Stats Strip -->
+    <app-stats-strip [stats]="statsStrip()" />
+
+    <!-- Toolbar -->
+    <app-page-toolbar
+      [searchPlaceholder]="'Search by order ID or status…'"
+      [filterOptions]="filterOptions()"
+      [activeFilter]="statusFilter()"
+      (searchChange)="searchQuery.set($event)"
+      (filterChange)="statusFilter.set($event)"
+    />
+
+    @if (loading()) {
+      <app-skeleton-list [rows]="5" />
+    } @else if (filteredOrders().length === 0) {
+      <app-empty-state
+        [title]="'No orders found'"
+        [message]="'This user has no orders matching the current filter'"
+      />
+    } @else {
+      <div class="order-list">
+        @for (order of filteredOrders(); track order.orderId) {
+          <div class="order-card" [class.expanded]="expandedId() === order.orderId">
+            <!-- Accent bar -->
+            <div class="order-accent" [style.background]="accentColor(order.status)"></div>
+
+            <div class="order-main" (click)="toggleExpand(order.orderId)">
+              <!-- Avatar -->
+              <div class="order-avatar" [style.background]="accentColor(order.status) + '22'" [style.color]="accentColor(order.status)">
+                {{ orderInitials(order) }}
+              </div>
+
+              <!-- Info -->
+              <div class="order-info">
+                <div class="order-id">Order #{{ order.orderId }}</div>
+                <div class="order-type">{{ order.type ?? 'Standard' }} Order</div>
+              </div>
+
+              <!-- Stats -->
+              <div class="order-stats">
+                <div class="stat-item">
+                  <span class="stat-val">{{ formatAmount(order.totalAmount) }}</span>
+                  <span class="stat-lbl">Amount</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-val">{{ (order.orderItems?.length ?? 0) }}</span>
+                  <span class="stat-lbl">Items</span>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <app-status-badge [status]="order.status" />
+
+              <!-- Expand chevron -->
+              <svg class="chevron" [class.open]="expandedId() === order.orderId"
+                   viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <path d="M3 4.5l3 3 3-3"/>
+              </svg>
+            </div>
+
+            <!-- Expanded Detail -->
+            @if (expandedId() === order.orderId) {
+              <div class="order-detail">
+                <div class="detail-grid">
+                  <div class="detail-section">
+                    <div class="detail-label">Order Details</div>
+                    <div class="detail-row">
+                      <span class="dr-key">Order ID</span>
+                      <span class="dr-val">#{{ order.orderId }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="dr-key">Type</span>
+                      <span class="dr-val">{{ order.type ?? 'Standard' }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="dr-key">Status</span>
+                      <span class="dr-val"><app-status-badge [status]="order.status" /></span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="dr-key">Amount</span>
+                      <span class="dr-val amount">{{ formatAmount(order.totalAmount) }}</span>
+                    </div>
+                  </div>
+                  @if (order.orderItems && order.orderItems.length > 0) {
+                    <div class="detail-section">
+                      <div class="detail-label">Items ({{ order.orderItems.length }})</div>
+                      @for (item of order.orderItems; track item.orderItemId) {
+                        <div class="detail-row">
+                          <span class="dr-key">Item #{{ item.itemId }}</span>
+                          <span class="dr-val">{{ item.quantity }}× · ₹{{ item.unitPrice?.toLocaleString('en-IN') }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>
-

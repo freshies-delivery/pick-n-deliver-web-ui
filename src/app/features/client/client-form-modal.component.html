@@ -1,0 +1,52 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="md" [hasIcon]="true" (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="2" width="6" height="6" rx="1.5"/>
+    <rect x="10" y="2" width="6" height="6" rx="1.5"/>
+    <rect x="2" y="10" width="6" height="6" rx="1.5"/>
+    <rect x="10" y="10" width="6" height="6" rx="1.5"/>
+  </svg>
+
+  <div class="form-section-label">Basic Information</div>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-group">
+      <label class="form-label">Client Name <span class="required">*</span></label>
+      <input formControlName="name" class="form-input" placeholder="e.g. Saravana Bhavan"
+        [class.ng-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+        [class.ng-touched]="form.get('name')?.touched" />
+      @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+        <span class="form-error">Name is required</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description <span class="optional">(optional)</span></label>
+      <textarea formControlName="description" class="form-textarea" rows="2" placeholder="Brief description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Segment <span class="optional">(optional)</span></label>
+      <select formControlName="segment_id" class="form-select">
+        <option [value]="null">— None selected —</option>
+        @for (seg of segments(); track seg.id) {
+          <option [value]="seg.id">{{ seg.name }}</option>
+        }
+      </select>
+    </div>
+  </form>
+
+  <div class="form-divider"></div>
+  <div class="form-section-label">Client Image</div>
+
+  <app-image-search
+    [initialQuery]="form.get('name')?.value ?? ''"
+    (imageSelected)="onImage($event)"
+    (imageCleared)="clearImage()"
+  />
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+    {{ isEdit() ? 'Save Changes' : 'Add Client' }}
+  </button>
+</app-modal>

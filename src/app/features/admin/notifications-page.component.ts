@@ -1,8 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
 import { PageToolbarComponent, FilterOption } from '../../shared/components/page-toolbar/page-toolbar.component';
 import { RichListItemComponent, ListStat } from '../../shared/components/rich-list-item/rich-list-item.component';
@@ -10,6 +10,8 @@ import { SkeletonListComponent } from '../../shared/components/skeleton-list/ske
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { NotificationEntry, NotificationService } from './notification.service';
+import { ModalService } from '../../core/services/modal.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-notifications-page',
@@ -104,13 +106,44 @@ export class NotificationsPageComponent implements OnInit {
     { value: 'scheduled', label: 'Scheduled', count: this.notifications().filter(n => n.status === 'scheduled').length }
   ]);
 
+  private readonly modalService = inject(ModalService);
+  private readonly toastService = inject(ToastService);
+
+  readonly headerActions: PageHeaderAction[] = [
+    { label: 'Send Notification', icon: 'add', type: 'primary', action: () => this.openSend() }
+  ];
+
   constructor(private readonly notificationService: NotificationService) {}
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
     this.notificationService.list()
       .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (notifications) => this.notifications.set(notifications)
+      .subscribe({ next: (notifications) => this.notifications.set(notifications) });
+  }
+
+  openSend(): void {
+    this.modalService.openSendNotification().subscribe(value => {
+      if (!value) return;
+      this.notificationService.send(value).subscribe({
+        next: () => { this.toastService.success('Notification sent'); this.load(); },
+        error: () => this.toastService.error('Failed to send notification'),
+      });
+    });
+  }
+
+  confirmDelete(notif: NotificationEntry): void {
+    this.modalService.openConfirm({ title: 'Delete Notification', message: `Delete "${notif.title}"?` })
+      .subscribe(confirmed => {
+        if (!confirmed) return;
+        this.notificationService.delete(notif.id).subscribe({
+          next: () => { this.toastService.success('Notification deleted'); this.load(); },
+          error: () => this.toastService.error('Failed to delete notification'),
+        });
       });
   }
 

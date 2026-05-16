@@ -35,5 +35,9 @@
     @if (activeTab() === 'ratings') {
       <app-outlet-ratings [outletId]="outletId()" />
     }
+
+    @if (activeTab() === 'dashboard') {
+      <app-outlet-dashboard [outletId]="outletId()" />
+    }
   </div>
 </div>

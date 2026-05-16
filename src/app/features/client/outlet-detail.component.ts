@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoryListComponent } from './category-list.component';
 import { OutletRatingsComponent } from './outlet-ratings.component';
 import { OutletAddressComponent } from './outlet-address.component';
+import { OutletDashboardComponent } from './outlet-dashboard.component';
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { CategoryDto } from './services/category.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
@@ -18,7 +19,8 @@ import { FabActionService } from '../../core/services/fab-action.service';
     PageHeaderComponent,
     CategoryListComponent,
     OutletRatingsComponent,
-    OutletAddressComponent
+    OutletAddressComponent,
+    OutletDashboardComponent,
   ],
   templateUrl: './outlet-detail.component.html',
   styleUrl: './outlet-detail.component.scss',
@@ -34,7 +36,7 @@ import { FabActionService } from '../../core/services/fab-action.service';
 export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(CategoryListComponent) private readonly categoryListComponent?: CategoryListComponent;
 
-  readonly activeTab = signal<'address' | 'categories' | 'ratings'>('categories');
+  readonly activeTab = signal<'address' | 'categories' | 'ratings' | 'dashboard'>('categories');
   private openCategoryDialogPending = false;
 
   readonly clientId = signal(0);
@@ -43,7 +45,8 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly tabs = [
     { key: 'address' as const,    label: 'Address' },
     { key: 'categories' as const, label: 'Categories' },
-    { key: 'ratings' as const,    label: 'Ratings' }
+    { key: 'ratings' as const,    label: 'Ratings' },
+    { key: 'dashboard' as const,  label: 'Dashboard' },
   ];
 
   readonly headerActions: PageHeaderAction[] = [
@@ -64,7 +67,9 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.hierarchyState.syncFromRoute(this.route.snapshot);
 
     const url = this.router.url;
-    if (url.includes('/ratings')) {
+    if (url.includes('/dashboard')) {
+      this.activeTab.set('dashboard');
+    } else if (url.includes('/ratings')) {
       this.activeTab.set('ratings');
     } else if (url.includes('/categories')) {
       this.activeTab.set('categories');
@@ -86,7 +91,7 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fabActionService.unregisterAction('addCategory');
   }
 
-  setTab(tab: 'address' | 'categories' | 'ratings'): void {
+  setTab(tab: 'address' | 'categories' | 'ratings' | 'dashboard'): void {
     this.activeTab.set(tab);
     const cId = this.clientId();
     const oId = this.outletId();
@@ -94,6 +99,8 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'categories']);
     } else if (tab === 'ratings') {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'ratings']);
+    } else if (tab === 'dashboard') {
+      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'dashboard']);
     } else {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId]);
     }

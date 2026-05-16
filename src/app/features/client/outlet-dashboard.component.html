@@ -1,0 +1,311 @@
+<div class="od-wrap">
+  @if (loading()) {
+    <div class="od-loading"><div class="od-spinner"></div></div>
+  }
+
+  @if (!loading() && stats()) {
+
+    <!-- Live Strip -->
+    <div class="live-strip">
+      <span class="ls-dot"></span>
+      <span class="ls-text">
+        Live &middot; {{ activeCount() }} active orders &middot; {{ stats()!.deliveryMetrics.activeRiders }} riders en route
+      </span>
+      <span class="ls-time">Updated {{ formatTime(lastRefreshed()) }}</span>
+      <button class="ls-refresh" type="button" (click)="loadAll()">Refresh</button>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid">
+
+      <!-- Orders Today -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(59,130,246,0.15);color:#93C5FD">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <rect x="2" y="3" width="16" height="14" rx="2"/>
+            <path d="M6 7h8M6 10h6M6 13h4"/>
+          </svg>
+        </div>
+        <div class="kpi-value">{{ stats()!.ordersToday }}</div>
+        <div class="kpi-label">Orders Today</div>
+        <div class="kpi-change" [class.up]="stats()!.ordersTodayChange >= 0" [class.down]="stats()!.ordersTodayChange < 0">
+          {{ stats()!.ordersTodayChange >= 0 ? '↑' : '↓' }} {{ stats()!.ordersTodayChange | number:'1.0-0' }}% vs yesterday
+        </div>
+        <div class="sparkline">
+          @for (v of stats()!.sparklines.orders; track $index) {
+            <div class="sp-bar"
+                 [style.height.px]="sparklineHeight(v, stats()!.sparklines.orders)"
+                 [style.background]="$index === 6 ? 'rgba(59,130,246,0.9)' : 'rgba(59,130,246,0.35)'">
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Revenue Today -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(34,197,94,0.15);color:#86EFAC">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="10" cy="10" r="7"/><path d="M10 7v6M8 9h3a1 1 0 1 1 0 2H8m0 0h4"/>
+          </svg>
+        </div>
+        <div class="kpi-value">{{ formatRevenue(stats()!.revenueToday) }}</div>
+        <div class="kpi-label">Revenue Today</div>
+        <div class="kpi-change" [class.up]="stats()!.revenueTodayChange >= 0" [class.down]="stats()!.revenueTodayChange < 0">
+          {{ stats()!.revenueTodayChange >= 0 ? '↑' : '↓' }} {{ stats()!.revenueTodayChange | number:'1.0-0' }}% vs yesterday
+        </div>
+        <div class="sparkline">
+          @for (v of stats()!.sparklines.revenue; track $index) {
+            <div class="sp-bar"
+                 [style.height.px]="sparklineHeight(v, stats()!.sparklines.revenue)"
+                 [style.background]="$index === 6 ? 'rgba(34,197,94,0.9)' : 'rgba(34,197,94,0.35)'">
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Avg Delivery Time -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/>
+          </svg>
+        </div>
+        <div class="kpi-value">{{ stats()!.avgDeliveryMinutes }}m</div>
+        <div class="kpi-label">Avg Delivery Time</div>
+        <div class="kpi-change" [class.good-down]="stats()!.avgDeliveryChange < 0" [class.down]="stats()!.avgDeliveryChange >= 0">
+          {{ stats()!.avgDeliveryChange < 0 ? '↓' : '↑' }} {{ stats()!.avgDeliveryChange | number:'1.0-0' }}m vs yesterday
+        </div>
+        <div class="sparkline">
+          @for (v of stats()!.sparklines.delivery; track $index) {
+            <div class="sp-bar"
+                 [style.height.px]="sparklineHeight(v, stats()!.sparklines.delivery)"
+                 [style.background]="$index === 6 ? 'rgba(245,158,11,0.9)' : 'rgba(245,158,11,0.35)'">
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Avg Rating -->
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(168,85,247,0.15);color:#C084FC">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292z"/>
+          </svg>
+        </div>
+        <div class="kpi-value">{{ stats()!.avgRating | number:'1.1-1' }}</div>
+        <div class="kpi-label">Avg Rating</div>
+        <div class="kpi-change" [class.up]="stats()!.avgRatingChange >= 0" [class.down]="stats()!.avgRatingChange < 0">
+          {{ stats()!.avgRatingChange >= 0 ? '↑' : '↓' }} {{ stats()!.avgRatingChange | number:'1.1-1' }} this week
+        </div>
+        <div class="sparkline">
+          @for (v of stats()!.sparklines.rating; track $index) {
+            <div class="sp-bar"
+                 [style.height.px]="sparklineHeight(v, stats()!.sparklines.rating)"
+                 [style.background]="$index === 6 ? 'rgba(168,85,247,0.9)' : 'rgba(168,85,247,0.35)'">
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid: left (orders + chart) | right (rating + items) -->
+    <div class="outlet-main-grid">
+
+      <!-- Left: Live Orders + Weekly Chart -->
+      <div class="od-card">
+        <div class="od-card-header">
+          <span class="od-card-title">Live Orders</span>
+          <span class="od-card-link">View all →</span>
+        </div>
+
+        <div class="order-list">
+          @for (order of liveOrders(); track order.id) {
+            <div class="order-row">
+              <span class="or-id">{{ order.id }}</span>
+              <div class="or-info">
+                <div class="or-customer">{{ order.customerName }}</div>
+                <div class="or-items">{{ order.itemsSummary }}</div>
+              </div>
+              <span class="or-amount">{{ formatRevenue(order.amount) }}</span>
+              <app-status-badge [status]="order.status" />
+            </div>
+          }
+        </div>
+
+        <div class="weekly-chart">
+          <div class="wc-label">Orders — Last 7 Days</div>
+          <div class="wc-bars">
+            @for (day of stats()!.weeklyOrders; track day.day; let i = $index) {
+              <div class="wc-col">
+                <div class="wc-bar"
+                     [style.height.px]="weeklyBarHeight(day.count, stats()!.weeklyOrders)"
+                     [style.background]="isToday(i) ? 'rgba(59,130,246,0.85)' : 'rgba(59,130,246,0.28)'">
+                </div>
+                <span class="wc-lbl">{{ day.day }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="right-col">
+
+        <!-- Rating Summary -->
+        <div class="od-card">
+          <div class="od-card-header">
+            <span class="od-card-title">Rating Summary</span>
+            <span class="od-card-link">View all →</span>
+          </div>
+          <div class="rating-big">
+            <span class="rating-score">{{ stats()!.ratingSummary.avg | number:'1.1-1' }}</span>
+            <div>
+              <div class="rating-stars">
+                @for (s of stars; track s) {
+                  <span [class.star-filled]="starFilled(s, stats()!.ratingSummary.avg)"
+                        [class.star-empty]="!starFilled(s, stats()!.ratingSummary.avg)">★</span>
+                }
+              </div>
+              <div class="rating-total">{{ stats()!.ratingSummary.total }} reviews</div>
+            </div>
+          </div>
+          <div class="rating-bars">
+            @for (star of [5,4,3,2,1]; track star) {
+              <div class="rb-row">
+                <span class="rb-lbl">{{ star }}★</span>
+                <div class="rb-track">
+                  <div class="rb-fill" [style.width.%]="ratingBarWidth(star)"></div>
+                </div>
+                <span class="rb-count">{{ stats()!.ratingSummary.breakdown[star] || 0 }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Top Items -->
+        <div class="od-card">
+          <div class="od-card-header">
+            <span class="od-card-title">Top Items Today</span>
+          </div>
+          @for (item of topItems(); track item.id; let i = $index) {
+            <div class="ti-row">
+              <span class="ti-rank">{{ i + 1 }}</span>
+              <div class="ti-avatar"
+                   [style.background]="item.color + '22'"
+                   [style.color]="item.color">
+                {{ item.name.slice(0, 2).toUpperCase() }}
+              </div>
+              <div class="ti-info">
+                <div class="ti-name">{{ item.name }}</div>
+                <div class="ti-cat">{{ item.category }}</div>
+              </div>
+              <div class="ti-bar">
+                <div class="ti-track">
+                  <div class="ti-fill" [style.width.%]="itemBarWidth(item)" [style.background]="item.color"></div>
+                </div>
+              </div>
+              <span class="ti-count" [style.color]="item.color">{{ item.ordersToday }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Grid: delivery | revenue | activity -->
+    <div class="outlet-bottom-grid">
+
+      <!-- Delivery Metrics -->
+      <div class="od-card">
+        <div class="od-card-title mb-10">Delivery Metrics</div>
+        <div class="delivery-ring">
+          <div class="ring-wrap">
+            <svg width="72" height="72" viewBox="0 0 72 72" style="display:block">
+              <circle cx="36" cy="36" r="26" fill="none" stroke="rgba(99,102,241,0.15)" stroke-width="6"/>
+              <circle cx="36" cy="36" r="26" fill="none" stroke="#6366F1" stroke-width="6"
+                      stroke-linecap="round"
+                      [attr.stroke-dasharray]="CIRCUMFERENCE"
+                      [attr.stroke-dashoffset]="dashOffset(stats()!.deliveryMetrics.onTimePercent)"
+                      style="transform:rotate(-90deg);transform-origin:36px 36px"/>
+            </svg>
+            <div class="ring-inner">
+              <span class="ring-val">{{ stats()!.deliveryMetrics.onTimePercent }}%</span>
+              <span class="ring-sub">on-time</span>
+            </div>
+          </div>
+        </div>
+        <div class="metric-row">
+          <span class="mr-label">Avg delivery time</span>
+          <span class="mr-value">{{ stats()!.deliveryMetrics.avgMinutes }}m</span>
+        </div>
+        <div class="metric-row">
+          <span class="mr-label">Fastest today</span>
+          <span class="mr-value">{{ stats()!.deliveryMetrics.fastestMinutes }}m</span>
+        </div>
+        <div class="metric-row">
+          <span class="mr-label">Cancelled today</span>
+          <span class="mr-value" style="color:#FCA5A5">{{ stats()!.deliveryMetrics.cancelledToday }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="mr-label">Active riders</span>
+          <span class="mr-value" style="color:#86EFAC">{{ stats()!.deliveryMetrics.activeRiders }}</span>
+        </div>
+      </div>
+
+      <!-- Revenue Breakdown -->
+      <div class="od-card">
+        <div class="od-card-title mb-10">Revenue Breakdown</div>
+        <div class="rev-bars">
+          <div class="rev-item">
+            <div class="rev-head">
+              <span class="rev-label">Food Orders</span>
+              <span class="rev-val">{{ formatRevenue(stats()!.revenueBreakdown.foodOrders) }}</span>
+            </div>
+            <div class="rev-track">
+              <div class="rev-fill" style="background:#22C55E"
+                   [style.width.%]="revenueBarWidth(stats()!.revenueBreakdown.foodOrders)"></div>
+            </div>
+          </div>
+          <div class="rev-item">
+            <div class="rev-head">
+              <span class="rev-label">Delivery Fees</span>
+              <span class="rev-val">{{ formatRevenue(stats()!.revenueBreakdown.deliveryFees) }}</span>
+            </div>
+            <div class="rev-track">
+              <div class="rev-fill" style="background:#3B82F6"
+                   [style.width.%]="revenueBarWidth(stats()!.revenueBreakdown.deliveryFees)"></div>
+            </div>
+          </div>
+          <div class="rev-item">
+            <div class="rev-head">
+              <span class="rev-label">Tips</span>
+              <span class="rev-val">{{ formatRevenue(stats()!.revenueBreakdown.tips) }}</span>
+            </div>
+            <div class="rev-track">
+              <div class="rev-fill" style="background:#A855F7"
+                   [style.width.%]="revenueBarWidth(stats()!.revenueBreakdown.tips)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="rev-total">
+          <span class="rev-total-label">Total Revenue</span>
+          <span class="rev-total-val">{{ formatRevenue(revenueTotal()) }}</span>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="od-card">
+        <div class="od-card-title mb-10">Recent Activity</div>
+        @for (event of recentActivity(); track event.id) {
+          <div class="act-item">
+            <span class="act-dot" [style.background]="activityDot(event.type)"></span>
+            <div class="act-body">
+              <div class="act-text">{{ event.text }}</div>
+              <div class="act-time">{{ formatTime(event.timestamp) }}</div>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+</div>

@@ -1,0 +1,39 @@
+form { display: flex; flex-direction: column; gap: 14px; }
+
+.food-type-group {
+  display: flex; gap: 10px; flex-wrap: wrap;
+
+  .food-type-option {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 8px;
+    border: 1px solid rgba(99,102,241,0.2);
+    background: rgba(99,102,241,0.05);
+    color: var(--t2); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+
+    input[type="radio"] { display: none; }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    &.selected {
+      border-color: rgba(99,102,241,0.6);
+      background: rgba(99,102,241,0.15);
+      color: #A5B4FC;
+    }
+
+    &:hover:not(.selected) { background: rgba(99,102,241,0.1); }
+  }
+}
+
+.input-prefix-wrap {
+  position: relative;
+  .input-prefix {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--t3); font-size: 13px; pointer-events: none;
+  }
+  .with-prefix { padding-left: 26px; }
+}
+
+.availability-group { align-self: flex-end; }

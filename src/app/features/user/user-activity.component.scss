@@ -1,4 +1,16 @@
-.page { padding: 24px 32px; }
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: 24px 32px 0;
+}
 
 .user-tabs {
   display: flex;
@@ -7,8 +19,7 @@
   padding: 0 32px;
   margin: 0 -32px;
   background: var(--bg2);
-  position: sticky;
-  top: 52px;
+  flex-shrink: 0;
   z-index: 10;
 }
 
@@ -40,7 +51,13 @@
   }
 }
 
-.page-content { margin-top: 24px; }
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
 
 .range-bar {
   display: flex;
@@ -153,4 +170,77 @@
   font-size: 10.5px;
   color: var(--t3);
   margin-top: 4px;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.range-bar { margin: 0; }
+
+.view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.vt-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--t3);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 140ms;
+
+  &:hover { color: var(--t1); }
+
+  &.active {
+    background: rgba(99, 102, 241, 0.15);
+    color: #A5B4FC;
+    font-weight: 600;
+  }
+}
+
+.chart-panel {
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t1);
+}
+
+.chart-count {
+  font-size: 11.5px;
+  color: var(--t3);
+}
+
+.chart-wrap {
+  height: 220px;
+  position: relative;
 }

@@ -3,10 +3,10 @@ import {
   OnInit,
   computed,
   signal,
+  inject,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
-import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 
@@ -17,6 +17,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge/statu
 import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { UserContextService } from '../../core/services/user-context.service';
+import { ModalService } from '../../core/services/modal.service';
 import { OrderDto, OrderService } from './services/order.service';
 
 @Component({
@@ -30,8 +31,6 @@ import { OrderDto, OrderService } from './services/order.service';
     StatusBadgeComponent,
     SkeletonListComponent,
     EmptyStateComponent,
-    DatePipe,
-    DecimalPipe,
     RouterLink,
     RouterLinkActive,
   ],
@@ -43,20 +42,45 @@ export class UserOrdersComponent implements OnInit {
   readonly loading     = signal(false);
   readonly orders      = signal<OrderDto[]>([]);
   readonly searchQuery = signal('');
-  readonly statusFilter= signal<string>('all');
-  readonly expandedId  = signal<number | null>(null);
-  readonly userLabel   = computed(() => this.userContext.state.userName ?? `#${this.userId()}`);
+  readonly statusFilter  = signal<string>('all');
+  readonly segmentFilter = signal<string>('all');
+  readonly expandedId    = signal<number | null>(null);
+  readonly userLabel     = computed(() => this.userContext.state.userName ?? `#${this.userId()}`);
+
+  readonly palette = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#14B8A6'];
+
+  readonly segmentChips = computed(() => {
+    const map = new Map<string, { key: string; label: string; count: number }>();
+    for (const order of this.orders()) {
+      const key   = order.segmentId != null ? String(order.segmentId) : '__none__';
+      const label = order.segmentName ?? 'Unassigned';
+      if (!map.has(key)) map.set(key, { key, label, count: 0 });
+      map.get(key)!.count++;
+    }
+    const sorted = [...map.values()].sort((a, b) => {
+      if (a.key === '__none__') return 1;
+      if (b.key === '__none__') return -1;
+      return a.label.localeCompare(b.label);
+    });
+    return sorted.map((s, i) => ({
+      ...s,
+      color: s.key === '__none__' ? '#6B7280' : this.palette[i % this.palette.length],
+    }));
+  });
 
   readonly filteredOrders = computed(() => {
-    const q  = this.searchQuery().toLowerCase().trim();
-    const sf = this.statusFilter();
+    const q   = this.searchQuery().toLowerCase().trim();
+    const sf  = this.statusFilter();
+    const seg = this.segmentFilter();
     return this.orders().filter(o => {
-      const matchesStatus = sf === 'all' || (o.status ?? '').toLowerCase() === sf;
-      const matchesSearch = !q ||
+      const matchesStatus  = sf === 'all' || (o.status ?? '').toLowerCase() === sf;
+      const matchesSearch  = !q ||
         String(o.orderId).includes(q) ||
         (o.status ?? '').toLowerCase().includes(q) ||
         (o.type ?? '').toLowerCase().includes(q);
-      return matchesStatus && matchesSearch;
+      const matchesSegment = seg === 'all' ||
+        (seg === '__none__' ? o.segmentId == null : String(o.segmentId) === seg);
+      return matchesStatus && matchesSearch && matchesSegment;
     });
   });
 
@@ -108,6 +132,8 @@ export class UserOrdersComponent implements OnInit {
     { value: 'pending',   label: 'Pending',    count: this.orders().filter(o => o.status?.toLowerCase() === 'pending').length },
   ]);
 
+  private readonly modalService = inject(ModalService);
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly userContext: UserContextService,
@@ -152,6 +178,11 @@ export class UserOrdersComponent implements OnInit {
       en_route:  '#3B82F6',
     };
     return map[(status ?? '').toLowerCase()] ?? '#6366F1';
+  }
+
+  viewOrder(orderId: number | undefined): void {
+    if (!orderId) return;
+    this.modalService.openViewOrder(orderId).subscribe();
   }
 
   orderInitials(order: OrderDto): string {

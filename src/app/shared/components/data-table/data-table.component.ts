@@ -3,10 +3,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SpinnerComponent } from '../spinner/spinner.component';
 
 export interface ColumnConfig {
   key: string;
@@ -23,9 +23,9 @@ export interface ColumnConfig {
     MatTableModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatPaginatorModule,
-    MatTooltipModule
+    MatTooltipModule,
+    SpinnerComponent,
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',

@@ -7,6 +7,7 @@ import { CategoryListComponent } from './category-list.component';
 import { OutletRatingsComponent } from './outlet-ratings.component';
 import { OutletAddressComponent } from './outlet-address.component';
 import { OutletDashboardComponent } from './outlet-dashboard.component';
+import { OutletOrdersComponent } from './outlet-orders.component';
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { CategoryDto } from './services/category.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
@@ -21,6 +22,7 @@ import { FabActionService } from '../../core/services/fab-action.service';
     OutletRatingsComponent,
     OutletAddressComponent,
     OutletDashboardComponent,
+    OutletOrdersComponent,
   ],
   templateUrl: './outlet-detail.component.html',
   styleUrl: './outlet-detail.component.scss',
@@ -36,17 +38,18 @@ import { FabActionService } from '../../core/services/fab-action.service';
 export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(CategoryListComponent) private readonly categoryListComponent?: CategoryListComponent;
 
-  readonly activeTab = signal<'address' | 'categories' | 'ratings' | 'dashboard'>('categories');
+  readonly activeTab = signal<'address' | 'categories' | 'ratings' | 'dashboard' | 'orders'>('dashboard');
   private openCategoryDialogPending = false;
 
   readonly clientId = signal(0);
   readonly outletId = signal(0);
 
   readonly tabs = [
-    { key: 'address' as const,    label: 'Address' },
+    { key: 'dashboard' as const,  label: 'Dashboard' },
     { key: 'categories' as const, label: 'Categories' },
     { key: 'ratings' as const,    label: 'Ratings' },
-    { key: 'dashboard' as const,  label: 'Dashboard' },
+    { key: 'address' as const,    label: 'Address' },
+    { key: 'orders' as const,     label: 'Orders' },
   ];
 
   readonly headerActions: PageHeaderAction[] = [
@@ -66,15 +69,19 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.outletId.set(Number(this.route.snapshot.paramMap.get('outletId')));
     this.hierarchyState.syncFromRoute(this.route.snapshot);
 
-    const url = this.router.url;
-    if (url.includes('/dashboard')) {
+    const url = this.router.url.split('?')[0];
+    if (url.endsWith('/dashboard')) {
       this.activeTab.set('dashboard');
-    } else if (url.includes('/ratings')) {
+    } else if (url.endsWith('/ratings')) {
       this.activeTab.set('ratings');
-    } else if (url.includes('/categories')) {
+    } else if (url.endsWith('/categories')) {
       this.activeTab.set('categories');
-    } else {
+    } else if (url.endsWith('/orders')) {
+      this.activeTab.set('orders');
+    } else if (url.endsWith('/address')) {
       this.activeTab.set('address');
+    } else {
+      this.activeTab.set('dashboard');
     }
 
     this.fabActionService.registerAction('addCategory', () => this.openAddCategoryFromHeader());
@@ -91,7 +98,7 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fabActionService.unregisterAction('addCategory');
   }
 
-  setTab(tab: 'address' | 'categories' | 'ratings' | 'dashboard'): void {
+  setTab(tab: 'address' | 'categories' | 'ratings' | 'dashboard' | 'orders'): void {
     this.activeTab.set(tab);
     const cId = this.clientId();
     const oId = this.outletId();
@@ -101,8 +108,10 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'ratings']);
     } else if (tab === 'dashboard') {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'dashboard']);
+    } else if (tab === 'orders') {
+      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'orders']);
     } else {
-      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId]);
+      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'address']);
     }
   }
 

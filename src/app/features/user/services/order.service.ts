@@ -20,6 +20,8 @@ export interface OrderDto {
   outletId?: number;
   userId?: number;
   deliveryPartnerId?: number;
+  segmentId?: number;
+  segmentName?: string;
   orderItems?: OrderItemDto[];
 }
 

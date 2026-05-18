@@ -7,8 +7,9 @@ import { Chart, registerables } from 'chart.js';
 import { Subscription, switchMap } from 'rxjs';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { DashboardService, DashboardStats, Activity, DeliveryMetrics } from './dashboard.service';
+import { DashboardStats } from './dashboard.service';
 import { LocationService } from '../../core/services/location.service';
+import { AppDashService } from '../../core/services/app-dash.service';
 
 Chart.register(...registerables);
 
@@ -20,16 +21,16 @@ Chart.register(...registerables);
   styleUrl: './admin-overview.component.scss'
 })
 export class AdminOverviewComponent implements OnInit, OnDestroy {
-  private readonly dashboardService = inject(DashboardService);
-  readonly locationService = inject(LocationService);
+  private readonly dashService = inject(AppDashService);
+  readonly locationService     = inject(LocationService);
 
-  readonly loading  = signal(true);
-  readonly stats    = signal<DashboardStats | null>(null);
-  readonly activity = signal<Activity[]>([]);
-  readonly metrics  = signal<DeliveryMetrics | null>(null);
-  readonly dateRange= signal<'today' | 'week' | 'month'>('today');
-  readonly sortCol  = signal<string>('ordersToday');
-  readonly sortDir  = signal<'asc' | 'desc'>('desc');
+  readonly loading   = signal(true);
+  readonly stats     = signal<DashboardStats | null>(null);
+  readonly activity  = signal<any[]>([]);
+  readonly metrics   = signal<any | null>(null);
+  readonly dateRange = signal<'today' | 'week' | 'month'>('today');
+  readonly sortCol   = signal<string>('ordersToday');
+  readonly sortDir   = signal<'asc' | 'desc'>('desc');
 
   readonly DATE_RANGES: { key: 'today' | 'week' | 'month'; label: string }[] = [
     { key: 'today', label: 'Today' },
@@ -44,11 +45,11 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
 
   readonly sortedOutlets = computed(() => {
     const outlets = this.stats()?.topOutlets ?? [];
-    const col = this.sortCol();
-    const dir = this.sortDir();
+    const col     = this.sortCol();
+    const dir     = this.sortDir();
     return [...outlets].sort((a, b) => {
-      const av = (a as unknown as Record<string, unknown>)[col] as number | string ?? 0;
-      const bv = (b as unknown as Record<string, unknown>)[col] as number | string ?? 0;
+      const av = (a as any)[col] ?? 0;
+      const bv = (b as any)[col] ?? 0;
       const cmp = av < bv ? -1 : av > bv ? 1 : 0;
       return dir === 'asc' ? cmp : -cmp;
     });
@@ -67,9 +68,9 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
     return this.OUTLET_CITIES[rank] ?? 'Chennai';
   }
 
-  lineChartData = signal<ChartData<'line'>>({ labels: [], datasets: [] });
+  lineChartData    = signal<ChartData<'line'>>({ labels: [], datasets: [] });
   doughnutChartData = signal<ChartData<'doughnut'>>({ labels: [], datasets: [] });
-  barChartData = signal<ChartData<'bar'>>({ labels: [], datasets: [] });
+  barChartData     = signal<ChartData<'bar'>>({ labels: [], datasets: [] });
 
   readonly pageSubtitle = computed(() => {
     const sel = this.locationService.selected();
@@ -78,7 +79,7 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
     return `Aggregated view across ${sel.length} selected locations`;
   });
 
-  readonly isAllLocations = this.locationService.isAllSelected;
+  readonly isAllLocations    = this.locationService.isAllSelected;
   readonly selectedLocations = this.locationService.selected;
 
   private readonly AREA_MAP: Record<number, string[]> = {
@@ -122,19 +123,17 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
   };
 
   private readonly stats$ = toObservable(this.locationService.selectedIds).pipe(
-    switchMap((ids) => this.dashboardService.getStats(ids.length === 0 ? null : ids))
+    switchMap(ids => {
+      return this.dashService.getGlobalStats(ids.length > 0 ? ids : undefined);
+    })
   );
 
   private statsSub?: Subscription;
-  private activitySub?: Subscription;
-  private metricsSub?: Subscription;
 
   ngOnInit(): void {
-    this.activitySub = this.dashboardService.getActivity().subscribe((a) => this.activity.set(a));
-    this.metricsSub = this.dashboardService.getDeliveryMetrics().subscribe((m) => this.metrics.set(m));
-
     this.statsSub = this.stats$.subscribe({
-      next: (stats) => {
+      next: (raw) => {
+        const stats = this.mapToOldFormat(raw);
         this.stats.set(stats);
         this.buildCharts(stats);
         this.loading.set(false);
@@ -145,15 +144,43 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.statsSub?.unsubscribe();
-    this.activitySub?.unsubscribe();
-    this.metricsSub?.unsubscribe();
+  }
+
+  private mapToOldFormat(raw: any): DashboardStats {
+    return {
+      totalClients:            raw?.totalClients            ?? 0,
+      clientsGrowth:           0,
+      activeOutlets:           raw?.activeOutlets?.rawValue ?? raw?.activeOutlets ?? 0,
+      outletsGrowth:           0,
+      ordersToday:             raw?.ordersToday?.rawValue   ?? raw?.ordersToday   ?? 0,
+      ordersGrowthPercent:     raw?.ordersToday?.changePercent ?? 0,
+      activeRiders:            0,
+      riderUtilizationPercent: 0,
+      dailyOrders: (raw?.dailyOrders ?? []).map((d: any) => ({
+        date:           d.day ?? d.date ?? '',
+        consumerOrders: d.orderCount ?? 0,
+        storeOrders:    0,
+      })),
+      ordersByCategory: [],
+      revenueByCity: (raw?.revenueByCity ?? []).map((c: any) => ({
+        city:    c.city,
+        revenue: c.revenue,
+      })),
+      topOutlets: (raw?.topOutlets ?? []).map((o: any, i: number) => ({
+        rank:        i + 1,
+        name:        o.name,
+        category:    o.clientName ?? '',
+        ordersToday: o.ordersToday ?? 0,
+        rating:      o.avgRating  ?? 0,
+      })),
+    };
   }
 
   getRevenueSectionLabel(): string {
     const sel = this.locationService.selected();
     if (sel.length === 0) return 'All cities';
     if (sel.length === 1) return `Areas in ${sel[0].name}`;
-    return sel.map((l) => l.name).join(', ');
+    return sel.map(l => l.name).join(', ');
   }
 
   private getRevenueLabels(stats: DashboardStats): string[] {
@@ -162,16 +189,16 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
       const areas = this.AREA_MAP[sel[0].id];
       if (areas) return areas.slice(0, stats.revenueByCity.length);
     }
-    return stats.revenueByCity.map((r) => r.city);
+    return stats.revenueByCity.map(r => r.city);
   }
 
   private buildCharts(stats: DashboardStats): void {
     this.lineChartData.set({
-      labels: stats.dailyOrders.map((d) => d.date),
+      labels: stats.dailyOrders.map(d => d.date),
       datasets: [
         {
           label: 'Consumer Orders',
-          data: stats.dailyOrders.map((d) => d.consumerOrders),
+          data: stats.dailyOrders.map(d => d.consumerOrders),
           borderColor: '#2997FF',
           backgroundColor: 'rgba(41,151,255,0.08)',
           tension: 0.4,
@@ -180,7 +207,7 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
         },
         {
           label: 'Store Orders',
-          data: stats.dailyOrders.map((d) => d.storeOrders),
+          data: stats.dailyOrders.map(d => d.storeOrders),
           borderColor: '#32D74B',
           backgroundColor: 'rgba(50,215,75,0.08)',
           tension: 0.4,
@@ -191,10 +218,10 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
     });
 
     this.doughnutChartData.set({
-      labels: stats.ordersByCategory.map((c) => c.category),
+      labels: stats.ordersByCategory.map(c => c.category),
       datasets: [{
-        data: stats.ordersByCategory.map((c) => c.count),
-        backgroundColor: stats.ordersByCategory.map((c) => c.color),
+        data: stats.ordersByCategory.map(c => c.count),
+        backgroundColor: stats.ordersByCategory.map(c => c.color),
         borderWidth: 0,
         hoverOffset: 6
       }]
@@ -205,7 +232,7 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
       labels: revenueLabels,
       datasets: [{
         label: 'Revenue (₹)',
-        data: stats.revenueByCity.map((r) => r.revenue),
+        data: stats.revenueByCity.map(r => r.revenue),
         backgroundColor: '#2997FF',
         borderRadius: 6,
         hoverBackgroundColor: '#34AADC'

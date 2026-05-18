@@ -1,21 +1,19 @@
-import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { DialogFieldConfig, GenericFormDialogComponent } from '../../shared/components/generic-form-dialog/generic-form-dialog.component';
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { RichListItemComponent } from '../../shared/components/rich-list-item/rich-list-item.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
-import { PageToolbarComponent, FilterOption } from '../../shared/components/page-toolbar/page-toolbar.component';
+import { PageToolbarComponent } from '../../shared/components/page-toolbar/page-toolbar.component';
 import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
-import { OutletDto, OutletService } from './services/outlet.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
 import { FabActionService } from '../../core/services/fab-action.service';
+import { ModalService } from '../../core/services/modal.service';
+import { ToastService } from '../../core/services/toast.service';
+import { AppDashService } from '../../core/services/app-dash.service';
 
 @Component({
   selector: 'app-outlet-list',
@@ -28,16 +26,18 @@ import { FabActionService } from '../../core/services/fab-action.service';
   styleUrl: './outlet-list.component.scss'
 })
 export class OutletListComponent implements OnInit, OnDestroy {
-  readonly clientId = signal(0);
-  readonly loading = signal(false);
-  readonly outlets = signal<OutletDto[]>([]);
+  readonly clientId    = signal(0);
+  readonly loading     = signal(false);
+  readonly outlets     = signal<any[]>([]);
   readonly searchQuery = signal('');
   readonly currentPage = signal(1);
-  readonly pageSize = 10;
+  readonly pageSize    = 10;
 
   readonly filteredOutlets = computed(() => {
     const q = this.searchQuery().toLowerCase();
-    return this.outlets().filter((o) => !q || (o.name?.toLowerCase().includes(q) ?? false) || (o.type?.toLowerCase().includes(q) ?? false));
+    return this.outlets().filter(o =>
+      !q || (o.name?.toLowerCase().includes(q) ?? false) || (o.type?.toLowerCase().includes(q) ?? false)
+    );
   });
 
   readonly pagedOutlets = computed(() => {
@@ -56,20 +56,13 @@ export class OutletListComponent implements OnInit, OnDestroy {
     { label: 'Add Outlet', icon: 'add', type: 'primary', action: () => this.openCreateDialog() }
   ];
 
-  readonly fields: DialogFieldConfig[] = [
-    { key: 'name', label: 'Name', type: 'text', required: true },
-    { key: 'description', label: 'Description', type: 'textarea' },
-    { key: 'type', label: 'Type', type: 'text' },
-    { key: 'isVeg', label: 'Vegetarian', type: 'checkbox' },
-    { key: 'isPickupAvailable', label: 'Pickup Available', type: 'checkbox' }
-  ];
+  private readonly modalService  = inject(ModalService);
+  private readonly toastService  = inject(ToastService);
+  private readonly dashService   = inject(AppDashService);
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly outletService: OutletService,
-    private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar,
     private readonly hierarchyState: HierarchyStateService,
     private readonly fabActionService: FabActionService
   ) {}
@@ -88,47 +81,90 @@ export class OutletListComponent implements OnInit, OnDestroy {
 
   loadOutlets(): void {
     this.loading.set(true);
-    this.outletService.list(this.clientId()).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: (outlets) => this.outlets.set(outlets),
-      error: () => this.snackBar.open('Unable to load outlets', 'Close', { duration: 3000 })
-    });
+    this.dashService.getOutlets(this.clientId(), 0, 200)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: res => {
+          const list = Array.isArray(res) ? res : (res?.content ?? []);
+          this.outlets.set(list);
+        },
+        error: () => this.toastService.error('Unable to load outlets')
+      });
   }
 
   openCreateDialog(): void {
-    this.dialog.open(GenericFormDialogComponent<OutletDto>, { data: { title: 'Add Outlet', fields: this.fields } })
-      .afterClosed().subscribe((value: Partial<OutletDto> | undefined) => {
-        if (!value) return;
-        this.outletService.create({ ...value, clientId: this.clientId() } as OutletDto).subscribe({
-          next: () => { this.snackBar.open('Outlet created', 'Close', { duration: 2500 }); this.loadOutlets(); },
-          error: () => this.snackBar.open('Failed to create outlet', 'Close', { duration: 3000 })
-        });
+    const clientId = this.clientId();
+    this.modalService.openAddOutlet(clientId, '').subscribe((value: any) => {
+      if (!value) return;
+      const dto = {
+        name:              value.name,
+        description:       value.description ?? '',
+        type:              value.type ?? '',
+        outletUri:         value.outlet_uri ?? '',
+        isVeg:             value.is_veg ?? false,
+        isPickupAvailable: value.is_pickup_available ?? true,
+        imageUrl:          value.image_url ?? '',
+        clientId,
+      };
+      this.dashService.createOutlet(dto).subscribe({
+        next: (created) => {
+          if (created?.outletId && value.address_line1) {
+            const addrDto = {
+              doorNo:       value.door_no ?? '',
+              buildingName: value.building_name ?? '',
+              addressLine1: value.address_line1,
+              addressLine2: value.address_line2 ?? '',
+              city:         value.city,
+              state:        value.state,
+              zipCode:      value.zip_code ?? '',
+              country:      value.country ?? 'India',
+              instructions: value.instructions ?? '',
+              latitude:     value.latitude ?? null,
+              longitude:    value.longitude ?? null,
+            };
+            this.dashService.upsertOutletAddress(created.outletId, addrDto).subscribe();
+          }
+          this.toastService.success('Outlet created');
+          this.loadOutlets();
+        },
+        error: () => this.toastService.error('Failed to create outlet')
       });
+    });
   }
 
-  openEditDialog(outlet: OutletDto): void {
-    this.dialog.open(GenericFormDialogComponent<OutletDto>, { data: { title: `Edit ${outlet.name}`, fields: this.fields, initialValue: outlet } })
-      .afterClosed().subscribe((value: Partial<OutletDto> | undefined) => {
-        if (!value || !outlet.outletId) return;
-        this.outletService.update(outlet.outletId, { ...outlet, ...value, clientId: this.clientId() }).subscribe({
-          next: () => { this.snackBar.open('Outlet updated', 'Close', { duration: 2500 }); this.loadOutlets(); },
-          error: () => this.snackBar.open('Failed to update outlet', 'Close', { duration: 3000 })
-        });
+  openEditDialog(outlet: any): void {
+    this.modalService.openEditOutlet(outlet).subscribe((value: any) => {
+      if (!value || !outlet.outletId) return;
+      const dto = {
+        name:              value.name ?? outlet.name,
+        description:       value.description ?? outlet.description ?? '',
+        type:              value.type ?? outlet.type ?? '',
+        outletUri:         value.outlet_uri ?? outlet.outletUri ?? '',
+        isVeg:             value.is_veg ?? outlet.isVeg ?? false,
+        isPickupAvailable: value.is_pickup_available ?? outlet.isPickupAvailable ?? true,
+        imageUrl:          value.image_url ?? outlet.imageUrl ?? '',
+        clientId:          this.clientId(),
+      };
+      this.dashService.updateOutlet(outlet.outletId, dto).subscribe({
+        next: () => { this.toastService.success('Outlet updated'); this.loadOutlets(); },
+        error: () => this.toastService.error('Failed to update outlet')
       });
+    });
   }
 
-  confirmDelete(outlet: OutletDto): void {
+  confirmDelete(outlet: any): void {
     if (!outlet.outletId) return;
-    this.dialog.open(ConfirmDialogComponent, { data: { title: 'Delete Outlet', message: `Delete ${outlet.name}?` } })
-      .afterClosed().subscribe((confirmed: boolean) => {
+    this.modalService.openConfirm({ title: 'Delete Outlet', message: `Delete ${outlet.name}?` })
+      .subscribe(confirmed => {
         if (!confirmed) return;
-        this.outletService.delete(outlet.outletId!).subscribe({
-          next: () => { this.snackBar.open('Outlet deleted', 'Close', { duration: 2500 }); this.loadOutlets(); },
-          error: () => this.snackBar.open('Failed to delete outlet', 'Close', { duration: 3000 })
+        this.dashService.deleteOutlet(outlet.outletId).subscribe({
+          next: () => { this.toastService.success('Outlet deleted'); this.loadOutlets(); },
+          error: () => this.toastService.error('Failed to delete outlet')
         });
       });
   }
 
-  openDetails(outlet: OutletDto): void {
+  openDetails(outlet: any): void {
     if (!outlet.outletId) return;
     this.hierarchyState.setOutlet(outlet.outletId, outlet.name ?? null);
     this.router.navigate(['/dashboard/clients', this.clientId(), 'outlets', outlet.outletId]);

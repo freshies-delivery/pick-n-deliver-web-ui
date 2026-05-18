@@ -22,11 +22,7 @@
   </div>
 
   @if (loading()) {
-    <div class="loading-wrap">
-      @for (i of shimmerRows; track i) {
-        <div class="shimmer-block"></div>
-      }
-    </div>
+    <app-spinner size="lg" />
   } @else if (categories().length === 0) {
     <app-empty-state
       title="No categories yet"
@@ -58,7 +54,7 @@
                [class.active]="activeCatId() === cat.categoryId"
                (click)="scrollToCategory(cat.categoryId!)">
             <span class="cn-name">{{ cat.name }}</span>
-            <div class="cn-count">{{ cat.itemIds?.length ?? 0 }}</div>
+            <div class="cn-count">{{ cat.itemCount ?? 0 }}</div>
           </div>
         }
       </div>

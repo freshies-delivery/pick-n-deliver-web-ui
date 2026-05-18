@@ -1,0 +1,194 @@
+<div class="oo-wrap">
+
+  <!-- Summary Stats -->
+  <div class="oo-summary">
+    <div class="oo-stat">
+      <div class="oo-stat-icon" style="background:rgba(99,102,241,0.15);color:#A5B4FC">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <rect x="2" y="3" width="14" height="12" rx="1.5"/><path d="M6 7h6M6 10h4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="oo-stat-value">{{ stats().total }}</div>
+        <div class="oo-stat-label">Total Orders</div>
+      </div>
+    </div>
+
+    <div class="oo-stat">
+      <div class="oo-stat-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="9" cy="9" r="7"/><path d="M9 5v4l3 3"/>
+        </svg>
+      </div>
+      <div>
+        <div class="oo-stat-value">{{ stats().active }}</div>
+        <div class="oo-stat-label">Active / Pending</div>
+      </div>
+    </div>
+
+    <div class="oo-stat">
+      <div class="oo-stat-icon" style="background:rgba(34,197,94,0.15);color:#86EFAC">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="9" cy="9" r="7"/><path d="M9 6v4M8 10h2a1 1 0 1 1 0 2H8m0 0h3"/>
+        </svg>
+      </div>
+      <div>
+        <div class="oo-stat-value">{{ formatAmount(stats().revenue) }}</div>
+        <div class="oo-stat-label">Total Revenue</div>
+      </div>
+    </div>
+
+    <div class="oo-stat">
+      <div class="oo-stat-icon" style="background:rgba(59,130,246,0.15);color:#93C5FD">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M9 2l1.5 4.5H15l-3.75 2.75L12.75 14 9 11.25 5.25 14l1.5-4.75L3 6.5h4.5z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="oo-stat-value">{{ formatAmount(stats().avgOrder) }}</div>
+        <div class="oo-stat-label">Avg Order Value</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Segment Filter Chips -->
+  @if (segmentChips().length > 1) {
+    <div class="seg-chips-wrap">
+      <div class="seg-chips">
+        <div class="seg-chip" [class.active]="segmentFilter() === 'all'" style="--tc:#6366F1"
+             (click)="segmentFilter.set('all')">
+          <div class="sc-dot" style="background:#6366F1"></div>
+          <span class="sc-name">All Segments</span>
+          <span class="sc-badge" style="background:#6366F1">{{ orders().length }}</span>
+        </div>
+        @for (chip of segmentChips(); track chip.key) {
+          <div class="seg-chip" [class.active]="segmentFilter() === chip.key"
+               [style.--tc]="chip.color" (click)="segmentFilter.set(chip.key)">
+            <div class="sc-dot" [style.background]="chip.color"></div>
+            <span class="sc-name">{{ chip.label }}</span>
+            <span class="sc-badge" [style.background]="chip.color">{{ chip.count }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Toolbar -->
+  <div class="oo-toolbar">
+    <div class="oo-filters">
+      @for (tab of filterTabs; track tab.key) {
+        <button
+          type="button"
+          class="oo-filter"
+          [class.active]="statusFilter() === tab.key"
+          (click)="statusFilter.set(tab.key)">
+          {{ tab.label }}
+          <span class="oo-filter-count">{{ statusCounts()[tab.key] || 0 }}</span>
+        </button>
+      }
+    </div>
+
+    <button type="button" class="oo-btn-create" (click)="openCreate()">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M7 2v10M2 7h10"/>
+      </svg>
+      New Order
+    </button>
+  </div>
+
+  <!-- Content -->
+  @if (loading()) {
+    <app-skeleton-list [rows]="6" />
+  } @else if (filteredOrders().length === 0) {
+    <app-empty-state
+      [title]="statusFilter() === 'all' ? 'No orders yet' : 'No ' + statusFilter().toLowerCase().replace('_', ' ') + ' orders'"
+      [message]="statusFilter() === 'all' ? 'Use the New Order button to create the first order for this outlet' : 'Change the filter to see other orders'"
+    />
+  } @else {
+    <div class="oo-list">
+      @for (order of filteredOrders(); track order.orderId) {
+        <div class="oo-card" [class.expanded]="expandedId() === order.orderId">
+          <div class="oo-accent" [style.background]="accentColor(order.status)"></div>
+          <div class="oo-card-main" (click)="toggleExpand(order.orderId)">
+            <div class="oo-avatar"
+                 [style.background]="accentColor(order.status) + '22'"
+                 [style.color]="accentColor(order.status)">
+              #{{ order.orderId }}
+            </div>
+            <div class="oo-info">
+              <div class="oo-order-id">Order #{{ order.orderId }}</div>
+              <div class="oo-items">{{ itemsSummary(order) }}</div>
+              @if (order.userId) {
+                <div class="oo-user">User #{{ order.userId }}</div>
+              }
+            </div>
+            @if (order.type) {
+              <div class="oo-type">{{ order.type }}</div>
+            }
+            <div class="oo-amount">{{ formatAmount(order.totalAmount) }}</div>
+            <app-status-badge [status]="order.status" />
+            <button type="button" class="oo-view-btn" (click)="$event.stopPropagation(); viewOrder(order.orderId)">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <ellipse cx="8" cy="8" rx="6" ry="4"/><circle cx="8" cy="8" r="2"/>
+              </svg>
+              View
+            </button>
+            <svg class="oo-chevron" [class.open]="expandedId() === order.orderId"
+                 viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M4 5l2 2 2-2"/>
+            </svg>
+          </div>
+          @if (expandedId() === order.orderId) {
+            <div class="oo-detail">
+              @if ((order.orderItems?.length ?? 0) > 0) {
+                <div class="oo-detail-section">
+                  <div class="oo-detail-label">Items</div>
+                  <div class="oo-items-table">
+                    @for (item of order.orderItems!; track item.orderItemId) {
+                      <div class="oo-item-row">
+                        <span class="oo-item-name">{{ item.itemName }}</span>
+                        <span class="oo-item-qty">× {{ item.quantity }}</span>
+                        <span class="oo-item-price">{{ formatAmount(item.unitPrice) }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+              <div class="oo-detail-meta">
+                @if (order.notes) {
+                  <div class="oo-meta-row">
+                    <span class="oo-meta-key">Notes</span>
+                    <span class="oo-meta-val">{{ order.notes }}</span>
+                  </div>
+                }
+                @if (order.requestBag) {
+                  <div class="oo-meta-row">
+                    <span class="oo-meta-key">Bag</span>
+                    <span class="oo-meta-val">Requested</span>
+                  </div>
+                }
+                @if (order.deliveryPartnerId) {
+                  <div class="oo-meta-row">
+                    <span class="oo-meta-key">Partner</span>
+                    <span class="oo-meta-val">#{{ order.deliveryPartnerId }}</span>
+                  </div>
+                }
+              </div>
+              <div class="oo-detail-actions">
+                @for (next of nextStatuses(order.status); track next.value) {
+                  <button type="button" class="oo-action-btn" (click)="$event.stopPropagation(); updateStatus(order, next.value)">
+                    {{ next.label }}
+                  </button>
+                }
+                <button type="button" class="oo-action-btn oo-action-btn--danger" (click)="$event.stopPropagation(); confirmDelete(order)">
+                  Delete
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+</div>

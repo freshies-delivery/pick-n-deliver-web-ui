@@ -7,14 +7,38 @@
 
   <!-- Tab Navigation -->
   <div class="user-tabs">
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'overview']" routerLinkActive="active">Dashboard</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
-    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Address</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'activity']" routerLinkActive="active">Activity</a>
   </div>
 
   <div class="page-content">
     <!-- Stats Strip -->
     <app-stats-strip [stats]="statsStrip()" />
+
+    <!-- Segment Filter Chips -->
+    @if (segmentChips().length > 1) {
+      <div class="seg-chips-wrap">
+        <div class="seg-chips">
+          <div class="seg-chip" [class.active]="segmentFilter() === 'all'" style="--tc:#6366F1"
+               (click)="segmentFilter.set('all')">
+            <div class="sc-dot" style="background:#6366F1"></div>
+            <span class="sc-name">All Segments</span>
+            <span class="sc-badge" style="background:#6366F1">{{ orders().length }}</span>
+          </div>
+          @for (chip of segmentChips(); track chip.key) {
+            <div class="seg-chip" [class.active]="segmentFilter() === chip.key"
+                 [style.--tc]="chip.color" (click)="segmentFilter.set(chip.key)">
+              <div class="sc-dot" [style.background]="chip.color"></div>
+              <span class="sc-name">{{ chip.label }}</span>
+              <span class="sc-badge" [style.background]="chip.color">{{ chip.count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <!-- Toolbar -->
     <app-page-toolbar
@@ -36,22 +60,15 @@
       <div class="order-list">
         @for (order of filteredOrders(); track order.orderId) {
           <div class="order-card" [class.expanded]="expandedId() === order.orderId">
-            <!-- Accent bar -->
             <div class="order-accent" [style.background]="accentColor(order.status)"></div>
-
             <div class="order-main" (click)="toggleExpand(order.orderId)">
-              <!-- Avatar -->
               <div class="order-avatar" [style.background]="accentColor(order.status) + '22'" [style.color]="accentColor(order.status)">
                 {{ orderInitials(order) }}
               </div>
-
-              <!-- Info -->
               <div class="order-info">
                 <div class="order-id">Order #{{ order.orderId }}</div>
                 <div class="order-type">{{ order.type ?? 'Standard' }} Order</div>
               </div>
-
-              <!-- Stats -->
               <div class="order-stats">
                 <div class="stat-item">
                   <span class="stat-val">{{ formatAmount(order.totalAmount) }}</span>
@@ -62,18 +79,18 @@
                   <span class="stat-lbl">Items</span>
                 </div>
               </div>
-
-              <!-- Status -->
               <app-status-badge [status]="order.status" />
-
-              <!-- Expand chevron -->
+              <button type="button" class="uo-view-btn" (click)="$event.stopPropagation(); viewOrder(order.orderId)">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                  <ellipse cx="8" cy="8" rx="6" ry="4"/><circle cx="8" cy="8" r="2"/>
+                </svg>
+                View
+              </button>
               <svg class="chevron" [class.open]="expandedId() === order.orderId"
                    viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
                 <path d="M3 4.5l3 3 3-3"/>
               </svg>
             </div>
-
-            <!-- Expanded Detail -->
             @if (expandedId() === order.orderId) {
               <div class="order-detail">
                 <div class="detail-grid">

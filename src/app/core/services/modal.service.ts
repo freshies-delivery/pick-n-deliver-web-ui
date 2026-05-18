@@ -13,6 +13,8 @@ import { NotificationFormModalComponent }    from '../../features/admin/notifica
 import { UserFormModalComponent }            from '../../features/user/user-form-modal.component';
 import { DeliveryPartnerFormModalComponent } from '../../features/admin/delivery-partner-form-modal.component';
 import { AddressFormModalComponent }         from '../../features/user/address-form-modal.component';
+import { OutletOrderFormModalComponent }       from '../../features/client/outlet-order-form-modal.component';
+import { OutletOrderDetailModalComponent }     from '../../features/client/outlet-order-detail-modal.component';
 
 import { ClientDto }   from '../../features/client/services/client.service';
 import { OutletDto }   from '../../features/client/services/outlet.service';
@@ -20,6 +22,7 @@ import { CategoryDto } from '../../features/client/services/category.service';
 import { ItemDto }     from '../../features/client/services/item.service';
 import { UserDto }     from '../../features/user/services/user.service';
 import { AddressDto }  from '../../features/user/services/address.service';
+import { OutletOrderDto } from '../../features/client/services/outlet-order.service';
 
 const BASE: MatDialogConfig = {
   backdropClass: 'swiftly-modal-backdrop',
@@ -27,6 +30,7 @@ const BASE: MatDialogConfig = {
   autoFocus:     false,
   restoreFocus:  false,
   maxWidth:      '95vw',
+  maxHeight:     '90vh',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -127,6 +131,16 @@ export class ModalService {
 
   openEditAddress(userId: number, address: AddressDto): Observable<Partial<AddressDto> | undefined> {
     return this.dialog.open(AddressFormModalComponent, { ...BASE, width: '720px', data: { userId, address } }).afterClosed();
+  }
+
+  // ── Outlet Order ────────────────────────────────────────────────────────
+
+  openAddOrder(outletId: number, outletName?: string): Observable<Partial<OutletOrderDto> | undefined> {
+    return this.dialog.open(OutletOrderFormModalComponent, { ...BASE, width: '520px', data: { outletId, outletName } }).afterClosed();
+  }
+
+  openViewOrder(orderId: number): Observable<void> {
+    return this.dialog.open(OutletOrderDetailModalComponent, { ...BASE, width: '1100px' , data: { orderId } }).afterClosed();
   }
 
   // ── Confirm ─────────────────────────────────────────────────────────────

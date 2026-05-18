@@ -3,8 +3,10 @@
   border: 1px solid rgba(99, 102, 241, 0.25);
   border-radius: 16px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: calc(90vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
   animation: swiftlySlideUp 180ms ease;
 
@@ -12,10 +14,7 @@
   &.md  { max-width: 580px; }
   &.lg  { max-width: 720px; }
   &.xl  { max-width: 900px; }
-
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); border-radius: 2px; }
+  &.xxl { max-width: 1100px; }
 }
 
 @keyframes swiftlySlideUp {
@@ -28,6 +27,7 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 20px 20px 0;
+  flex-shrink: 0;
 }
 
 .modal-header-left {
@@ -89,6 +89,13 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); border-radius: 2px; }
 }
 
 .modal-footer {
@@ -98,4 +105,5 @@
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }

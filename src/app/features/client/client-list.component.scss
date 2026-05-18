@@ -74,6 +74,21 @@
   }
 }
 
+// ─── Children row ────────────────────────────────────────────────────────────
+
+.seg-tabs-children {
+  background: rgba(99, 102, 241, 0.03);
+  border-bottom-color: rgba(99, 102, 241, 0.07);
+
+  .child-tab {
+    padding: 7px 14px;
+
+    .st-dot { width: 7px; height: 7px; }
+    .st-name { font-size: 11.5px; }
+    .st-badge { font-size: 9px; }
+  }
+}
+
 // ─── Segment Banner ──────────────────────────────────────────────────────────
 
 .seg-banner {

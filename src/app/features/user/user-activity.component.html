@@ -7,8 +7,10 @@
 
   <!-- Tab Navigation -->
   <div class="user-tabs">
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'overview']" routerLinkActive="active">Dashboard</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
-    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Address</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'activity']" routerLinkActive="active">Activity</a>
   </div>
 
@@ -18,21 +20,37 @@
       <app-stats-strip [stats]="statsStrip()" />
     }
 
-    <!-- Date Range Selector -->
-    <div class="range-bar">
-      <span class="range-label">Show:</span>
-      @for (r of [['7d','7 Days'],['30d','30 Days'],['90d','90 Days'],['all','All Time']]; track r[0]) {
-        <button
-          class="range-pill"
-          type="button"
-          [class.active]="dateRange() === r[0]"
-          (click)="dateRange.set($any(r[0]))">
-          {{ r[1] }}
+    <!-- Controls row -->
+    <div class="controls-row">
+      <div class="range-bar">
+        <span class="range-label">Show:</span>
+        @for (r of [['7d','7 Days'],['30d','30 Days'],['90d','90 Days'],['all','All Time']]; track r[0]) {
+          <button
+            class="range-pill"
+            type="button"
+            [class.active]="dateRange() === r[0]"
+            (click)="dateRange.set($any(r[0]))">
+            {{ r[1] }}
+          </button>
+        }
+      </div>
+
+      <div class="view-toggle">
+        <button class="vt-btn" [class.active]="viewMode() === 'timeline'" type="button" (click)="viewMode.set('timeline')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M4 4h8M4 8h6M4 12h4"/>
+          </svg>
+          Timeline
         </button>
-      }
+        <button class="vt-btn" [class.active]="viewMode() === 'chart'" type="button" (click)="viewMode.set('chart')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M2 14V6M6 14V4M10 14V8M14 14V2"/>
+          </svg>
+          Chart
+        </button>
+      </div>
     </div>
 
-    <!-- Timeline -->
     @if (loading()) {
       <app-skeleton-list [rows]="6" />
     } @else if (activities().length === 0) {
@@ -41,6 +59,16 @@
           <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
         </svg>
         <p>No activity found for this period</p>
+      </div>
+    } @else if (viewMode() === 'chart') {
+      <div class="chart-panel card">
+        <div class="chart-header">
+          <span class="chart-title">Activity by Day</span>
+          <span class="chart-count">{{ activities().length }} events</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas baseChart [data]="barChartData()" [options]="barChartOptions" type="bar"></canvas>
+        </div>
       </div>
     } @else {
       <div class="timeline-wrap">

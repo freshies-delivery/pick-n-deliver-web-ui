@@ -1,0 +1,65 @@
+<app-modal
+  [title]="title"
+  [subtitle]="subtitle"
+  size="md"
+  [hasIcon]="true"
+  (closeRequested)="close()">
+
+  <svg icon viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="3" width="14" height="12" rx="1.5"/>
+    <path d="M6 3V2h6v1M6 8h6M6 11h4"/>
+  </svg>
+
+  <div class="form-section-label">Order Details</div>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <div class="form-group">
+      <label class="form-label">User ID <span class="required">*</span></label>
+      <input
+        formControlName="userId"
+        class="form-input"
+        type="number"
+        min="1"
+        [class.ng-invalid]="form.get('userId')?.invalid && form.get('userId')?.touched"
+        [class.ng-touched]="form.get('userId')?.touched"
+        placeholder="e.g. 1001"
+      />
+      @if (form.get('userId')?.hasError('required') && form.get('userId')?.touched) {
+        <span class="form-error">User ID is required</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Order Type</label>
+      <select formControlName="type" class="form-select">
+        <option value="DELIVERY">Delivery</option>
+        <option value="PICKUP">Pickup</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes <span class="optional">(optional)</span></label>
+      <textarea
+        formControlName="notes"
+        class="form-textarea"
+        rows="2"
+        placeholder="Special instructions or notes"
+      ></textarea>
+    </div>
+
+    <div class="form-group form-group--inline">
+      <input formControlName="requestBag" id="requestBag" type="checkbox" class="form-checkbox" />
+      <label for="requestBag" class="form-label form-label--checkbox">Request Bag</label>
+    </div>
+
+  </form>
+
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M2 7l4 4 6-6"/>
+    </svg>
+    Create Order
+  </button>
+
+</app-modal>

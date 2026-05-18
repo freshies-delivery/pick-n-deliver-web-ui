@@ -1,4 +1,16 @@
-.page { padding: 24px 32px; }
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: 24px 32px 0;
+}
 
 .user-tabs {
   display: flex;
@@ -7,8 +19,7 @@
   padding: 0 32px;
   margin: 0 -32px;
   background: var(--bg2);
-  position: sticky;
-  top: 52px;
+  flex-shrink: 0;
   z-index: 10;
 }
 
@@ -41,16 +52,81 @@
 }
 
 .page-content {
-  margin-top: 24px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-top: 24px;
+  padding-bottom: 32px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+}
+
+/* ── Segment filter chips ─────────────────────────────────────────── */
+.seg-chips-wrap {
+  flex-shrink: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  margin-bottom: 4px;
+  &::-webkit-scrollbar { display: none; }
+  scrollbar-width: none;
+}
+
+.seg-chips {
+  display: flex;
+  gap: 0;
+  min-width: max-content;
+}
+
+.seg-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 180ms ease;
+  white-space: nowrap;
+  user-select: none;
+
+  &:hover .sc-name { color: var(--t1); }
+
+  &.active {
+    border-bottom-color: var(--tc, #6366F1);
+    .sc-name  { color: var(--t1); font-weight: 600; }
+    .sc-badge { opacity: 1; }
+  }
+}
+
+.sc-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: opacity 160ms;
+}
+
+.sc-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t3);
+  transition: color 160ms;
+}
+
+.sc-badge {
+  font-size: 9.5px;
+  padding: 1px 7px;
+  border-radius: 100px;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0.75;
+  transition: opacity 160ms;
 }
 
 .order-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .order-card {
@@ -185,3 +261,23 @@
 .dr-key { font-size: 12px; color: var(--t2); }
 .dr-val { font-size: 12px; font-weight: 600; color: var(--t1); }
 .dr-val.amount { font-family: 'Sora', sans-serif; color: #86EFAC; }
+
+.uo-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(99,102,241,0.25);
+  background: rgba(99,102,241,0.08);
+  color: #A5B4FC;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+
+  svg { flex-shrink: 0; }
+  &:hover { background: rgba(99,102,241,0.16); color: #C7D2FE; }
+}

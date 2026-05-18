@@ -8,7 +8,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs/operators';
 
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { SegmentService, Segment } from './segment.service';
+import { Segment } from './segment.service';
+import { AppDashService } from '../../core/services/app-dash.service';
 
 export interface SegmentModalData { segment?: Record<string, unknown>; }
 
@@ -21,9 +22,9 @@ export interface SegmentModalData { segment?: Record<string, unknown>; }
   styleUrl:    './segment-form-modal.component.scss',
 })
 export class SegmentFormModalComponent implements OnInit {
-  private readonly fb             = inject(FormBuilder);
-  private readonly destroyRef     = inject(DestroyRef);
-  private readonly segmentService = inject(SegmentService);
+  private readonly fb          = inject(FormBuilder);
+  private readonly destroyRef  = inject(DestroyRef);
+  private readonly dashService = inject(AppDashService);
 
   readonly isEdit   = signal(false);
   readonly segments = signal<Segment[]>([]);
@@ -46,9 +47,21 @@ export class SegmentFormModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.segmentService.list()
+    this.dashService.getSegments()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(s => this.segments.set(s));
+      .subscribe((segs: any[]) => {
+        const excludeId = this.data?.segment
+          ? String((this.data.segment as any)['segmentId'] ?? (this.data.segment as any)['id'] ?? '')
+          : null;
+        const mapped: Segment[] = (segs ?? [])
+          .filter((s: any) => !excludeId || String(s.segmentId) !== excludeId)
+          .map((s: any) => ({
+            id: String(s.segmentId), name: s.name, description: s.description ?? '',
+            criteria: '', criteriaReadable: '', userCount: s.clientCount ?? 0,
+            isActive: true, createdAt: new Date(), color: '#6366F1',
+          }));
+        this.segments.set(mapped);
+      });
 
     this.form.get('name')!.valueChanges
       .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))

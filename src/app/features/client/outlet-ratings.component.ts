@@ -1,19 +1,13 @@
 import {
-  Component,
-  Input,
-  OnChanges,
-  SimpleChanges,
-  ChangeDetectionStrategy,
-  signal,
-  computed
+  Component, Input, OnChanges, SimpleChanges,
+  ChangeDetectionStrategy, inject, signal, computed
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { RatingSidebarComponent } from './rating-sidebar.component';
 import { RatingFeedComponent } from './rating-feed.component';
-import { RatingDto, RatingService } from './services/rating.service';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ModalService } from '../../core/services/modal.service';
+import { ToastService } from '../../core/services/toast.service';
+import { AppDashService } from '../../core/services/app-dash.service';
 
 @Component({
   selector: 'app-outlet-ratings',
@@ -26,8 +20,9 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 export class OutletRatingsComponent implements OnChanges {
   @Input() outletId = 0;
 
-  readonly loading = signal(false);
-  readonly ratings = signal<RatingDto[]>([]);
+  readonly loading      = signal(false);
+  readonly ratings      = signal<any[]>([]);
+  readonly summary      = signal<any>(null);
   readonly activeFilter = signal<number | 'all'>('all');
 
   readonly filteredRatings = computed(() => {
@@ -36,11 +31,9 @@ export class OutletRatingsComponent implements OnChanges {
     return this.ratings().filter(r => r.score === f);
   });
 
-  constructor(
-    private readonly ratingService: RatingService,
-    private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar
-  ) {}
+  private readonly dashService  = inject(AppDashService);
+  private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(ModalService);
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['outletId'] && this.outletId) {
@@ -50,33 +43,32 @@ export class OutletRatingsComponent implements OnChanges {
 
   load(): void {
     this.loading.set(true);
-    this.ratingService
-      .listForOutlet(this.outletId)
+    this.dashService.getRatings(this.outletId, 0, 100)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: r => this.ratings.set(r),
-        error: () => this.snackBar.open('Unable to load ratings', 'Close', { duration: 3000 })
+        next: res => {
+          const list = Array.isArray(res) ? res : (res?.content ?? []);
+          this.ratings.set(list);
+        },
+        error: () => this.toastService.error('Unable to load ratings')
       });
+    this.dashService.getRatingSummary(this.outletId)
+      .subscribe({ next: s => this.summary.set(s) });
   }
 
-  requestDelete(rating: RatingDto): void {
+  requestDelete(rating: any): void {
     if (!rating.ratingId) return;
-    this.dialog
-      .open(ConfirmDialogComponent, {
-        data: {
-          title: 'Delete Review',
-          message: 'Remove this review permanently?'
-        }
-      })
-      .afterClosed()
+    this.modalService.openConfirm({ title: 'Delete Review', message: 'Remove this review permanently?' })
       .subscribe((ok: boolean) => {
         if (!ok) return;
-        this.ratingService.deleteRating(rating.ratingId!).subscribe({
+        this.dashService.deleteRating(this.outletId, rating.ratingId).subscribe({
           next: () => {
-            this.snackBar.open('Review deleted', 'Close', { duration: 2500 });
-            this.load();
+            this.toastService.success('Review deleted');
+            this.ratings.update(list => list.filter(r => r.ratingId !== rating.ratingId));
+            this.dashService.getRatingSummary(this.outletId)
+              .subscribe({ next: s => this.summary.set(s) });
           },
-          error: () => this.snackBar.open('Failed to delete', 'Close', { duration: 3000 })
+          error: () => this.toastService.error('Failed to delete')
         });
       });
   }

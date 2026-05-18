@@ -31,9 +31,72 @@
   }
 
   @if (loading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading dashboard…</p>
+    <div class="dash-skeleton">
+
+      <!-- Stat cards -->
+      <div class="sk-stat-row">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="sk-stat-card">
+            <div class="sk-icon sk-wave"></div>
+            <div class="sk-stat-body">
+              <div class="sk-line sk-wave" style="width:60%;height:22px;margin-bottom:8px"></div>
+              <div class="sk-line sk-wave" style="width:45%"></div>
+              <div class="sk-line sk-wave" style="width:70%;margin-top:8px"></div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Wide line chart -->
+      <div class="sk-card sk-wave" style="height:220px">
+        <div class="sk-card-title sk-wave"></div>
+      </div>
+
+      <!-- Two charts side by side -->
+      <div class="sk-two-col">
+        <div class="sk-card sk-wave" style="height:200px"></div>
+        <div class="sk-card sk-wave" style="height:200px"></div>
+      </div>
+
+      <!-- Activity + top outlets -->
+      <div class="sk-two-col">
+        <div class="sk-card sk-list-card">
+          <div class="sk-line sk-wave" style="width:40%;height:14px;margin-bottom:18px"></div>
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="sk-list-row">
+              <div class="sk-dot sk-wave"></div>
+              <div class="sk-line sk-wave" style="flex:1"></div>
+              <div class="sk-line sk-wave" style="width:60px"></div>
+            </div>
+          }
+        </div>
+        <div class="sk-card sk-list-card">
+          <div class="sk-line sk-wave" style="width:40%;height:14px;margin-bottom:18px"></div>
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="sk-list-row">
+              <div class="sk-line sk-wave" style="width:18px"></div>
+              <div class="sk-line sk-wave" style="flex:1"></div>
+              <div class="sk-line sk-wave" style="width:40px"></div>
+              <div class="sk-line sk-wave" style="width:36px"></div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Performance table -->
+      <div class="sk-card sk-list-card">
+        <div class="sk-line sk-wave" style="width:30%;height:14px;margin-bottom:18px"></div>
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="sk-list-row">
+            <div class="sk-line sk-wave" style="width:24px"></div>
+            <div class="sk-line sk-wave" style="flex:2"></div>
+            <div class="sk-line sk-wave" style="width:60px"></div>
+            <div class="sk-line sk-wave" style="width:50px"></div>
+            <div class="sk-line sk-wave" style="width:70px"></div>
+          </div>
+        }
+      </div>
+
     </div>
   }
 

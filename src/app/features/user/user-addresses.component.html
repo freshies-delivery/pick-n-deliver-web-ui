@@ -8,53 +8,123 @@
 
   <!-- Tab Navigation -->
   <div class="user-tabs">
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'overview']" routerLinkActive="active">Dashboard</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
-    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Address</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'activity']" routerLinkActive="active">Activity</a>
   </div>
 
-  <div class="page-content">
-    @if (loading()) {
-      <app-skeleton-list [rows]="4" />
-    } @else if (addresses().length === 0) {
-      <app-empty-state
-        [title]="'No saved addresses'"
-        [message]="'This user has not saved any delivery addresses yet'"
-      />
-    } @else {
-      <div class="addr-list">
-        @for (addr of addresses(); track addr.addressId) {
-          <div class="addr-card"
-               [class.selected]="selectedId() === addr.addressId"
-               (click)="selectAddress(addr.addressId ?? 0)">
+  <div class="addr-layout" [class.has-map]="!!selectedAddress()">
 
-            <div class="addr-card-top">
-              <span class="addr-type-pill" [class]="addrLabel(addr)">
-                {{ addr.label ?? 'Other' }}
-              </span>
-              @if (addr.favorite) {
-                <span class="addr-default-badge">Default</span>
-              }
+    <!-- Sidebar -->
+    <div class="addr-sidebar">
+
+      <div class="as-score-card">
+        <div class="as-num">{{ addresses().length }}</div>
+        <div class="as-label">Saved Addresses</div>
+      </div>
+
+      <div class="as-bars">
+        @for (type of ['home','work','other']; track type) {
+          <div class="as-bar-row">
+            <span class="asbr-lbl">{{ type | titlecase }}</span>
+            <div class="asbr-track">
+              <div class="asbr-fill" [class]="type"
+                   [style.width.%]="typePercent(type)">
+              </div>
             </div>
-
-            <div class="addr-lines">{{ addrLines(addr) }}</div>
-
-            <div class="addr-card-actions">
-              <button class="addr-btn" type="button" (click)="$event.stopPropagation(); openEditDialog(addr)">
-                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                  <path d="M11 5l4 4M3 17l4-1 9-9a2.8 2.8 0 0 0-4-4L3 13v4z"/>
-                </svg>
-                Edit
-              </button>
-              <button class="addr-btn danger" type="button" (click)="$event.stopPropagation(); confirmDelete(addr)">
-                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                  <path d="M3 6h14M8 6V4h4v2M5 6l1 11h8l1-11"/>
-                </svg>
-                Delete
-              </button>
-            </div>
+            <span class="asbr-cnt">{{ typeCount(type) }}</span>
           </div>
         }
+      </div>
+
+      <div class="as-filter-label">Filter by Type</div>
+
+      <div class="as-filter-item"
+           [class.active]="typeFilter() === 'all'"
+           (click)="typeFilter.set('all')">
+        <div class="af-dot" style="background:#A5B4FC"></div>
+        <span class="af-lbl">All</span>
+        <span class="af-cnt">{{ addresses().length }}</span>
+      </div>
+
+      @for (type of ['home','work','other']; track type) {
+        <div class="as-filter-item"
+             [class.active]="typeFilter() === type"
+             (click)="typeFilter.set(typeFilter() === type ? 'all' : type)">
+          <div class="af-dot" [class]="type"></div>
+          <span class="af-lbl">{{ type | titlecase }}</span>
+          <span class="af-cnt">{{ typeCount(type) }}</span>
+        </div>
+      }
+
+    </div>
+
+    <!-- Feed -->
+    <div class="addr-feed">
+
+      <div class="af-header">
+        <div class="af-title">{{ filteredAddresses().length }} Address{{ filteredAddresses().length !== 1 ? 'es' : '' }}</div>
+      </div>
+
+      @if (loading()) {
+        <app-skeleton-list [rows]="3" />
+      } @else if (filteredAddresses().length === 0) {
+        <app-empty-state
+          [title]="'No addresses found'"
+          [message]="typeFilter() === 'all' ? 'This user has no saved addresses' : 'No ' + (typeFilter() | titlecase) + ' addresses'"
+        />
+      } @else {
+        <div class="addr-list">
+          @for (addr of filteredAddresses(); track addr.addressId) {
+            <div class="addr-card"
+                 [class.selected]="selectedId() === addr.addressId"
+                 (click)="selectAddress(addr.addressId ?? 0)">
+
+              <div class="addr-card-top">
+                <span class="addr-type-pill" [class]="addrLabel(addr)">
+                  {{ addr.label ?? 'Other' }}
+                </span>
+                @if (addr.favorite) {
+                  <span class="addr-default-badge">Default</span>
+                }
+              </div>
+
+              @if (addr.outletName) {
+                <div class="addr-outlet-tag">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12l-1 8H3L2 3zm2 0V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1"/></svg>
+                  {{ addr.outletName }}
+                </div>
+              }
+              <div class="addr-lines">{{ addrLines(addr) }}</div>
+
+              <div class="addr-card-actions">
+                <button class="addr-btn" type="button" (click)="$event.stopPropagation(); openEditDialog(addr)">
+                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <path d="M11 5l4 4M3 17l4-1 9-9a2.8 2.8 0 0 0-4-4L3 13v4z"/>
+                  </svg>
+                  Edit
+                </button>
+                <button class="addr-btn danger" type="button" (click)="$event.stopPropagation(); confirmDelete(addr)">
+                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <path d="M3 6h14M8 6V4h4v2M5 6l1 11h8l1-11"/>
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (selectedAddress()) {
+      <div class="addr-map-wrap">
+        <app-map-panel
+          [address]="selectedAddress()!"
+          (coordsUpdate)="updateCoords($event)"
+        />
       </div>
     }
   </div>

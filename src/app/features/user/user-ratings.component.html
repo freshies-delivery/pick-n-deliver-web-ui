@@ -2,24 +2,28 @@
   <app-page-header
     [breadcrumb]="'User View / Users'"
     [title]="'Ratings'"
-    [subtitle]="'Ratings received by ' + userLabel()"
-  ></app-page-header>
+    [subtitle]="'Ratings given by ' + userLabel()"
+  />
 
+  <!-- Tab Navigation -->
   <div class="user-tabs">
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'overview']" routerLinkActive="active">Dashboard</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'orders']" routerLinkActive="active">Orders</a>
-    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Addresses</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'addresses']" routerLinkActive="active">Address</a>
     <a class="user-tab" [routerLink]="['/dashboard/users', userId(), 'activity']" routerLinkActive="active">Activity</a>
   </div>
 
-  <div class="page-content">
-    <div class="card">
-      <app-data-table
-        [columns]="columns"
-        [data]="ratings()"
-        [loading]="loading()"
-        [clickableRows]="false"
-        [emptyMessage]="'No ratings found for this user'"
-      ></app-data-table>
-    </div>
+  <div class="ratings-content">
+    <app-rating-sidebar
+      [ratings]="ratings()"
+      [activeFilter]="activeFilter()"
+      (filterChange)="activeFilter.set($event)"
+    />
+    <app-rating-feed
+      [ratings]="filteredRatings()"
+      [loading]="loading()"
+      (deleteRequest)="requestDelete($event)"
+    />
   </div>
 </div>

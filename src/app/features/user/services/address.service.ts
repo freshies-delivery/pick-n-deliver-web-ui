@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { apiUrl } from '../../../core/api.config';
 
 export interface AddressDto {
   addressId?: number;
   userId?: number;
   outletId?: number;
+  outletName?: string;
   doorNo?: string;
   buildingName?: string;
   addressLine1?: string;
@@ -38,9 +38,7 @@ export class AddressService {
 
   listForUser(userId: number): Observable<AddressDto[]> {
     const params = new HttpParams().set('userId', String(userId));
-    return this.http.get<AddressDto[]>(this.endpoint, { params }).pipe(
-      map((addresses) => addresses.filter((a) => a.userId === userId))
-    );
+    return this.http.get<AddressDto[]>(this.endpoint, { params });
   }
 
   get(id: number): Observable<AddressDto> {

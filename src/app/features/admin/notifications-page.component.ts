@@ -1,5 +1,4 @@
 import { Component, OnInit, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { DecimalPipe, DatePipe } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
@@ -25,8 +24,6 @@ import { ToastService } from '../../core/services/toast.service';
     SkeletonListComponent,
     EmptyStateComponent,
     PaginationComponent,
-    DecimalPipe,
-    DatePipe
   ],
   templateUrl: './notifications-page.component.html',
   styleUrl: './notifications-page.component.scss'

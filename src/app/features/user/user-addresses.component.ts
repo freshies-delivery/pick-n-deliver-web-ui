@@ -7,12 +7,14 @@ import {
   inject,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
 import { finalize } from 'rxjs';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { MapPanelComponent } from '../client/map-panel.component';
 import { UserContextService } from '../../core/services/user-context.service';
 import { AddressDto, AddressService } from './services/address.service';
 import { ModalService } from '../../core/services/modal.service';
@@ -26,8 +28,10 @@ import { ToastService } from '../../core/services/toast.service';
     PageHeaderComponent,
     SkeletonListComponent,
     EmptyStateComponent,
+    MapPanelComponent,
     RouterLink,
     RouterLinkActive,
+    TitleCasePipe,
   ],
   templateUrl: './user-addresses.component.html',
   styleUrl: './user-addresses.component.scss',
@@ -37,7 +41,19 @@ export class UserAddressesComponent implements OnInit {
   readonly loading   = signal(false);
   readonly addresses = signal<AddressDto[]>([]);
   readonly selectedId= signal<number | null>(null);
+  readonly typeFilter= signal<string>('all');
   readonly userLabel = computed(() => this.userContext.state.userName ?? `#${this.userId()}`);
+
+  readonly filteredAddresses = computed(() => {
+    const f = this.typeFilter();
+    if (f === 'all') return this.addresses();
+    return this.addresses().filter(a => (a.label ?? 'other').toLowerCase() === f);
+  });
+
+  readonly selectedAddress = computed(() => {
+    const id = this.selectedId();
+    return id ? (this.addresses().find(a => a.addressId === id) ?? null) : null;
+  });
 
   readonly headerActions: PageHeaderAction[] = [
     { label: 'Add Address', icon: 'add', type: 'primary', action: () => this.openCreateDialog() },
@@ -119,5 +135,27 @@ export class UserAddressesComponent implements OnInit {
     return [address.addressLine1, address.addressLine2, address.city, address.state, address.zipCode]
       .filter(Boolean)
       .join(', ');
+  }
+
+  updateCoords(coords: { latitude: number; longitude: number }): void {
+    const addr = this.selectedAddress();
+    if (!addr?.addressId) return;
+    this.addressService.update(addr.addressId, { ...addr, ...coords }).subscribe({
+      next: () => {
+        this.addresses.update(addrs => addrs.map(a => a.addressId === addr.addressId ? { ...a, ...coords } : a));
+        this.toastService.success('Location updated');
+      },
+      error: () => this.toastService.error('Failed to update location'),
+    });
+  }
+
+  typeCount(type: string): number {
+    return this.addresses().filter(a => (a.label ?? 'other').toLowerCase() === type).length;
+  }
+
+  typePercent(type: string): number {
+    const total = this.addresses().length;
+    if (!total) return 0;
+    return Math.round((this.typeCount(type) / total) * 100);
   }
 }

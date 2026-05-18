@@ -7,8 +7,11 @@ import {
   effect,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
-import { DatePipe } from '@angular/common';
 import { finalize } from 'rxjs';
+import { BaseChartDirective } from 'ng2-charts';
+import { Chart, registerables, ChartData, ChartOptions } from 'chart.js';
+
+Chart.register(...registerables);
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
@@ -24,7 +27,7 @@ import {
   selector: 'app-user-activity',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeaderComponent, StatsStripComponent, SkeletonListComponent, DatePipe, RouterLink, RouterLinkActive],
+  imports: [PageHeaderComponent, StatsStripComponent, SkeletonListComponent, RouterLink, RouterLinkActive, BaseChartDirective],
   templateUrl: './user-activity.component.html',
   styleUrl: './user-activity.component.scss',
 })
@@ -41,8 +44,8 @@ export class UserActivityComponent implements OnInit {
     if (!s) return [];
     return [
       {
-        value: s.totalSessions,
-        label: 'Total Sessions',
+        value: (s as any).totalEvents ?? (s as any).totalSessions ?? 0,
+        label: 'Total Events',
         iconPath: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z',
         iconBg: 'rgba(99,102,241,0.15)',
         iconColor: '#A5B4FC',
@@ -64,14 +67,16 @@ export class UserActivityComponent implements OnInit {
         valueColor: '#FCD34D',
       },
       {
-        value: s.supportTickets,
-        label: 'Support Tickets',
-        iconPath: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zm-5 0a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
+        value: s.totalAddresses ?? (s as any).supportTickets ?? 0,
+        label: 'Saved Addresses',
+        iconPath: 'M10 2C6.686 2 4 4.686 4 8c0 4.5 6 10 6 10s6-5.5 6-10c0-3.314-2.686-6-6-6zM10 10.5A2.5 2.5 0 1 1 10 5a2.5 2.5 0 0 1 0 5.5z',
         iconBg: 'rgba(236,72,153,0.15)',
         iconColor: '#F9A8D4',
       },
     ];
   });
+
+  readonly viewMode = signal<'timeline' | 'chart'>('timeline');
 
   readonly groupedActivities = computed(() => {
     const groups = new Map<string, UserActivityEvent[]>();
@@ -84,6 +89,40 @@ export class UserActivityComponent implements OnInit {
   });
 
   readonly groupKeys = computed(() => Array.from(this.groupedActivities().keys()));
+
+  readonly barChartData = computed((): ChartData<'bar'> => {
+    const buckets = new Map<string, number>();
+    for (const event of this.activities()) {
+      const label = event.timestamp.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      buckets.set(label, (buckets.get(label) ?? 0) + 1);
+    }
+    const labels = Array.from(buckets.keys()).reverse();
+    const data   = labels.map(l => buckets.get(l) ?? 0);
+    return {
+      labels,
+      datasets: [{
+        label: 'Events',
+        data,
+        backgroundColor: 'rgba(99,102,241,0.5)',
+        borderColor: '#6366F1',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    };
+  });
+
+  readonly barChartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} event${ctx.parsed.y !== 1 ? 's' : ''}` } }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6B7280', font: { size: 11 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6B7280', font: { size: 11 }, stepSize: 1 }, beginAtZero: true }
+    }
+  };
 
   constructor(
     private readonly route: ActivatedRoute,

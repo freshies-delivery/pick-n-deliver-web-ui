@@ -4,10 +4,10 @@
     <!-- SVG Logo -->
     <a class="logo" href="/" aria-label="Swiftly home">
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="16" fill="#22C55E" opacity="0.15"/>
+        <circle cx="16" cy="16" r="16" fill="#6366F1" opacity="0.18"/>
         <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22"
-              stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M22 8L26 12L22 16" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              stroke="#818CF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M22 8L26 12L22 16" stroke="#818CF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
       <span class="wordmark">Swift<span class="accent">ly</span></span>
     </a>
@@ -23,7 +23,7 @@
 
     <!-- Right Actions -->
     <div class="nav-actions">
-      <button class="btn-ghost" (click)="openLogin()" aria-label="Log in">Log in</button>
+      <button class="btn-login" (click)="openLogin()" aria-label="Log in">Log in</button>
       <button class="btn-accent" aria-label="Get the app">Get the App</button>
       <button class="hamburger" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -35,6 +35,7 @@
 <!-- HERO SECTION -->
 <section class="hero" id="home">
   <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
   <div class="container">
     <div class="hero-content">
       <div class="hero-text animate-on-scroll">
@@ -426,9 +427,9 @@
       <div class="footer-brand">
         <a class="logo" href="/" aria-label="Swiftly">
           <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="16" fill="#22C55E" opacity="0.15"/>
-            <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <path d="M22 8L26 12L22 16" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="16" cy="16" r="16" fill="#6366F1" opacity="0.18"/>
+            <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M22 8L26 12L22 16" stroke="#818CF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
           </svg>
           <span class="wordmark">Swift<span class="accent">ly</span></span>
         </a>
@@ -497,9 +498,9 @@
     <!-- Logo inside modal -->
     <div class="modal-logo">
       <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="16" fill="#22C55E" opacity="0.15"/>
-        <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M22 8L26 12L22 16" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="16" cy="16" r="16" fill="#6366F1" opacity="0.18"/>
+        <path d="M20 10C20 10 14 10 12 13C10 16 16 16 16 16C16 16 22 16 20 19C18 22 12 22 12 22" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M22 8L26 12L22 16" stroke="#818CF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
       <span class="wordmark">Swift<span class="accent">ly</span></span>
     </div>
@@ -514,7 +515,9 @@
         <label for="password">Password</label>
         <input id="password" type="password" [(ngModel)]="loginPassword" name="password" placeholder="Min. 6 characters" autocomplete="current-password"/>
       </div>
-      <div class="form-error" *ngIf="loginError">{{ loginError }}</div>
+      @if (loginError) {
+        <div class="form-error">{{ loginError }}</div>
+      }
       <button type="submit" class="btn-accent btn-full">Log in to Swiftly</button>
     </form>
     <p class="modal-footer-link">Don't have an account? <a href="#">Sign up free</a></p>

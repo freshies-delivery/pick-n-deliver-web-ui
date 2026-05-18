@@ -1,5 +1,4 @@
 import { Component, HostListener, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -7,7 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [RouterModule, FormsModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
@@ -35,9 +34,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  @HostListener('window:scroll')
-  onScroll() {
-    this.scrolled = window.scrollY > 20;
+  @HostListener('scroll', ['$event'])
+  onScroll(event: Event) {
+    this.scrolled = (event.target as HTMLElement).scrollTop > 20;
   }
 
   openLogin() {

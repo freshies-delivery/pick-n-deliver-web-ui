@@ -28,6 +28,11 @@ export class UserRatingService {
     return this.http.get<RatingDto[]>(this.endpoint, { params });
   }
 
+  listByUser(userId: number): Observable<RatingDto[]> {
+    const params = new HttpParams().set('userId', String(userId));
+    return this.http.get<RatingDto[]>(`${this.endpoint}/user`, { params });
+  }
+
   create(payload: RatingDto): Observable<RatingDto> {
     return this.http.post<RatingDto>(this.endpoint, payload);
   }

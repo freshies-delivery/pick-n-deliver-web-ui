@@ -1,8 +1,7 @@
 <div class="table-container">
   @if (loading) {
     <div class="table-loading">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Loading data...</p>
+      <app-spinner size="lg" variant="inline" />
     </div>
   } @else {
     <table mat-table [dataSource]="paginatedData" [@rowsStagger]="paginatedData.length">

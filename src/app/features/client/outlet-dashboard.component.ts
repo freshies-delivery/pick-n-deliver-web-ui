@@ -1,25 +1,27 @@
 import {
-  Component,
-  Input,
-  OnInit,
-  DestroyRef,
-  inject,
-  signal,
-  computed,
+  Component, Input, OnInit, OnDestroy,
+  DestroyRef, inject, signal, computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import {
-  OutletDashboardService,
-  OutletDashboardStats,
-  LiveOrder,
-  TopItem,
-  ActivityEvent,
+  OutletDashboardStats, LiveOrder, TopItem, ActivityEvent
 } from './services/outlet-dashboard.service';
+import { AppDashService } from '../../core/services/app-dash.service';
+import { ToastService } from '../../core/services/toast.service';
+
+const STATUS_MAP: Record<number, LiveOrder['status']> = {
+  0: 'preparing', 1: 'preparing', 2: 'en_route', 3: 'delivered', 4: 'cancelled'
+};
+const ITEM_COLORS = ['#6366F1', '#22C55E', '#F59E0B', '#3B82F6', '#EC4899'];
+const EVENT_TYPE_MAP: Record<string, ActivityEvent['type']> = {
+  ORDER_PLACED: 'order_placed', RIDER_PICKUP: 'rider_pickup',
+  NEW_REVIEW:   'new_review',   ORDER_CANCEL: 'order_cancel', ITEM_CHANGE: 'item_change'
+};
 
 @Component({
   selector: 'app-outlet-dashboard',
@@ -29,9 +31,10 @@ import {
   templateUrl: './outlet-dashboard.component.html',
   styleUrl: './outlet-dashboard.component.scss',
 })
-export class OutletDashboardComponent implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly svc = inject(OutletDashboardService);
+export class OutletDashboardComponent implements OnInit, OnDestroy {
+  private readonly destroyRef   = inject(DestroyRef);
+  private readonly dashService  = inject(AppDashService);
+  private readonly toastService = inject(ToastService);
 
   @Input({ required: true }) outletId!: number;
 
@@ -60,21 +63,56 @@ export class OutletDashboardComponent implements OnInit {
       .subscribe(() => this.loadAll());
   }
 
+  ngOnDestroy(): void {}
+
   loadAll(): void {
     this.loading.set(true);
-    forkJoin({
-      stats:    this.svc.getStats(this.outletId),
-      orders:   this.svc.getLiveOrders(this.outletId),
-      items:    this.svc.getTopItems(this.outletId),
-      activity: this.svc.getRecentActivity(this.outletId),
-    })
+    this.dashService.getOutletDashboard(this.outletId, 'today')
       .pipe(finalize(() => this.loading.set(false)))
-      .subscribe(d => {
-        this.stats.set(d.stats);
-        this.liveOrders.set(d.orders);
-        this.topItems.set(d.items);
-        this.recentActivity.set(d.activity);
-        this.lastRefreshed.set(new Date());
+      .subscribe({
+        next: d => {
+          if (!d) return;
+
+          const topItemsList: TopItem[] = (d.topItems ?? []).map((item: any, i: number) => ({
+            id:          String(item.itemId),
+            name:        item.name,
+            category:    item.categoryName ?? '',
+            ordersToday: item.ordersToday  ?? 0,
+            maxOrders:   Math.max(...(d.topItems ?? []).map((x: any) => x.ordersToday ?? 0), 1),
+            color:       ITEM_COLORS[i % ITEM_COLORS.length],
+          }));
+
+          const stats: OutletDashboardStats = {
+            ordersToday:        d.ordersToday  ?? 0,
+            ordersTodayChange:  0,
+            revenueToday:       d.revenueToday ?? 0,
+            revenueTodayChange: 0,
+            avgDeliveryMinutes: 0,
+            avgDeliveryChange:  0,
+            avgRating:          d.avgRating    ?? 0,
+            avgRatingChange:    0,
+            sparklines:        { orders: [], revenue: [], delivery: [], rating: [] },
+            weeklyOrders:      [],
+            revenueBreakdown:  { foodOrders: d.revenueToday ?? 0, deliveryFees: 0, tips: 0 },
+            deliveryMetrics:   { onTimePercent: 0, avgMinutes: 0, fastestMinutes: 0, cancelledToday: 0, activeRiders: 0 },
+            ratingSummary:     { avg: d.avgRating ?? 0, total: d.ratingCount ?? 0, breakdown: {} },
+          };
+          this.stats.set(stats);
+
+          this.liveOrders.set([]);
+
+          this.topItems.set(topItemsList);
+
+          const activity: ActivityEvent[] = (d.recentRatings ?? []).map((r: any, i: number) => ({
+            id:        String(r.ratingId ?? i),
+            type:      'new_review' as ActivityEvent['type'],
+            text:      `${r.userName ?? 'Someone'} rated ${r.score}★${r.comment ? ` — "${r.comment}"` : ''}`,
+            timestamp: new Date(r.createdAt ?? Date.now()),
+          }));
+          this.recentActivity.set(activity);
+          this.lastRefreshed.set(new Date());
+        },
+        error: () => this.toastService.error('Failed to load dashboard')
       });
   }
 
@@ -89,7 +127,7 @@ export class OutletDashboardComponent implements OnInit {
   }
 
   isToday(idx: number): boolean {
-    const d = new Date().getDay();
+    const d      = new Date().getDay();
     const dayMap = [1, 2, 3, 4, 5, 6, 0];
     return dayMap[idx] === d;
   }
@@ -101,11 +139,8 @@ export class OutletDashboardComponent implements OnInit {
 
   activityDot(type: ActivityEvent['type']): string {
     const m: Record<string, string> = {
-      order_placed:  '#22C55E',
-      rider_pickup:  '#3B82F6',
-      new_review:    '#F59E0B',
-      order_cancel:  '#F43F5E',
-      item_change:   '#A855F7',
+      order_placed: '#22C55E', rider_pickup: '#3B82F6',
+      new_review:   '#F59E0B', order_cancel: '#F43F5E', item_change: '#A855F7',
     };
     return m[type] ?? '#6B7280';
   }

@@ -8,7 +8,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ImageSearchComponent } from '../../shared/components/image-search/image-search.component';
-import { SegmentService, Segment } from '../admin/segment.service';
+import { Segment } from '../admin/segment.service';
+import { AppDashService } from '../../core/services/app-dash.service';
 import { ClientDto } from './services/client.service';
 
 export interface ClientModalData { client?: ClientDto; }
@@ -22,9 +23,9 @@ export interface ClientModalData { client?: ClientDto; }
   styleUrl:    './client-form-modal.component.scss',
 })
 export class ClientFormModalComponent implements OnInit {
-  private readonly fb             = inject(FormBuilder);
-  private readonly destroyRef     = inject(DestroyRef);
-  private readonly segmentService = inject(SegmentService);
+  private readonly fb          = inject(FormBuilder);
+  private readonly destroyRef  = inject(DestroyRef);
+  private readonly dashService = inject(AppDashService);
 
   readonly segments = signal<Segment[]>([]);
   readonly isEdit   = signal(false);
@@ -45,7 +46,16 @@ export class ClientFormModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.segmentService.list().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(s => this.segments.set(s));
+    this.dashService.getSegments()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((segs: any[]) => {
+        const mapped: Segment[] = (segs ?? []).map((s: any, i: number) => ({
+          id: String(s.segmentId), name: s.name, description: s.description ?? '',
+          criteria: '', criteriaReadable: '', userCount: s.clientCount ?? 0,
+          isActive: true, createdAt: new Date(), color: '#6366F1',
+        }));
+        this.segments.set(mapped);
+      });
     if (this.data?.client) {
       this.isEdit.set(true);
       const c = this.data.client;

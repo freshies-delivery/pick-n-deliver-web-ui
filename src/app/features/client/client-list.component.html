@@ -8,7 +8,7 @@
 
   <app-stats-strip [stats]="statsStrip()" />
 
-  <!-- Segment Tabs -->
+  <!-- Segment Tabs — Row 1: root segments -->
   <div class="seg-tabs-wrap">
     <div class="seg-tabs">
       <div class="seg-tab"
@@ -19,9 +19,10 @@
         <span class="st-badge" style="background:#6366F1">{{ clients().length }}</span>
       </div>
 
-      @for (seg of segments(); track seg.id) {
+      @for (seg of rootSegments(); track seg.id) {
         <div class="seg-tab"
              [class.active]="activeSegmentId() === seg.id"
+             [class.root-active]="activeRootId() === seg.id"
              [style.--tc]="seg.color"
              (click)="selectSegment(seg.id)">
           <div class="st-dot" [style.background]="seg.color"></div>
@@ -42,6 +43,26 @@
       </div>
     </div>
   </div>
+
+  <!-- Segment Tabs — Row 2: children of selected root -->
+  @if (childSegments().length > 0) {
+    <div class="seg-tabs-wrap seg-tabs-children">
+      <div class="seg-tabs">
+        @for (seg of childSegments(); track seg.id) {
+          <div class="seg-tab child-tab"
+               [class.active]="activeSegmentId() === seg.id"
+               [style.--tc]="seg.color"
+               (click)="selectSegment(seg.id)">
+            <div class="st-dot" [style.background]="seg.color"></div>
+            <span class="st-name">{{ seg.name }}</span>
+            <span class="st-badge" [style.background]="seg.color">
+              {{ seg.clientIds?.length ?? '—' }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
   <!-- Active Segment Banner -->
   @if (activeSegment(); as seg) {

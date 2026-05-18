@@ -176,7 +176,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   openUserOrders(user: UserDto): void {
     if (!user.userId) return;
     this.userContext.setUser(user.userId, user.name ?? null);
-    this.router.navigate(['/dashboard/users', user.userId, 'orders']);
+    this.router.navigate(['/dashboard/users', user.userId, 'overview']);
   }
 
   userStats(user: UserDto): ListStat[] {

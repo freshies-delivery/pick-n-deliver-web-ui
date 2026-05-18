@@ -10,7 +10,7 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
 export class ModalComponent {
   @Input() title = '';
   @Input() subtitle = '';
-  @Input() size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
+  @Input() size: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' = 'md';
   @Input() hasIcon = false;
   @Output() closeRequested = new EventEmitter<void>();
 }

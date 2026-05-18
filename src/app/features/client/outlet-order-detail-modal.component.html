@@ -1,0 +1,205 @@
+<app-modal [title]="title" [subtitle]="subtitle" size="xxl" (closeRequested)="close()">
+
+  @if (loading()) {
+    <app-spinner size="lg" label="Loading order details…" />
+  } @else if (error()) {
+    <div class="od-error">{{ error() }}</div>
+  } @else if (order()) {
+
+    <div class="od-body">
+
+      <!-- ── Header strip ────────────────────────────────────────────── -->
+      <div class="od-header-strip">
+        <app-status-badge [status]="detail.status" />
+        @if (detail.type) {
+          <span class="od-badge">{{ detail.type }}</span>
+        }
+        @if (detail.requestBag) {
+          <span class="od-badge od-badge--bag">Bag Requested</span>
+        }
+        <span class="od-spacer"></span>
+        <span class="od-total">{{ fmt(detail.totalAmount) }}</span>
+      </div>
+
+      <!-- ── Two-column layout ───────────────────────────────────────── -->
+      <div class="od-cols">
+
+        <!-- LEFT: map + items + notes -->
+        <div class="od-left">
+
+          <!-- Map -->
+          <div class="od-map-block">
+            @if (directionsEmbedUrl) {
+              <iframe class="od-map-iframe" [src]="directionsEmbedUrl"
+                      frameborder="0" allowfullscreen loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"></iframe>
+              <a class="od-map-link" [href]="directionsLinkUrl" target="_blank" rel="noopener">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 8 5 8s5-4 5-8c0-2.76-2.24-5-5-5z"/>
+                  <circle cx="8" cy="7" r="2"/>
+                </svg>
+                Open in Google Maps
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <path d="M2 10L10 2M5 2h5v5"/>
+                </svg>
+              </a>
+            } @else {
+              <div class="od-map-empty">
+                <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                  <path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 8 5 8s5-4 5-8c0-2.76-2.24-5-5-5z"/>
+                  <circle cx="8" cy="7" r="2"/>
+                </svg>
+                <span>No coordinates available</span>
+              </div>
+            }
+          </div>
+
+          <!-- Items table -->
+          @if ((detail.items?.length || 0) > 0) {
+            <div class="od-items-section">
+              <div class="od-sec-title">Items</div>
+              <div class="od-items-table">
+                <div class="od-items-head">
+                  <span class="odi-name">Item</span>
+                  <span class="odi-qty">Qty</span>
+                  <span class="odi-unit">Unit</span>
+                  <span class="odi-total">Total</span>
+                </div>
+                @for (item of detail.items!; track item.itemId) {
+                  <div class="od-item-row">
+                    <span class="odi-name">{{ item.itemName }}</span>
+                    <span class="odi-qty">× {{ item.quantity }}</span>
+                    <span class="odi-unit">{{ fmt(item.unitPrice) }}</span>
+                    <span class="odi-total">{{ fmt(item.lineTotal) }}</span>
+                  </div>
+                }
+                <div class="od-items-foot">
+                  <span class="odi-name">Total</span>
+                  <span class="odi-qty"></span>
+                  <span class="odi-unit"></span>
+                  <span class="odi-total od-total-val">{{ fmt(detail.totalAmount) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Notes -->
+          @if (detail.notes) {
+            <div class="od-notes">
+              <span class="od-notes-label">Notes</span>
+              <span>{{ detail.notes }}</span>
+            </div>
+          }
+
+        </div>
+
+        <!-- RIGHT: info sections -->
+        <div class="od-right">
+
+          <!-- Customer -->
+          <div class="od-section">
+            <div class="od-sec-title">Customer</div>
+            @if (detail.userName) {
+              <div class="od-row"><span class="od-key">Name</span><span class="od-val">{{ detail.userName }}</span></div>
+            }
+            @if (detail.userPhone) {
+              <div class="od-row"><span class="od-key">Phone</span><span class="od-val">{{ detail.userPhone }}</span></div>
+            }
+            @if (detail.userEmail) {
+              <div class="od-row"><span class="od-key">Email</span><span class="od-val">{{ detail.userEmail }}</span></div>
+            }
+          </div>
+
+          <!-- Delivery address -->
+          <div class="od-section">
+            <div class="od-sec-title">Delivery Address</div>
+            @if (detail.deliveryAddressLine) {
+              <div class="od-row"><span class="od-key">Address</span><span class="od-val">{{ detail.deliveryAddressLine }}</span></div>
+            }
+            @if (detail.receiverName) {
+              <div class="od-row"><span class="od-key">Receiver</span><span class="od-val">{{ detail.receiverName }}</span></div>
+            }
+            @if (detail.receiverPhone) {
+              <div class="od-row"><span class="od-key">Phone</span><span class="od-val">{{ detail.receiverPhone }}</span></div>
+            }
+            @if (detail.deliveryInstructions) {
+              <div class="od-row"><span class="od-key">Instructions</span><span class="od-val">{{ detail.deliveryInstructions }}</span></div>
+            }
+          </div>
+
+          <!-- Outlet -->
+          <div class="od-section">
+            <div class="od-sec-title">Outlet</div>
+            @if (detail.outletName) {
+              <div class="od-row"><span class="od-key">Name</span><span class="od-val">{{ detail.outletName }}</span></div>
+            }
+            @if (detail.outletType) {
+              <div class="od-row"><span class="od-key">Type</span><span class="od-val">{{ detail.outletType }}</span></div>
+            }
+            @if (detail.outletAddressLine) {
+              <div class="od-row"><span class="od-key">Address</span><span class="od-val">{{ detail.outletAddressLine }}</span></div>
+            }
+          </div>
+
+          <!-- Delivery partner -->
+          @if (detail.partnerName || detail.partnerPhone) {
+            <div class="od-section">
+              <div class="od-sec-title">Delivery Partner</div>
+              @if (detail.partnerName) {
+                <div class="od-row"><span class="od-key">Name</span><span class="od-val">{{ detail.partnerName }}</span></div>
+              }
+              @if (detail.partnerPhone) {
+                <div class="od-row"><span class="od-key">Phone</span><span class="od-val">{{ detail.partnerPhone }}</span></div>
+              }
+              @if (detail.partnerVehicleType) {
+                <div class="od-row"><span class="od-key">Vehicle</span><span class="od-val">{{ detail.partnerVehicleType }}</span></div>
+              }
+            </div>
+          }
+
+          <!-- Offer -->
+          @if (detail.offerId) {
+            <div class="od-section">
+              <div class="od-sec-title">Offer Applied</div>
+              @if (detail.offerName) {
+                <div class="od-row"><span class="od-key">Name</span><span class="od-val">{{ detail.offerName }}</span></div>
+              }
+              @if (detail.offerCode) {
+                <div class="od-row"><span class="od-key">Code</span><span class="od-val od-mono">{{ detail.offerCode }}</span></div>
+              }
+              @if (detail.offerDiscount != null) {
+                <div class="od-row"><span class="od-key">Discount</span><span class="od-val">{{ detail.offerDiscount }}%</span></div>
+              }
+            </div>
+          }
+
+          <!-- Payment -->
+          @if (detail.paymentStatus || detail.paymentProvider) {
+            <div class="od-section">
+              <div class="od-sec-title">Payment</div>
+              @if (detail.paymentStatus) {
+                <div class="od-row"><span class="od-key">Status</span><span class="od-val">{{ detail.paymentStatus }}</span></div>
+              }
+              @if (detail.paymentProvider) {
+                <div class="od-row"><span class="od-key">Provider</span><span class="od-val">{{ detail.paymentProvider }}</span></div>
+              }
+              @if (detail.paymentAmount != null) {
+                <div class="od-row">
+                  <span class="od-key">Amount</span>
+                  <span class="od-val">{{ fmt(detail.paymentAmount) }}{{ detail.paymentCurrency ? ' ' + detail.paymentCurrency : '' }}</span>
+                </div>
+              }
+              @if (detail.paymentId) {
+                <div class="od-row"><span class="od-key">Ref ID</span><span class="od-val od-mono">{{ detail.paymentId }}</span></div>
+              }
+            </div>
+          }
+
+        </div>
+      </div>
+
+    </div>
+
+  }
+
+</app-modal>

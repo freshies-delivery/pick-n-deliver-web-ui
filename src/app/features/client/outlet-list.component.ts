@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
@@ -20,7 +20,8 @@ import { AppDashService } from '../../core/services/app-dash.service';
   standalone: true,
   imports: [
     PageHeaderComponent, RichListItemComponent, StatsStripComponent,
-    PageToolbarComponent, SkeletonListComponent, EmptyStateComponent, PaginationComponent
+    PageToolbarComponent, SkeletonListComponent, EmptyStateComponent, PaginationComponent,
+    RouterLink, RouterLinkActive,
   ],
   templateUrl: './outlet-list.component.html',
   styleUrl: './outlet-list.component.scss'

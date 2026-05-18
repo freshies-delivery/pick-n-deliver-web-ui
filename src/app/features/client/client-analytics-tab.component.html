@@ -1,0 +1,81 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Clients / ' + clientName()"
+    [title]="clientName()"
+    [subtitle]="'Analytics & trends'"
+  />
+
+  <div class="client-tabs">
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'dashboard']" routerLinkActive="active">Dashboard</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'outlets']" routerLinkActive="active">Outlets</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'orders']" routerLinkActive="active">Orders</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'analytics']" routerLinkActive="active">Analytics</a>
+  </div>
+
+  <div class="page-content">
+    <!-- Range selector -->
+    <div class="range-bar">
+      @for (r of RANGES; track r.key) {
+        <button class="range-btn" [class.active]="range() === r.key" (click)="setRange(r.key)">{{r.label}}</button>
+      }
+    </div>
+
+    @if (loading()) {
+      <app-skeleton-list [rows]="4" />
+    } @else if (analytics()) {
+      <!-- KPI cards -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <span class="kpi-label">Total Orders</span>
+          <span class="kpi-value">{{analytics()!.ordersTotal | number}}</span>
+          <span class="kpi-trend" [class]="trendClass(analytics()!.ordersTrend)">
+            {{trendIcon(analytics()!.ordersTrend)}} {{analytics()!.ordersTrend | number:'1.1-1'}}%
+          </span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Total Revenue</span>
+          <span class="kpi-value">₹{{analytics()!.revenueTotal | number:'1.0-0'}}</span>
+          <span class="kpi-trend" [class]="trendClass(analytics()!.revenueTrend)">
+            {{trendIcon(analytics()!.revenueTrend)}} {{analytics()!.revenueTrend | number:'1.1-1'}}%
+          </span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Avg Order Value</span>
+          <span class="kpi-value">₹{{analytics()!.avgOrderValue | number:'1.0-0'}}</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Avg Rating</span>
+          <span class="kpi-value">{{(analytics()!.avgRating ?? 0) | number:'1.1-1'}}</span>
+          <span class="kpi-sub">/ 5.0</span>
+        </div>
+      </div>
+
+      <!-- Revenue chart -->
+      <div class="chart-card">
+        <div class="chart-title">Daily Revenue</div>
+        <div class="bar-chart">
+          @for (w of analytics()!.weeklyRevenue; track w.day) {
+            <div class="bar-col">
+              <div class="bar-fill" [style.height.px]="revenueBarHeight(w.revenue)" title="₹{{w.revenue | number:'1.0-0'}}"></div>
+              <span class="bar-label">{{w.day}}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Orders chart -->
+      <div class="chart-card">
+        <div class="chart-title">Daily Orders</div>
+        <div class="bar-chart">
+          @for (w of analytics()!.weeklyOrders; track w.day) {
+            <div class="bar-col">
+              <div class="bar-fill bar-fill--orders" [style.height.px]="ordersBarHeight(w.orderCount)" title="{{w.orderCount}} orders"></div>
+              <span class="bar-label">{{w.day}}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -10,18 +10,322 @@
   padding: 0 24px 32px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
-.segments-list {
+.saving-bar {
+  padding: 8px 14px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6366f1;
+  text-align: center;
+}
+
+// ── Tree container ────────────────────────────────────────────────────────────
+
+.tree {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--bdr);
   border-radius: 12px;
   overflow: hidden;
   background: var(--bg3);
+}
 
-  app-rich-list-item:not(:last-child) {
-    border-bottom: 1px solid var(--bdr);
+// ── Row ───────────────────────────────────────────────────────────────────────
+
+.seg-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px 11px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--bdr);
+  position: relative;
+  cursor: default;
+  transition: background 0.12s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--bg2); }
+
+  // child rows are slightly different background
+  &.seg-row--child {
+    background: color-mix(in srgb, var(--bg2) 40%, var(--bg3));
+
+    &:hover {
+      background: color-mix(in srgb, var(--bg2) 70%, var(--bg3));
+    }
   }
+
+  // dragging state
+  &.is-dragging {
+    opacity: 0.35;
+    background: var(--bg2);
+  }
+
+  // drop indicator — top edge
+  &.drag-over-before::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 8px;
+    right: 8px;
+    height: 2px;
+    background: #6366f1;
+    border-radius: 2px;
+    z-index: 2;
+  }
+
+  // drop indicator — bottom edge
+  &.drag-over-after::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 8px;
+    right: 8px;
+    height: 2px;
+    background: #6366f1;
+    border-radius: 2px;
+    z-index: 2;
+  }
+}
+
+// ── Indent guide (depth lines on the left) ────────────────────────────────────
+
+.indent-guide {
+  flex-shrink: 0;
+  display: block;
+  height: 100%;
+  position: relative;
+
+  // vertical connecting line for each depth level
+  &::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--depth, 1) * 24px - 12px);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--bdr);
+  }
+}
+
+// ── Drag handle ───────────────────────────────────────────────────────────────
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  color: var(--t3);
+  cursor: grab;
+  transition: color 0.1s, background 0.1s;
+
+  &:hover {
+    color: var(--t2);
+    background: var(--bdr);
+  }
+
+  &:active { cursor: grabbing; }
+}
+
+// ── Priority tag ──────────────────────────────────────────────────────────────
+
+.priority-tag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+
+.seg-avatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+// ── Info ──────────────────────────────────────────────────────────────────────
+
+.seg-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.seg-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seg-desc {
+  font-size: 11px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+.seg-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.seg-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t3);
+
+  svg { opacity: 0.7; }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+
+.seg-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--bdr);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--t2);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+
+  svg { flex-shrink: 0; }
+
+  &:hover {
+    background: var(--bg2);
+    color: var(--t1);
+  }
+
+  &.action-btn--child {
+    color: #6366f1;
+    border-color: rgba(99, 102, 241, 0.3);
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+  }
+
+  &.action-btn--edit {
+    padding: 4px 7px;
+
+    &:hover {
+      color: #3b82f6;
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(59, 130, 246, 0.07);
+    }
+  }
+
+  &.action-btn--delete {
+    padding: 4px 7px;
+
+    &:hover {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.07);
+    }
+  }
+
+}
+
+// ── Expand / collapse button (far right) ─────────────────────────────────────
+
+.expand-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  margin-left: 4px;
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--t3);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+  min-width: 38px;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+
+  svg {
+    transition: transform 0.22s ease;
+    flex-shrink: 0;
+  }
+
+  &[disabled] {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  &.expand-btn--active {
+    cursor: pointer;
+    color: var(--t2);
+    border-color: var(--bdr);
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.08);
+      color: #6366f1;
+      border-color: rgba(99, 102, 241, 0.35);
+    }
+  }
+
+  &.expand-btn--open svg {
+    transform: rotate(180deg);
+  }
+}
+
+.expand-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: inherit;
 }

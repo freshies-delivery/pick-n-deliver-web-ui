@@ -8,6 +8,54 @@
 
   <app-stats-strip [stats]="statsStrip()" />
 
+  <!-- CLIENT SEARCH -->
+  <div class="cl-search-wrap">
+    <div class="cls-row" [class.focused]="searchFocused()" [class.has-value]="searchQuery().length > 0">
+      <svg class="cls-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="6.5" cy="6.5" r="5"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
+      </svg>
+      <input class="cls-input" type="text" autocomplete="off"
+             placeholder="Search clients by name or ID…"
+             [value]="searchQuery()"
+             (input)="onSearchInput($any($event.target).value)"
+             (focus)="onSearchFocus()"
+             (blur)="onSearchBlur()" />
+      @if (searchLoading()) {
+        <div class="cls-spinner"></div>
+      }
+      @if (searchQuery().length > 0 && !searchLoading()) {
+        <button class="cls-clear" (click)="clearSearch()" aria-label="Clear">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>
+          </svg>
+        </button>
+      }
+    </div>
+
+    @if (showSuggestions() && suggestions().length > 0) {
+      <div class="cls-dropdown">
+        @for (c of suggestions(); track c.clientId) {
+          <div class="cls-item" (mousedown)="selectClient(c)">
+            <div class="cls-av">{{ getInitials(c.name) }}</div>
+            <div class="cls-info">
+              <div class="cls-name" [innerHTML]="highlightMatch(c.name, searchQuery())"></div>
+              <div class="cls-meta">#{{ c.clientId }}
+                @if (c.totalOutlets) { · {{ c.totalOutlets }} outlets }
+                @if (c.segmentName) { · {{ c.segmentName }} }
+              </div>
+            </div>
+            @if (c.segmentName) {
+              <span class="cls-seg">{{ c.segmentName }}</span>
+            }
+            <svg class="cls-arrow" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M6 4l4 4-4 4"/>
+            </svg>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
   <!-- Segment Tabs — Row 1: root segments -->
   <div class="seg-tabs-wrap">
     <div class="seg-tabs">
@@ -108,16 +156,6 @@
 
   <!-- Toolbar -->
   <div class="toolbar">
-    <div class="search-box">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-        <circle cx="6.5" cy="6.5" r="5"/>
-        <line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
-      </svg>
-      <input type="text"
-             placeholder="Search clients…"
-             [value]="searchQuery()"
-             (input)="searchQuery.set($any($event.target).value)" />
-    </div>
     <button class="btn-ghost-sm" (click)="toggleAll()">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
         @if (allExpanded()) {
@@ -178,6 +216,14 @@
             }
 
             <div class="cr-actions" (click)="$event.stopPropagation()">
+              <button class="act-btn" title="Dashboard" (click)="goToClientDashboard(client, $event)">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="5" height="5" rx="1"/>
+                  <rect x="9" y="2" width="5" height="5" rx="1"/>
+                  <rect x="2" y="9" width="5" height="5" rx="1"/>
+                  <rect x="9" y="9" width="5" height="5" rx="1"/>
+                </svg>
+              </button>
               <button class="act-btn" title="Edit" (click)="openEditDialog(client, $event)">
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M11.5 2.5a2.121 2.121 0 013 3L5 15H2v-3L11.5 2.5z"/>

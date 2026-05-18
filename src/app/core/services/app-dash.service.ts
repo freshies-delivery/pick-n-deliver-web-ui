@@ -19,8 +19,9 @@ export class AppDashService {
   }
 
   // CLIENTS
-  getClients(page = 0, size = 20, locationIds?: number[]): Observable<any> {
+  getClients(page = 0, size = 20, locationIds?: number[], search?: string): Observable<any> {
     let p = new HttpParams().set('page', page).set('size', size);
+    if (search) p = p.set('search', search);
     if (locationIds && locationIds.length > 0) {
       locationIds.forEach(id => p = p.append('locationIds', String(id)));
     }
@@ -43,9 +44,10 @@ export class AppDashService {
   }
 
   // OUTLETS
-  getOutlets(clientId?: number, page = 0, size = 20, locationIds?: number[]): Observable<any> {
+  getOutlets(clientId?: number, page = 0, size = 20, locationIds?: number[], search?: string): Observable<any> {
     let p = new HttpParams().set('page', page).set('size', size);
-    if (clientId) p = p.set('clientId', clientId);
+    if (clientId)   p = p.set('clientId', clientId);
+    if (search)     p = p.set('search', search);
     if (locationIds && locationIds.length > 0) {
       locationIds.forEach(id => p = p.append('locationIds', String(id)));
     }
@@ -141,7 +143,57 @@ export class AppDashService {
   deleteSegment(id: number): Observable<any> {
     return this.http.delete<any>(`${BASE}/segments/${id}`);
   }
+  reorderSegments(updates: { segmentId: number; priority: number }[]): Observable<any> {
+    return this.http.put<any>(`${BASE}/segments/reorder`, updates);
+  }
   assignClientToSegment(segmentId: number, clientId: number): Observable<any> {
     return this.http.put<any>(`${BASE}/segments/${segmentId}/clients/${clientId}`, null);
+  }
+
+  // CLIENT DETAIL
+  getClientDetail(id: number): Observable<any> {
+    return this.http.get<any>(`${BASE}/clients/${id}`);
+  }
+  getClientDashboard(id: number): Observable<any> {
+    return this.http.get<any>(`${BASE}/clients/${id}/dashboard`);
+  }
+  getClientOrders(id: number, page = 0, size = 20, status?: string, outletId?: number): Observable<any> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (status)   p = p.set('status', status);
+    if (outletId) p = p.set('outletId', outletId);
+    return this.http.get<any>(`${BASE}/clients/${id}/orders`, { params: p });
+  }
+  getClientRatings(id: number, page = 0, size = 20, outletId?: number, score?: number): Observable<any> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (outletId) p = p.set('outletId', outletId);
+    if (score)    p = p.set('score', score);
+    return this.http.get<any>(`${BASE}/clients/${id}/ratings`, { params: p });
+  }
+  getClientRatingSummary(id: number): Observable<any> {
+    return this.http.get<any>(`${BASE}/clients/${id}/ratings/summary`);
+  }
+  getClientAnalytics(id: number, range = '7d'): Observable<any> {
+    return this.http.get<any>(`${BASE}/clients/${id}/analytics`, { params: { range } });
+  }
+
+  // USERS
+  getUsers(page = 0, size = 20, search?: string): Observable<any> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (search) p = p.set('search', search);
+    return this.http.get<any>(`${BASE}/users`, { params: p });
+  }
+  getUserDetail(id: number): Observable<any> {
+    return this.http.get<any>(`${BASE}/users/${id}`);
+  }
+  getUserDashboard(id: number): Observable<any> {
+    return this.http.get<any>(`${BASE}/users/${id}/dashboard`);
+  }
+  getUserOrders(id: number, page = 0, size = 20, status?: string): Observable<any> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (status) p = p.set('status', status);
+    return this.http.get<any>(`${BASE}/users/${id}/orders`, { params: p });
+  }
+  getUserRatings(id: number, page = 0, size = 10): Observable<any> {
+    return this.http.get<any>(`${BASE}/users/${id}/ratings`, { params: { page, size } });
   }
 }

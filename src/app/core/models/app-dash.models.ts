@@ -108,20 +108,28 @@ export interface AppDashItemDto {
 export interface AppDashRatingDto {
   ratingId:      number;
   userId?:       number;
-  targetType:    string;
-  targetId:      number;
+  targetType?:   string;
+  targetId?:     number;
   score:         number;
   comment?:      string;
   createdAt?:    string;
   userName?:     string;
   userInitials?: string;
+  outletName?:   string;
 }
 
 export interface AppDashRatingSummaryDto {
-  avgRating:     number;
-  totalReviews:  number;
-  breakdown:     Record<number, number>;
-  recentReviews: AppDashRatingDto[];
+  outletId?:       number;
+  avgRating?:      number;
+  totalRatings?:   number;
+  totalReviews?:   number;
+  fiveStarCount?:  number;
+  fourStarCount?:  number;
+  threeStarCount?: number;
+  twoStarCount?:   number;
+  oneStarCount?:   number;
+  breakdown?:      Record<number, number>;
+  recentReviews?:  AppDashRatingDto[];
 }
 
 export interface AppDashLiveOrderDto {
@@ -236,4 +244,88 @@ export interface AppDashClientStatsDto {
   totalOutlets:   number;
   totalSegments:  number;
   unassigned:     number;
+}
+
+export interface AppDashOrderRowDto {
+  orderId:       number;
+  orderCode:     string;
+  outletName?:   string;
+  outletInitials?: string;
+  clientName?:   string;
+  itemCount:     number;
+  totalAmount:   number;
+  statusCode:    number;
+  statusLabel:   string;
+  createdTime?:  string;
+}
+
+export interface AppDashWeeklyTrendDto {
+  day:        string;
+  revenue:    number;
+  orderCount: number;
+}
+
+export interface AppDashOutletTopRowDto {
+  outletId:        number;
+  name:            string;
+  initials:        string;
+  ordersThisMonth: number;
+  maxOrders?:      number;
+}
+
+export interface AppDashClientDashboardDto {
+  clientId:      number;
+  totalOrders:   number;
+  totalRevenue:  number;
+  avgRating?:    number;
+  activeOutlets: number;
+  recentOrders:  AppDashOrderRowDto[];
+  topOutlets:    AppDashOutletTopRowDto[];
+  ratingSummary: AppDashRatingSummaryDto;
+  weeklyRevenue: AppDashWeeklyTrendDto[];
+}
+
+export interface AppDashClientAnalyticsDto {
+  range:         string;
+  ordersTotal:   number;
+  revenueTotal:  number;
+  avgRating?:    number;
+  ordersTrend:   number;
+  revenueTrend:  number;
+  avgOrderValue: number;
+  weeklyOrders:  AppDashWeeklyTrendDto[];
+  weeklyRevenue: AppDashWeeklyTrendDto[];
+  deliveryRate?: number;
+}
+
+export interface AppDashUserDetailDto {
+  userId:         number;
+  name:           string;
+  email?:         string;
+  phone?:         string;
+  status?:        string;
+  createdTime?:   string;
+  totalOrders:    number;
+  totalSpent:     number;
+  avgRatingGiven: number;
+  savedAddresses: number;
+}
+
+export interface AppDashUserTopItemDto {
+  itemId:     number;
+  name:       string;
+  outletName?: string;
+  orderCount: number;
+  maxOrders?: number;
+}
+
+export interface AppDashUserDashboardDto {
+  totalOrders:       number;
+  totalSpent:        number;
+  avgRatingGiven:    number;
+  savedAddresses:    number;
+  spendingChart:     AppDashWeeklyTrendDto[];
+  recentOrders:      AppDashOrderRowDto[];
+  mostOrderedItems:  AppDashUserTopItemDto[];
+  ratingSummary:     AppDashRatingSummaryDto;
 }

@@ -6,9 +6,13 @@ import {
   computed,
   signal,
   inject,
+  DestroyRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, Subject, EMPTY } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AppDashService } from '../../core/services/app-dash.service';
 
 import { PageHeaderAction, PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
@@ -112,6 +116,15 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   private readonly modalService = inject(ModalService);
   private readonly toastService = inject(ToastService);
+  private readonly dashService  = inject(AppDashService);
+  private readonly destroyRef   = inject(DestroyRef);
+
+  readonly suggestions     = signal<any[]>([]);
+  readonly showSuggestions = signal(false);
+  readonly searchLoading   = signal(false);
+  readonly searchFocused   = signal(false);
+
+  private readonly searchSubject$ = new Subject<string>();
 
   constructor(
     private readonly userService: UserService,
@@ -124,6 +137,26 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.fabActionService.registerAction('createUser', () => this.openCreateDialog());
     this.fabActionService.setFabAction(() => this.openCreateDialog());
     this.loadUsers();
+
+    this.searchSubject$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(q => {
+        if (!q.trim()) {
+          this.suggestions.set([]);
+          this.showSuggestions.set(false);
+          return EMPTY;
+        }
+        this.searchLoading.set(true);
+        return this.dashService.getUsers(0, 8, q)
+          .pipe(finalize(() => this.searchLoading.set(false)));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(res => {
+      const list = Array.isArray(res) ? res : (res?.content ?? []);
+      this.suggestions.set(list);
+      this.showSuggestions.set(list.length > 0);
+    });
   }
 
   ngOnDestroy(): void {
@@ -177,6 +210,50 @@ export class UserListComponent implements OnInit, OnDestroy {
     if (!user.userId) return;
     this.userContext.setUser(user.userId, user.name ?? null);
     this.router.navigate(['/dashboard/users', user.userId, 'overview']);
+  }
+
+  onSearchInput(value: string): void {
+    this.searchQuery.set(value);
+    this.currentPage.set(1);
+    this.searchSubject$.next(value);
+  }
+
+  onSearchFocus(): void {
+    this.searchFocused.set(true);
+    if (this.suggestions().length > 0) this.showSuggestions.set(true);
+  }
+
+  onSearchBlur(): void {
+    setTimeout(() => {
+      this.searchFocused.set(false);
+      this.showSuggestions.set(false);
+    }, 200);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.suggestions.set([]);
+    this.showSuggestions.set(false);
+    this.currentPage.set(1);
+    this.searchSubject$.next('');
+  }
+
+  selectUser(user: any): void {
+    this.showSuggestions.set(false);
+    const id = user.userId ?? user.id;
+    if (!id) return;
+    this.userContext.setUser(id, user.name ?? null);
+    this.router.navigate(['/dashboard/users', id, 'overview']);
+  }
+
+  getInitials(name: string): string {
+    return (name ?? '').split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
+  }
+
+  highlightMatch(text: string, query: string): string {
+    if (!query.trim() || !text) return text ?? '';
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark class="hl">$1</mark>');
   }
 
   userStats(user: UserDto): ListStat[] {

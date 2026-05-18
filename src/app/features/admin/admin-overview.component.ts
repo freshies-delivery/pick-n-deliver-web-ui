@@ -13,6 +13,11 @@ import { AppDashService } from '../../core/services/app-dash.service';
 
 Chart.register(...registerables);
 
+const SEGMENT_COLORS = [
+  '#6366F1', '#22C55E', '#F59E0B', '#3B82F6', '#EC4899',
+  '#8B5CF6', '#14B8A6', '#F97316', '#06B6D4', '#84CC16',
+];
+
 @Component({
   selector: 'app-admin-overview',
   standalone: true,
@@ -161,7 +166,11 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
         consumerOrders: d.orderCount ?? 0,
         storeOrders:    0,
       })),
-      ordersByCategory: [],
+      ordersByCategory: (raw?.ordersBySegment ?? []).map((s: any, i: number) => ({
+        category: s.name  ?? `Segment ${i + 1}`,
+        count:    s.count ?? 0,
+        color:    SEGMENT_COLORS[i % SEGMENT_COLORS.length],
+      })),
       revenueByCity: (raw?.revenueByCity ?? []).map((c: any) => ({
         city:    c.city,
         revenue: c.revenue,

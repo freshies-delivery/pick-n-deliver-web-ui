@@ -30,119 +30,47 @@
     <!-- Client View section -->
     <div class="nav-section-label">Client View</div>
 
-    <div class="nav-item" [class.active]="isRouteActive('/dashboard/clients')" (click)="navigateClientRoot()">
+    <div class="nav-item" [class.active]="isRouteActive('/dashboard/clients/explore')" (click)="navigateExplore()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6.5" cy="6.5" r="5"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
+        </svg>
+      </div>
+      <span class="nav-label">Explore</span>
+    </div>
+
+    <div class="nav-item" [class.active]="isRouteActive('/dashboard/clients/list')" (click)="navigateClientList()">
       <div class="nav-icon">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="2" width="5" height="5" rx="1.5"/><rect x="9" y="2" width="5" height="5" rx="1.5"/>
           <rect x="2" y="9" width="5" height="5" rx="1.5"/><rect x="9" y="9" width="5" height="5" rx="1.5"/>
         </svg>
       </div>
-      <span class="nav-label">Client List</span>
+      <span class="nav-label">All Clients</span>
       @if (clientCount() > 0) {
         <span class="nav-badge">{{ clientCount() }}</span>
       }
     </div>
 
-    <div class="nav-item nav-item--child" [class.active]="hasClient() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets')"
-         [class.disabled]="!hasClient()" (click)="navigateOutletList()">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 13V6l6-4 6 4v7"/><path d="M6 13v-3h4v3"/>
-        </svg>
-      </div>
-      <span class="nav-label">Outlet List</span>
-    </div>
-
-    <!-- Outlet Details sub-section -->
-    <div class="nav-item nav-item--child" [class.disabled]="!hasOutlet()" (click)="toggle('outletDetails')">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 2"/>
-        </svg>
-      </div>
-      <span class="nav-label">Outlet Details</span>
-      <svg class="chevron" [class.open]="expanded().outletDetails" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-        <path d="M3 4.5l3 3 3-3"/>
-      </svg>
-    </div>
-
-    @if (expanded().outletDetails) {
-      <div class="nav-item nav-item--child nav-item--sub"
-           [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories')"
-           [class.disabled]="!hasOutlet()" (click)="navigateCategories()">
-        <div class="nav-icon">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4h10M3 8h7M3 12h5"/></svg>
-        </div>
-        <span class="nav-label">Categories</span>
-      </div>
-
-      <div class="nav-item nav-item--child nav-item--sub"
-           [class.active]="hasCategory() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/categories/' + hierarchy().categoryId + '/items')"
-           [class.disabled]="!hasCategory()" (click)="navigateItems()">
-        <div class="nav-icon">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="4" height="4" rx="1"/><rect x="10" y="2" width="4" height="4" rx="1"/>
-            <rect x="2" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/>
-          </svg>
-        </div>
-        <span class="nav-label">Items</span>
-      </div>
-
-      <div class="nav-item nav-item--child nav-item--sub"
-           [class.active]="hasOutlet() && isRouteActive('/dashboard/clients/' + hierarchy().clientId + '/outlets/' + hierarchy().outletId + '/ratings')"
-           [class.disabled]="!hasOutlet()" (click)="navigateRatings()">
-        <div class="nav-icon">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/>
-          </svg>
-        </div>
-        <span class="nav-label">Ratings</span>
-      </div>
-    }
-
     <!-- User View section -->
     <div class="nav-section-label">User View</div>
 
-    <div class="nav-item" [class.active]="isRouteActive('/dashboard/users')" (click)="navigateUserList()">
+    <div class="nav-item" [class.active]="isRouteActive('/dashboard/users/explore')" (click)="navigateUserExplore()">
+      <div class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6.5" cy="6.5" r="5"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
+        </svg>
+      </div>
+      <span class="nav-label">Explore</span>
+    </div>
+
+    <div class="nav-item" [class.active]="isRouteActive('/dashboard/users/list')" (click)="navigateAllUsers()">
       <div class="nav-icon">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="8" cy="5.5" r="2.5"/><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5"/>
         </svg>
       </div>
-      <span class="nav-label">User List</span>
-    </div>
-
-    <div class="nav-item nav-item--child"
-         [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/orders')"
-         [class.disabled]="!hasUser()" (click)="navigateUserOrders()">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 10h4"/>
-        </svg>
-      </div>
-      <span class="nav-label">Orders</span>
-    </div>
-
-    <div class="nav-item nav-item--child"
-         [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/addresses')"
-         [class.disabled]="!hasUser()" (click)="navigateUserAddresses()">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <path d="M8 2C6 2 4.5 3.5 4.5 5.5c0 3 3.5 7.5 3.5 7.5s3.5-4.5 3.5-7.5C11.5 3.5 10 2 8 2z"/><circle cx="8" cy="5.5" r="1.5"/>
-        </svg>
-      </div>
-      <span class="nav-label">Addresses</span>
-    </div>
-
-    <div class="nav-item nav-item--child"
-         [class.active]="hasUser() && isRouteActive('/dashboard/users/' + user().userId + '/ratings')"
-         [class.disabled]="!hasUser()" (click)="navigateUserRatings()">
-      <div class="nav-icon">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/>
-        </svg>
-      </div>
-      <span class="nav-label">Ratings</span>
+      <span class="nav-label">All Users</span>
     </div>
 
     <!-- Admin Panel section -->

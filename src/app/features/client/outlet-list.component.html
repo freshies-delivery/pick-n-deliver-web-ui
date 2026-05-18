@@ -6,6 +6,14 @@
     [actions]="headerActions"
   />
 
+  <div class="client-tabs">
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'dashboard']" routerLinkActive="active">Dashboard</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'outlets']" routerLinkActive="active">Outlets</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'orders']" routerLinkActive="active">Orders</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'analytics']" routerLinkActive="active">Analytics</a>
+  </div>
+
   <app-stats-strip [stats]="statsStrip()" />
 
   <app-page-toolbar

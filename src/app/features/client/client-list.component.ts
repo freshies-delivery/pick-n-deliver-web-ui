@@ -1,13 +1,13 @@
 import {
   Component, OnDestroy, OnInit,
   ChangeDetectionStrategy,
-  WritableSignal, computed, signal, inject
+  WritableSignal, computed, signal, inject, DestroyRef
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { forkJoin, finalize, Subscription } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { forkJoin, finalize, Subscription, Subject, EMPTY } from 'rxjs';
+import { switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
@@ -62,6 +62,14 @@ export class ClientListComponent implements OnInit, OnDestroy {
   readonly expandedClients = signal<Set<number>>(new Set());
   readonly searchQuery = signal('');
   readonly allExpanded = signal(false);
+
+  readonly suggestions     = signal<any[]>([]);
+  readonly showSuggestions = signal(false);
+  readonly searchLoading   = signal(false);
+  readonly searchFocused   = signal(false);
+
+  private readonly searchSubject$ = new Subject<string>();
+  private readonly destroyRef     = inject(DestroyRef);
 
   private readonly outletsCache = new Map<number, WritableSignal<any[]>>();
   private readonly loadingOutlets = new Map<number, WritableSignal<boolean>>();
@@ -195,6 +203,26 @@ export class ClientListComponent implements OnInit, OnDestroy {
         this.toastService.error('Unable to load data');
         this.loading.set(false);
       }
+    });
+
+    this.searchSubject$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(q => {
+        if (!q.trim()) {
+          this.suggestions.set([]);
+          this.showSuggestions.set(false);
+          return EMPTY;
+        }
+        this.searchLoading.set(true);
+        return this.dashService.getClients(0, 8, undefined, q)
+          .pipe(finalize(() => this.searchLoading.set(false)));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(res => {
+      const list = Array.isArray(res) ? res : (res?.content ?? []);
+      this.suggestions.set(list);
+      this.showSuggestions.set(list.length > 0);
     });
   }
 
@@ -378,6 +406,13 @@ export class ClientListComponent implements OnInit, OnDestroy {
       });
   }
 
+  goToClientDashboard(client: any, event?: Event): void {
+    event?.stopPropagation();
+    if (!client.clientId) return;
+    this.hierarchyState.setClient(client.clientId, client.name);
+    this.router.navigate(['/dashboard/clients', client.clientId, 'dashboard']);
+  }
+
   goToOutlet(client: any, outlet: any, event?: Event): void {
     event?.stopPropagation();
     if (!outlet.outletId || !client.clientId) return;
@@ -445,6 +480,43 @@ export class ClientListComponent implements OnInit, OnDestroy {
           error: () => this.toastService.error('Failed to delete outlet')
         });
       });
+  }
+
+  onSearchInput(value: string): void {
+    this.searchQuery.set(value);
+    this.searchSubject$.next(value);
+  }
+
+  onSearchFocus(): void {
+    this.searchFocused.set(true);
+    if (this.suggestions().length > 0) this.showSuggestions.set(true);
+  }
+
+  onSearchBlur(): void {
+    setTimeout(() => {
+      this.searchFocused.set(false);
+      this.showSuggestions.set(false);
+    }, 200);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.suggestions.set([]);
+    this.showSuggestions.set(false);
+    this.searchSubject$.next('');
+  }
+
+  selectClient(client: any): void {
+    this.showSuggestions.set(false);
+    if (!client.clientId) return;
+    this.hierarchyState.setClient(client.clientId, client.name);
+    this.router.navigate(['/dashboard/clients', client.clientId, 'dashboard']);
+  }
+
+  highlightMatch(text: string, query: string): string {
+    if (!query.trim() || !text) return text ?? '';
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark class="hl">$1</mark>');
   }
 
   readonly shimmerRows = [1, 2, 3];

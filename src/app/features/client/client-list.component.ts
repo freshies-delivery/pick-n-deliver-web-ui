@@ -127,8 +127,8 @@ export class ClientListComponent implements OnInit, OnDestroy {
 
   readonly statsStrip = computed((): StripStat[] => {
     const total      = this.totalClients();
-    const unassigned = this.unassignedCount();
-    const assigned   = total - unassigned;
+    const assigned   = new Set(this.segments().flatMap(s => s.clientIds ?? [])).size;
+    const unassigned = total - assigned;
     return [
       { value: total,                   label: 'Total Clients', iconPath: 'M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z',                            iconBg: 'rgba(99,102,241,0.15)',  iconColor: '#818CF8' },
       { value: assigned,                label: 'Assigned',      iconPath: 'M13 4L6 11 3 8',                                                            iconBg: 'rgba(34,197,94,0.12)',   iconColor: '#86EFAC', valueColor: '#86EFAC' },
@@ -169,7 +169,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
       switchMap(ids => {
         const locIds = ids.length > 0 ? ids : undefined;
         return forkJoin({
-          clients:  this.dashService.getClients(0, 200, locIds),
+          clients:  this.dashService.getClients(0, 2000, locIds),
           segments: this.dashService.getSegments()
         });
       })
@@ -240,7 +240,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
     this.outletsCache.clear();
     this.loadingOutlets.clear();
     forkJoin({
-      clients:  this.dashService.getClients(0, 200, locIds),
+      clients:  this.dashService.getClients(0, 2000, locIds),
       segments: this.dashService.getSegments()
     }).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: ({ clients, segments }) => {

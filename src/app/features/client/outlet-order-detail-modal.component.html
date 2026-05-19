@@ -174,26 +174,36 @@
           }
 
           <!-- Payment -->
-          @if (detail.paymentStatus || detail.paymentProvider) {
-            <div class="od-section">
-              <div class="od-sec-title">Payment</div>
-              @if (detail.paymentStatus) {
-                <div class="od-row"><span class="od-key">Status</span><span class="od-val">{{ detail.paymentStatus }}</span></div>
-              }
+          <div class="od-section">
+            <div class="od-sec-title">Payment</div>
+            @if (!detail.paymentStatus && !detail.paymentProvider && detail.paymentAmount == null && !detail.paymentId) {
+              <div class="od-pay-empty">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                  <rect x="1" y="4" width="14" height="9" rx="2"/>
+                  <path d="M1 7h14"/>
+                  <path d="M5 10.5h2"/>
+                </svg>
+                No payment recorded
+              </div>
+            } @else {
+              <div class="od-pay-top">
+                @if (detail.paymentStatus) {
+                  <span class="od-pay-status od-pay-status--{{ detail.paymentStatus.toLowerCase() }}">
+                    {{ detail.paymentStatus }}
+                  </span>
+                }
+                @if (detail.paymentAmount != null) {
+                  <span class="od-pay-amount">{{ fmt(detail.paymentAmount) }}{{ detail.paymentCurrency ? ' ' + detail.paymentCurrency : '' }}</span>
+                }
+              </div>
               @if (detail.paymentProvider) {
                 <div class="od-row"><span class="od-key">Provider</span><span class="od-val">{{ detail.paymentProvider }}</span></div>
-              }
-              @if (detail.paymentAmount != null) {
-                <div class="od-row">
-                  <span class="od-key">Amount</span>
-                  <span class="od-val">{{ fmt(detail.paymentAmount) }}{{ detail.paymentCurrency ? ' ' + detail.paymentCurrency : '' }}</span>
-                </div>
               }
               @if (detail.paymentId) {
                 <div class="od-row"><span class="od-key">Ref ID</span><span class="od-val od-mono">{{ detail.paymentId }}</span></div>
               }
-            </div>
-          }
+            }
+          </div>
 
         </div>
       </div>

@@ -15,6 +15,7 @@ import { DeliveryPartnerFormModalComponent } from '../../features/admin/delivery
 import { AddressFormModalComponent }         from '../../features/user/address-form-modal.component';
 import { OutletOrderFormModalComponent }       from '../../features/client/outlet-order-form-modal.component';
 import { OutletOrderDetailModalComponent }     from '../../features/client/outlet-order-detail-modal.component';
+import { OrderTrackingModalComponent }         from '../../features/client/order-tracking-modal.component';
 
 import { ClientDto }   from '../../features/client/services/client.service';
 import { OutletDto }   from '../../features/client/services/outlet.service';
@@ -141,6 +142,10 @@ export class ModalService {
 
   openViewOrder(orderId: number): Observable<void> {
     return this.dialog.open(OutletOrderDetailModalComponent, { ...BASE, width: '1100px' , data: { orderId } }).afterClosed();
+  }
+
+  openOrderTracking(orderId: number): Observable<void> {
+    return this.dialog.open(OrderTrackingModalComponent, { ...BASE, width: '520px', data: { orderId } }).afterClosed();
   }
 
   // ── Confirm ─────────────────────────────────────────────────────────────

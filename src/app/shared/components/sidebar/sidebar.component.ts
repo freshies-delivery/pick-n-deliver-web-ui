@@ -25,11 +25,10 @@ export class SidebarComponent {
     toObservable(this.locationService.selectedIds).pipe(
       switchMap(ids => {
         const locIds = ids.length > 0 ? ids : undefined;
-        return this.dashService.getClients(0, 200, locIds);
+        return this.dashService.getClients(0, 1, locIds);
       })
     ).subscribe(res => {
-      const total = Array.isArray(res) ? res.length : (res?.totalElements ?? res?.content?.length ?? 0);
-      this.clientCount.set(total);
+      this.clientCount.set(res?.totalElements ?? 0);
     });
 
     this.notificationService.list().subscribe((n) =>

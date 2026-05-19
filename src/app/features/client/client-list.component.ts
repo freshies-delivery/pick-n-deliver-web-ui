@@ -56,6 +56,7 @@ interface SegmentWithClients extends Segment {
 export class ClientListComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly clients = signal<any[]>([]);
+  readonly totalClients = signal(0);
   readonly segments = signal<SegmentWithClients[]>([]);
   readonly activeSegmentId = signal<string>('all');
   readonly activeRootId    = signal<string | null>(null);
@@ -125,7 +126,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
   });
 
   readonly statsStrip = computed((): StripStat[] => {
-    const total      = this.clients().length;
+    const total      = this.totalClients();
     const unassigned = this.unassignedCount();
     const assigned   = total - unassigned;
     return [
@@ -176,6 +177,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
       next: ({ clients, segments }) => {
         const clientList = Array.isArray(clients) ? clients : (clients?.content ?? []);
         this.clients.set(clientList);
+        this.totalClients.set(Array.isArray(clients) ? clients.length : (clients?.totalElements ?? clientList.length));
 
         const rootSegs = (segments ?? []).filter((s: any) => !s.parentId);
         const childSegs = (segments ?? []).filter((s: any) => s.parentId);
@@ -244,6 +246,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
       next: ({ clients, segments }) => {
         const clientList = Array.isArray(clients) ? clients : (clients?.content ?? []);
         this.clients.set(clientList);
+        this.totalClients.set(Array.isArray(clients) ? clients.length : (clients?.totalElements ?? clientList.length));
 
         const rootSegs = (segments ?? []).filter((s: any) => !s.parentId);
         const childSegs = (segments ?? []).filter((s: any) => s.parentId);

@@ -139,6 +139,16 @@ export class OutletOrdersComponent implements OnChanges {
     this.modalService.openViewOrder(orderId).subscribe();
   }
 
+  trackOrder(orderId: number | undefined): void {
+    if (!orderId) return;
+    this.modalService.openOrderTracking(orderId).subscribe();
+  }
+
+  isActive(status?: string): boolean {
+    const s = (status ?? '').toUpperCase();
+    return s === 'PENDING' || s === 'IN_PROGRESS';
+  }
+
   confirmDelete(order: OutletOrderDto): void {
     if (!order.orderId) return;
     this.modalService.openConfirm({ title: 'Delete Order', message: `Delete Order #${order.orderId}? This cannot be undone.` })

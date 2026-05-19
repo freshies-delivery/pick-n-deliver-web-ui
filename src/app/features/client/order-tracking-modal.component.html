@@ -1,0 +1,107 @@
+<div class="otm-wrap">
+
+  <!-- Header -->
+  <div class="otm-header">
+    <div class="otm-header-left">
+      <div class="otm-icon">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="otm-title">Order #{{ orderId }} — Tracking</div>
+        <div class="otm-subtitle">Live event log &amp; status history</div>
+      </div>
+    </div>
+    <div class="otm-header-right">
+      @if (connected()) {
+        <div class="otm-live-badge">
+          <span class="otm-live-dot"></span>
+          LIVE
+        </div>
+      }
+      <button class="otm-close" type="button" (click)="close()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M1 1l12 12M13 1L1 13"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Current Status Bar -->
+  <div class="otm-status-bar">
+    <span class="otm-status-label">Current Status</span>
+    <span class="otm-status-pill" [style.background]="statusColor(currentStatus()) + '22'" [style.color]="statusColor(currentStatus())">
+      {{ statusLabel(currentStatus()) }}
+    </span>
+  </div>
+
+  <!-- Body -->
+  <div class="otm-body">
+
+    @if (loading()) {
+      <div class="otm-loading">
+        @for (i of [1,2,3]; track i) {
+          <div class="otm-shimmer-row">
+            <div class="otm-shimmer-dot sk-wave"></div>
+            <div class="otm-shimmer-lines">
+              <div class="sk-wave" style="width:40%;height:12px;border-radius:4px;margin-bottom:6px"></div>
+              <div class="sk-wave" style="width:60%;height:10px;border-radius:4px"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (error()) {
+      <div class="otm-error">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="10" cy="10" r="8"/><path d="M10 6v4m0 4h.01"/>
+        </svg>
+        <span>{{ error() }}</span>
+      </div>
+    } @else if (logs().length === 0) {
+      <div class="otm-empty">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 0 2-2h2a2 2 0 0 0 2 2"/>
+        </svg>
+        <p>No history yet</p>
+        <span>Events will appear here as the order progresses</span>
+      </div>
+    } @else {
+      <div class="otm-timeline">
+        @for (log of logs(); track log.archiveId; let last = $last; let idx = $index) {
+          <div class="otm-event" [class.otm-event--live]="log.live">
+            <div class="otm-event-track">
+              <div class="otm-event-dot" [style.background]="statusColor(log.status)" [class.otm-event-dot--live]="log.live"></div>
+              @if (!last) { <div class="otm-event-line"></div> }
+            </div>
+            <div class="otm-event-body">
+              <div class="otm-event-top">
+                <span class="otm-event-action">{{ actionLabel(log, idx) }}</span>
+                @if (log.status) {
+                  <span class="otm-event-status" [style.background]="statusColor(log.status) + '22'" [style.color]="statusColor(log.status)">
+                    {{ statusLabel(log.status) }}
+                  </span>
+                }
+                @if (log.live) {
+                  <span class="otm-live-tag">NEW</span>
+                }
+              </div>
+              <div class="otm-event-time">
+                {{ log.createdTime | date:'d MMM y, h:mm:ss a' }}
+              </div>
+              @if (log.partnerId) {
+                <div class="otm-event-meta">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/>
+                  </svg>
+                  Partner #{{ log.partnerId }} handling delivery
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>

@@ -185,6 +185,16 @@ export class UserOrdersComponent implements OnInit {
     this.modalService.openViewOrder(orderId).subscribe();
   }
 
+  trackOrder(orderId: number | undefined): void {
+    if (!orderId) return;
+    this.modalService.openOrderTracking(orderId).subscribe();
+  }
+
+  isActive(status?: string): boolean {
+    const s = (status ?? '').toLowerCase();
+    return s === 'pending' || s === 'in_progress' || s === 'en_route';
+  }
+
   orderInitials(order: OrderDto): string {
     return order.type?.slice(0, 2).toUpperCase() ?? 'OR';
   }

@@ -9,13 +9,50 @@
   <div class="page-content">
     <app-stats-strip [stats]="statsStrip()" />
 
-    <app-page-toolbar
-      [searchPlaceholder]="'Search by name, email or phone…'"
-      [filterOptions]="filterOptions()"
-      [activeFilter]="activeFilter()"
-      (searchChange)="searchQuery.set($event); currentPage.set(1)"
-      (filterChange)="activeFilter.set($event); currentPage.set(1)"
-    />
+    <!-- USER SEARCH -->
+    <div class="ul-search-wrap">
+      <div class="cls-row" [class.focused]="searchFocused()" [class.has-value]="searchQuery().length > 0">
+        <svg class="cls-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="6.5" cy="6.5" r="5"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
+        </svg>
+        <input class="cls-input" type="text" autocomplete="off"
+               placeholder="Search by name, email or phone…"
+               [value]="searchQuery()"
+               (input)="onSearchInput($any($event.target).value)"
+               (focus)="onSearchFocus()"
+               (blur)="onSearchBlur()" />
+        @if (searchLoading()) {
+          <div class="cls-spinner"></div>
+        }
+        @if (searchQuery().length > 0 && !searchLoading()) {
+          <button class="cls-clear" (click)="clearSearch()" aria-label="Clear">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>
+            </svg>
+          </button>
+        }
+      </div>
+
+      @if (showSuggestions() && suggestions().length > 0) {
+        <div class="cls-dropdown">
+          @for (u of suggestions(); track u.userId) {
+            <div class="cls-item" (mousedown)="selectUser(u)">
+              <div class="cls-av" style="border-radius:50%">{{ getInitials(u.name) }}</div>
+              <div class="cls-info">
+                <div class="cls-name" [innerHTML]="highlightMatch(u.name, searchQuery())"></div>
+                <div class="cls-meta">{{ u.email }}@if (u.phone) { · {{ u.phone }} }</div>
+              </div>
+              @if (u.status) {
+                <span class="cls-seg" [class.status-active]="u.status === 'ACTIVE'" [class.status-blocked]="u.status === 'BLOCKED'">{{ u.status }}</span>
+              }
+              <svg class="cls-arrow" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M6 4l4 4-4 4"/>
+              </svg>
+            </div>
+          }
+        </div>
+      }
+    </div>
 
     @if (loading()) {
       <app-skeleton-list [rows]="8" />

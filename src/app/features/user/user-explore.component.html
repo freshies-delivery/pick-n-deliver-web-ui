@@ -1,0 +1,66 @@
+<div class="explore-page">
+
+  <div class="explore-hero">
+    <div class="hero-title">Find User</div>
+    <div class="hero-sub">Search by user ID, phone number or email</div>
+  </div>
+
+  <div class="search-card">
+
+    <div class="search-row" [class.focused]="searchFocused()">
+      <svg class="s-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="6.5" cy="6.5" r="5"/><line x1="10.5" y1="10.5" x2="14.5" y2="14.5"/>
+      </svg>
+
+      <input class="s-input" type="text" autocomplete="off"
+             placeholder="Search by ID, phone or email…"
+             [value]="searchQuery()"
+             (input)="onInput($any($event.target).value)"
+             (focus)="onFocus()"
+             (blur)="onBlur()" />
+
+      @if (searchLoading()) {
+        <div class="s-spinner"></div>
+      }
+      @if (searchQuery().length > 0 && !searchLoading()) {
+        <button class="s-clear" (click)="clear()" aria-label="Clear">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>
+          </svg>
+        </button>
+      }
+    </div>
+
+    @if (showSuggestions() && suggestions().length > 0) {
+      <div class="suggestions">
+        @for (u of suggestions(); track u.userId) {
+          <div class="sug-row" (mousedown)="selectUser(u)">
+            <div class="sug-av">{{ initials(u.name) }}</div>
+            <div class="sug-info">
+              <div class="sug-name" [innerHTML]="highlight(u.name, searchQuery())"></div>
+              <div class="sug-meta">
+                #{{ u.userId }}
+                @if (u.phone) { · {{ u.phone }} }
+                @if (u.email) { · {{ u.email }} }
+              </div>
+            </div>
+            @if (u.status) {
+              <span class="sug-tag" [class.sug-tag--active]="u.status === 'ACTIVE'">{{ u.status }}</span>
+            }
+            <svg class="sug-arrow" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M6 4l4 4-4 4"/>
+            </svg>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!searchQuery().length) {
+      <div class="search-hint">
+        Enter a user ID, phone number, or email — click a result to open their overview
+      </div>
+    }
+
+  </div>
+
+</div>

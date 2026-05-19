@@ -3,6 +3,7 @@
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
   padding: 24px;
 }
 
@@ -204,6 +205,7 @@
 }
 
 .oo-card {
+  flex-shrink: 0;
   background: var(--bg2);
   border: 1px solid var(--bdr);
   border-radius: 12px;

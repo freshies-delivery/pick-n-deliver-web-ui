@@ -50,12 +50,17 @@
       <!-- Left: Category nav -->
       <div class="cat-nav">
         @for (cat of categories(); track cat.categoryId) {
-          <div class="cn-item"
-               [class.active]="activeCatId() === cat.categoryId"
-               (click)="scrollToCategory(cat.categoryId!)">
-            <span class="cn-name">{{ cat.name }}</span>
-            <div class="cn-count">{{ cat.itemCount ?? 0 }}</div>
-          </div>
+          @if (isLoadingItems(cat.categoryId!) || getItems(cat.categoryId!).length > 0) {
+            <div class="cn-item"
+                 [class.active]="activeCatId() === cat.categoryId"
+                 (click)="scrollToCategory(cat.categoryId!)">
+              <span class="cn-name">{{ cat.name }}</span>
+              <div class="cn-count">
+                @if (isLoadingItems(cat.categoryId!)) { — }
+                @else { {{ getItems(cat.categoryId!).length }} }
+              </div>
+            </div>
+          }
         }
       </div>
 

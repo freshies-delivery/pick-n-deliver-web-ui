@@ -36,7 +36,10 @@ export class CategoryListComponent implements OnChanges, OnDestroy {
   private scrollResetTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly totalItems = computed(() =>
-    this.categories().reduce((sum, c) => sum + (c.itemCount ?? c.itemIds?.length ?? 0), 0)
+    this.categories().reduce((sum, c) => {
+      if (!c.categoryId) return sum;
+      return sum + (this.itemsCache.get(c.categoryId)?.()?.length ?? 0);
+    }, 0)
   );
 
   readonly shimmerRows = [1, 2, 3];

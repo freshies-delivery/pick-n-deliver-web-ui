@@ -6,7 +6,8 @@ import { ChartConfiguration, ChartData } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, switchMap } from 'rxjs';
 
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
+import { ModalService } from '../../core/services/modal.service';
 import { DashboardStats } from './dashboard.service';
 import { LocationService } from '../../core/services/location.service';
 import { AppDashService } from '../../core/services/app-dash.service';
@@ -26,8 +27,20 @@ const SEGMENT_COLORS = [
   styleUrl: './admin-overview.component.scss'
 })
 export class AdminOverviewComponent implements OnInit, OnDestroy {
-  private readonly dashService = inject(AppDashService);
-  readonly locationService     = inject(LocationService);
+  private readonly dashService   = inject(AppDashService);
+  private readonly modalService  = inject(ModalService);
+  readonly locationService       = inject(LocationService);
+
+  readonly headerActions: PageHeaderAction[] = [
+    {
+      label: 'Generate Report', icon: 'download', type: 'secondary',
+      action: () => this.modalService.openReport({
+        type: 'location',
+        label: 'All Locations',
+        locationIds: this.locationService.selectedIds(),
+      }).subscribe(),
+    },
+  ];
 
   readonly loading   = signal(true);
   readonly stats     = signal<DashboardStats | null>(null);

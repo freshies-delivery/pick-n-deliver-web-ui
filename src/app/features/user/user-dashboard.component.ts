@@ -6,7 +6,8 @@ import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { finalize } from 'rxjs';
 
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
+import { ModalService } from '../../core/services/modal.service';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { UserContextService } from '../../core/services/user-context.service';
 import { UserDashboardService, UserDashData } from './services/user-dashboard.service';
@@ -27,12 +28,22 @@ export class UserDashboardComponent implements OnInit {
 
   private readonly userContext    = inject(UserContextService);
   private readonly dashService    = inject(UserDashboardService);
+  private readonly modalService   = inject(ModalService);
   private readonly route          = inject(ActivatedRoute);
+
+  readonly headerActions: PageHeaderAction[] = [];
 
   constructor() {
     const id = Number(this.route.snapshot.paramMap.get('userId'));
     this.userId.set(id);
     this.userContext.setUser(id, this.userContext.state.userName);
+    this.headerActions.push({
+      label: 'Generate Report', icon: 'download', type: 'secondary',
+      action: () => this.modalService.openReport({
+        type: 'user', entityId: this.userId(),
+        label: this.userLabel(),
+      }).subscribe(),
+    });
   }
 
   ngOnInit(): void {

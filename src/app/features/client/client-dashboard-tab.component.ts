@@ -7,11 +7,12 @@ import { DecimalPipe, DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { StatsStripComponent, StripStat } from '../../shared/components/stats-strip/stats-strip.component';
 import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
 import { AppDashService } from '../../core/services/app-dash.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
+import { ModalService } from '../../core/services/modal.service';
 import {
   AppDashClientDashboardDto, AppDashOrderRowDto,
   AppDashOutletTopRowDto, AppDashWeeklyTrendDto,
@@ -67,13 +68,28 @@ export class ClientDashboardTabComponent implements OnInit {
 
   private readonly dashService   = inject(AppDashService);
   private readonly hierService   = inject(HierarchyStateService);
+  private readonly modalService  = inject(ModalService);
   private readonly route         = inject(ActivatedRoute);
   private readonly destroyRef    = inject(DestroyRef);
+
+  readonly headerActions: PageHeaderAction[] = [];
 
   constructor() {
     const id = Number(this.route.snapshot.paramMap.get('clientId'));
     this.clientId.set(id);
     this.clientName.set(this.hierService.state.clientName ?? 'Client');
+    this.headerActions.push({
+      label: 'Generate Report', icon: 'download', type: 'secondary',
+      action: () => this.openReport(),
+    });
+  }
+
+  openReport(): void {
+    this.modalService.openReport({
+      type: 'client',
+      entityId: this.clientId(),
+      label: this.clientName(),
+    }).subscribe();
   }
 
   ngOnInit(): void {

@@ -9,6 +9,7 @@ import {
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { LocationService } from '../../../core/services/location.service';
 import { Location } from '../../../core/models/location.model';
 
@@ -23,6 +24,7 @@ export class LocationDropdownComponent implements AfterViewInit {
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   readonly locationService = inject(LocationService);
+  private readonly router = inject(Router);
   private readonly el = inject(ElementRef);
 
   readonly isOpen = signal(false);
@@ -75,6 +77,7 @@ export class LocationDropdownComponent implements AfterViewInit {
     this.locationService.setSelected(this.pendingSelected());
     this.isOpen.set(false);
     this.searchQuery.set('');
+    this.router.navigate(['/dashboard']);
   }
 
   trackById(_: number, loc: Location): number {

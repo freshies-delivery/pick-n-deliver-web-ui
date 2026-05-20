@@ -12,6 +12,7 @@ import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/p
 import { CategoryDto } from './services/category.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
 import { FabActionService } from '../../core/services/fab-action.service';
+import { ModalService } from '../../core/services/modal.service';
 
 @Component({
   selector: 'app-outlet-detail',
@@ -53,7 +54,8 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   readonly headerActions: PageHeaderAction[] = [
-    { label: 'Add Category', icon: 'add', type: 'primary', action: () => this.openAddCategoryFromHeader() }
+    { label: 'Generate Report', icon: 'download', type: 'secondary', action: () => this.openReport() },
+    { label: 'Add Category',    icon: 'add',      type: 'primary',   action: () => this.openAddCategoryFromHeader() },
   ];
 
   constructor(
@@ -61,8 +63,16 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly router: Router,
     private readonly snackBar: MatSnackBar,
     private readonly hierarchyState: HierarchyStateService,
-    private readonly fabActionService: FabActionService
+    private readonly fabActionService: FabActionService,
+    private readonly modalService: ModalService,
   ) {}
+
+  openReport(): void {
+    const outletName = this.hierarchyState.state.outletName ?? `Outlet #${this.outletId()}`;
+    this.modalService.openReport({
+      type: 'outlet', entityId: this.outletId(), label: outletName,
+    }).subscribe();
+  }
 
   ngOnInit(): void {
     this.clientId.set(Number(this.route.snapshot.paramMap.get('clientId')));

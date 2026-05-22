@@ -67,6 +67,14 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly modalService: ModalService,
   ) {}
 
+  get outletName(): string {
+    return this.hierarchyState.state.outletName ?? `Outlet #${this.outletId()}`;
+  }
+
+  get clientLabel(): string {
+    return this.hierarchyState.state.clientName ?? 'Client';
+  }
+
   openReport(): void {
     const outletName = this.hierarchyState.state.outletName ?? `Outlet #${this.outletId()}`;
     this.modalService.openReport({

@@ -19,10 +19,18 @@
       }
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Custom Label <span class="optional">(optional)</span></label>
-      <input formControlName="label" class="form-input" placeholder="e.g. Mom's House" />
-    </div>
+    @if (isOtherType()) {
+      <div class="form-group">
+        <label class="form-label">Custom Name <span class="required-mark">*</span></label>
+        <input formControlName="label" class="form-input" placeholder="e.g. Gym, Café, Co-working Space" />
+        <span class="form-hint">Give this address a name since "Other" alone isn't descriptive.</span>
+      </div>
+    } @else {
+      <div class="form-group">
+        <label class="form-label">Custom Label <span class="optional">(optional)</span></label>
+        <input formControlName="label" class="form-input" placeholder="e.g. Mom's House, Dad's Office" />
+      </div>
+    }
 
     <!-- Address -->
     <div class="form-divider"></div>

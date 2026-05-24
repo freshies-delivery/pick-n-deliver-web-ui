@@ -1,8 +1,10 @@
 import {
   Component, Inject, Optional, OnInit,
-  ChangeDetectionStrategy, signal, inject
+  ChangeDetectionStrategy, signal, computed, inject
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { startWith } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ModalComponent } from '../../shared/components/modal/modal.component';
@@ -16,7 +18,7 @@ export interface AddressModalData {
 const ADDRESS_TYPES = [
   { value: 'HOME',                label: 'Home' },
   { value: 'WORK',                label: 'Work' },
-  { value: 'FRIENDS_AND_FAMILY',  label: 'Friends & Family' },
+  { value: 'OUTLET',              label: 'Outlet' },
   { value: 'OTHER',               label: 'Other' },
 ];
 
@@ -53,6 +55,12 @@ export class AddressFormModalComponent implements OnInit {
     latitude:      [null as number | null],
     longitude:     [null as number | null],
   });
+
+  readonly addressType = toSignal(
+    this.form.controls['type'].valueChanges.pipe(startWith(this.form.controls['type'].value)),
+    { initialValue: this.form.controls['type'].value as string | null }
+  );
+  readonly isOtherType = computed(() => this.addressType() === 'OTHER');
 
   get title():    string { return this.isEdit() ? 'Edit Address' : 'Add Address'; }
   get subtitle(): string { return this.isEdit() ? 'Update address details' : 'Save a new delivery address'; }

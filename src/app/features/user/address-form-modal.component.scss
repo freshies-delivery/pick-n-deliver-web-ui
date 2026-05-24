@@ -22,6 +22,12 @@ form { display: flex; flex-direction: column; gap: 14px; }
   &:hover:not(.selected) { background: rgba(99,102,241,0.1); }
 }
 
+.required-mark {
+  color: #F87171;
+  font-weight: 600;
+  margin-left: 2px;
+}
+
 .bottom-row {
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   .fav-toggle { flex: 1; min-width: 240px; }

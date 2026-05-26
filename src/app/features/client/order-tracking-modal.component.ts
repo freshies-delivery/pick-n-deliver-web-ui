@@ -105,11 +105,21 @@ export class OrderTrackingModalComponent implements OnInit, OnDestroy {
 
   statusColor(status?: string | null): string {
     switch ((status ?? '').toUpperCase()) {
-      case 'PENDING':     return '#FCD34D';
-      case 'IN_PROGRESS': return '#93C5FD';
-      case 'COMPLETED':   return '#86EFAC';
-      case 'CANCELLED':   return '#FCA5A5';
-      default:            return '#A5B4FC';
+      case 'PLACED':           return '#38BDF8';
+      case 'ACCEPTED':         return '#67E8F9';
+      case 'PREPARING':        return '#FCD34D';
+      case 'READY':
+      case 'READY_FOR_PICKUP': return '#C4B5FD';
+      case 'PICKED_UP':        return '#93C5FD';
+      case 'OUT_FOR_DELIVERY': return '#A5B4FC';
+      case 'DELIVERED':        return '#6EE7B7';
+      case 'COMPLETED':        return '#86EFAC';
+      case 'CANCELLED':        return '#FCA5A5';
+      // legacy
+      case 'PENDING':          return '#FCD34D';
+      case 'IN_PROGRESS':      return '#93C5FD';
+      case 'ON_THE_WAY':       return '#A5B4FC';
+      default:                 return '#A5B4FC';
     }
   }
 
@@ -130,11 +140,21 @@ export class OrderTrackingModalComponent implements OnInit, OnDestroy {
 
   statusLabel(status?: string | null): string {
     switch ((status ?? '').toUpperCase()) {
-      case 'PENDING':     return 'Pending';
-      case 'IN_PROGRESS': return 'In Progress';
-      case 'COMPLETED':   return 'Completed';
-      case 'CANCELLED':   return 'Cancelled';
-      default:            return status ?? '—';
+      case 'PLACED':           return 'Placed';
+      case 'ACCEPTED':         return 'Accepted';
+      case 'PREPARING':        return 'Preparing';
+      case 'READY':            return 'Ready';
+      case 'READY_FOR_PICKUP': return 'Ready for Pickup';
+      case 'PICKED_UP':        return 'Picked Up';
+      case 'OUT_FOR_DELIVERY': return 'Out for Delivery';
+      case 'DELIVERED':        return 'Delivered';
+      case 'COMPLETED':        return 'Completed';
+      case 'CANCELLED':        return 'Cancelled';
+      // legacy
+      case 'PENDING':          return 'Pending';
+      case 'IN_PROGRESS':      return 'In Progress';
+      case 'ON_THE_WAY':       return 'On the Way';
+      default:                 return status ?? '—';
     }
   }
 }

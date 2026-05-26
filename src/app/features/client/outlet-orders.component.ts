@@ -67,7 +67,7 @@ export class OutletOrdersComponent implements OnChanges {
   readonly stats = computed(() => {
     const all = this.orders();
     const total    = all.length;
-    const active   = all.filter(o => ['PENDING', 'IN_PROGRESS'].includes((o.status ?? '').toUpperCase())).length;
+    const active   = all.filter(o => ['PLACED','ACCEPTED','PREPARING','READY','READY_FOR_PICKUP','PICKED_UP','OUT_FOR_DELIVERY'].includes((o.status ?? '').toUpperCase())).length;
     const revenue  = all.reduce((s, o) => s + (o.totalAmount ?? 0), 0);
     const avgOrder = total > 0 ? revenue / total : 0;
     return { total, active, revenue, avgOrder };
@@ -83,12 +83,17 @@ export class OutletOrdersComponent implements OnChanges {
   });
 
   readonly filterTabs = [
-    { key: 'all',         label: 'All' },
-    { key: 'PENDING',     label: 'Pending' },
-    { key: 'IN_PROGRESS', label: 'In Progress' },
-    { key: 'ON_THE_WAY',  label: 'On The Way' },
-    { key: 'COMPLETED',   label: 'Completed' },
-    { key: 'CANCELLED',   label: 'Cancelled' },
+    { key: 'all',              label: 'All' },
+    { key: 'PLACED',           label: 'Placed' },
+    { key: 'ACCEPTED',         label: 'Accepted' },
+    { key: 'PREPARING',        label: 'Preparing' },
+    { key: 'READY',            label: 'Ready' },
+    { key: 'READY_FOR_PICKUP', label: 'Ready for Pickup' },
+    { key: 'PICKED_UP',        label: 'Picked Up' },
+    { key: 'OUT_FOR_DELIVERY', label: 'Out for Delivery' },
+    { key: 'DELIVERED',        label: 'Delivered' },
+    { key: 'COMPLETED',        label: 'Completed' },
+    { key: 'CANCELLED',        label: 'Cancelled' },
   ];
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -147,7 +152,7 @@ export class OutletOrdersComponent implements OnChanges {
 
   isActive(status?: string): boolean {
     const s = (status ?? '').toUpperCase();
-    return s === 'PENDING' || s === 'IN_PROGRESS' || s === 'ON_THE_WAY';
+    return ['PLACED','ACCEPTED','PREPARING','READY','READY_FOR_PICKUP','PICKED_UP','OUT_FOR_DELIVERY'].includes(s);
   }
 
   confirmDelete(order: OutletOrderDto): void {
@@ -167,12 +172,21 @@ export class OutletOrdersComponent implements OnChanges {
 
   accentColor(status?: string): string {
     switch ((status ?? '').toUpperCase()) {
-      case 'PENDING':     return '#FCD34D';
-      case 'IN_PROGRESS': return '#93C5FD';
-      case 'ON_THE_WAY':  return '#7DD3FC';
-      case 'COMPLETED':   return '#86EFAC';
-      case 'CANCELLED':   return '#FCA5A5';
-      default:            return '#A5B4FC';
+      case 'PLACED':           return '#38BDF8';
+      case 'ACCEPTED':         return '#67E8F9';
+      case 'PREPARING':        return '#FCD34D';
+      case 'READY':
+      case 'READY_FOR_PICKUP': return '#C4B5FD';
+      case 'PICKED_UP':        return '#93C5FD';
+      case 'OUT_FOR_DELIVERY': return '#A5B4FC';
+      case 'DELIVERED':        return '#6EE7B7';
+      case 'COMPLETED':        return '#86EFAC';
+      case 'CANCELLED':        return '#FCA5A5';
+      // legacy
+      case 'PENDING':          return '#FCD34D';
+      case 'IN_PROGRESS':      return '#93C5FD';
+      case 'ON_THE_WAY':       return '#A5B4FC';
+      default:                 return '#A5B4FC';
     }
   }
 
@@ -189,13 +203,19 @@ export class OutletOrdersComponent implements OnChanges {
   }
 
   nextStatuses(current?: string): { label: string; value: string }[] {
-    const all = [
-      { label: 'Mark Pending',     value: 'PENDING' },
-      { label: 'Mark In Progress', value: 'IN_PROGRESS' },
-      { label: 'Mark On The Way',  value: 'ON_THE_WAY' },
-      { label: 'Mark Completed',   value: 'COMPLETED' },
-      { label: 'Cancel',           value: 'CANCELLED' },
-    ];
-    return all.filter(s => s.value !== (current ?? '').toUpperCase());
+    switch ((current ?? '').toUpperCase()) {
+      case 'PLACED':           return [{ label: 'Accept Order',          value: 'ACCEPTED' },       { label: 'Cancel', value: 'CANCELLED' }];
+      case 'ACCEPTED':         return [{ label: 'Start Preparing',       value: 'PREPARING' },      { label: 'Cancel', value: 'CANCELLED' }];
+      case 'PREPARING':        return [
+        { label: 'Mark Ready (Delivery)',  value: 'READY' },
+        { label: 'Ready for Pickup',       value: 'READY_FOR_PICKUP' },
+        { label: 'Cancel',                 value: 'CANCELLED' },
+      ];
+      case 'READY':            return [{ label: 'Rider Picked Up',       value: 'PICKED_UP' },      { label: 'Cancel', value: 'CANCELLED' }];
+      case 'READY_FOR_PICKUP': return [{ label: 'Mark Completed',        value: 'COMPLETED' },      { label: 'Cancel', value: 'CANCELLED' }];
+      case 'PICKED_UP':        return [{ label: 'Out for Delivery',      value: 'OUT_FOR_DELIVERY' },{ label: 'Cancel', value: 'CANCELLED' }];
+      case 'OUT_FOR_DELIVERY': return [{ label: 'Mark Delivered',        value: 'DELIVERED' },      { label: 'Cancel', value: 'CANCELLED' }];
+      default:                 return [];
+    }
   }
 }

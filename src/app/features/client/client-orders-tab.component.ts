@@ -41,12 +41,17 @@ export class ClientOrdersTabComponent implements OnInit {
   readonly clientName   = signal('');
 
   readonly filterOptions = computed((): FilterOption[] => [
-    { value: '',          label: 'All'        },
-    { value: 'pending',   label: 'Pending'    },
-    { value: 'confirmed', label: 'Confirmed'  },
-    { value: 'en_route',  label: 'En Route'   },
-    { value: 'delivered', label: 'Delivered'  },
-    { value: 'cancelled', label: 'Cancelled'  },
+    { value: '',                label: 'All'              },
+    { value: 'PLACED',          label: 'Placed'           },
+    { value: 'ACCEPTED',        label: 'Accepted'         },
+    { value: 'PREPARING',       label: 'Preparing'        },
+    { value: 'READY',           label: 'Ready'            },
+    { value: 'READY_FOR_PICKUP',label: 'Ready for Pickup' },
+    { value: 'PICKED_UP',       label: 'Picked Up'        },
+    { value: 'OUT_FOR_DELIVERY',label: 'Out for Delivery' },
+    { value: 'DELIVERED',       label: 'Delivered'        },
+    { value: 'COMPLETED',       label: 'Completed'        },
+    { value: 'CANCELLED',       label: 'Cancelled'        },
   ]);
 
   private readonly dashService  = inject(AppDashService);
@@ -57,23 +62,31 @@ export class ClientOrdersTabComponent implements OnInit {
   private readonly toastService = inject(ToastService);
 
   readonly STATUS_OPTIONS = [
-    { value: 'PENDING',     label: 'Pending'     },
-    { value: 'IN_PROGRESS', label: 'In Progress' },
-    { value: 'ON_THE_WAY',  label: 'On The Way'  },
-    { value: 'COMPLETED',   label: 'Completed'   },
-    { value: 'CANCELLED',   label: 'Cancelled'   },
+    { value: 'PLACED',           label: 'Placed'            },
+    { value: 'ACCEPTED',         label: 'Accepted'          },
+    { value: 'PREPARING',        label: 'Preparing'         },
+    { value: 'READY',            label: 'Ready'             },
+    { value: 'READY_FOR_PICKUP', label: 'Ready for Pickup'  },
+    { value: 'PICKED_UP',        label: 'Picked Up'         },
+    { value: 'OUT_FOR_DELIVERY', label: 'Out for Delivery'  },
+    { value: 'DELIVERED',        label: 'Delivered'         },
+    { value: 'COMPLETED',        label: 'Completed'         },
+    { value: 'CANCELLED',        label: 'Cancelled'         },
   ];
 
   private readonly STATUS_CODE_MAP: Record<number, string> = {
-    0: 'PENDING',
-    1: 'IN_PROGRESS',
-    2: 'ON_THE_WAY',
-    3: 'COMPLETED',
-    4: 'CANCELLED',
+    0: 'PLACED',
+    1: 'ACCEPTED',
+    2: 'PREPARING',
+    3: 'READY',
+    4: 'PICKED_UP',
+    5: 'OUT_FOR_DELIVERY',
+    6: 'DELIVERED',
+    7: 'CANCELLED',
   };
 
   currentStatus(code: number): string {
-    return this.STATUS_CODE_MAP[code] ?? 'PENDING';
+    return this.STATUS_CODE_MAP[code] ?? 'PLACED';
   }
 
   updateStatus(order: AppDashOrderRowDto, newStatus: string): void {
@@ -113,11 +126,11 @@ export class ClientOrdersTabComponent implements OnInit {
   onPageChange(page: number): void { this.load(page - 1); }
 
   statusLabel(code: number): string {
-    return ['Pending', 'Confirmed', 'En Route', 'Delivered', 'Cancelled'][code] ?? 'Unknown';
+    return ['Placed', 'Accepted', 'Preparing', 'Ready', 'Picked Up', 'Out for Delivery', 'Delivered', 'Cancelled'][code] ?? 'Unknown';
   }
 
   statusClass(code: number): string {
-    return ['status-pending', 'status-confirmed', 'status-enroute', 'status-delivered', 'status-cancelled'][code] ?? '';
+    return ['status-placed', 'status-accepted', 'status-preparing', 'status-ready', 'status-picked-up', 'status-out-for-delivery', 'status-delivered', 'status-cancelled'][code] ?? '';
   }
 
   protected readonly Math = Math;

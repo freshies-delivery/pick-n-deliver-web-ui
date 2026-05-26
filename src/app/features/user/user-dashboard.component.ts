@@ -90,10 +90,20 @@ export class UserDashboardComponent implements OnInit {
 
   accentColor(status?: string): string {
     const map: Record<string, string> = {
-      completed:   '#22C55E',
-      cancelled:   '#F43F5E',
-      pending:     '#F59E0B',
-      in_progress: '#3B82F6',
+      placed:           '#38BDF8',
+      accepted:         '#67E8F9',
+      preparing:        '#F59E0B',
+      ready:            '#8B5CF6',
+      ready_for_pickup: '#8B5CF6',
+      picked_up:        '#3B82F6',
+      out_for_delivery: '#6366F1',
+      delivered:        '#22C55E',
+      completed:        '#22C55E',
+      cancelled:        '#F43F5E',
+      // legacy
+      pending:          '#F59E0B',
+      in_progress:      '#3B82F6',
+      on_the_way:       '#6366F1',
     };
     return map[(status ?? '').toLowerCase()] ?? '#6366F1';
   }

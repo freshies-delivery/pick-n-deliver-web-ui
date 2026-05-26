@@ -73,7 +73,10 @@ export class UserOrdersComponent implements OnInit {
     const sf  = this.statusFilter();
     const seg = this.segmentFilter();
     return this.orders().filter(o => {
-      const matchesStatus  = sf === 'all' || (o.status ?? '').toLowerCase() === sf;
+      const matchesStatus  = sf === 'all'
+        || (sf === 'active'    && ['placed','accepted','preparing','ready','ready_for_pickup','picked_up','out_for_delivery'].includes((o.status ?? '').toLowerCase()))
+        || (sf === 'delivered' && ['delivered','completed'].includes((o.status ?? '').toLowerCase()))
+        || (o.status ?? '').toLowerCase() === sf;
       const matchesSearch  = !q ||
         String(o.orderId).includes(q) ||
         (o.status ?? '').toLowerCase().includes(q) ||
@@ -86,7 +89,7 @@ export class UserOrdersComponent implements OnInit {
 
   readonly statsStrip = computed((): StripStat[] => {
     const all = this.orders();
-    const delivered = all.filter(o => o.status?.toLowerCase() === 'delivered').length;
+    const delivered = all.filter(o => ['delivered','completed'].includes(o.status?.toLowerCase() ?? '')).length;
     const cancelled = all.filter(o => o.status?.toLowerCase() === 'cancelled').length;
     const totalSpent = all.reduce((s, o) => s + (o.totalAmount ?? 0), 0);
 
@@ -125,21 +128,31 @@ export class UserOrdersComponent implements OnInit {
     ];
   });
 
-  readonly filterOptions = computed((): FilterOption[] => [
-    { value: 'all',       label: 'All',       count: this.orders().length },
-    { value: 'delivered', label: 'Delivered',  count: this.orders().filter(o => o.status?.toLowerCase() === 'delivered').length },
-    { value: 'cancelled', label: 'Cancelled',  count: this.orders().filter(o => o.status?.toLowerCase() === 'cancelled').length },
-    { value: 'pending',   label: 'Pending',    count: this.orders().filter(o => o.status?.toLowerCase() === 'pending').length },
-  ]);
+  readonly filterOptions = computed((): FilterOption[] => {
+    const all = this.orders();
+    const isActive = (s?: string) => ['placed','accepted','preparing','ready','ready_for_pickup','picked_up','out_for_delivery'].includes((s ?? '').toLowerCase());
+    const isDone   = (s?: string) => ['delivered','completed'].includes((s ?? '').toLowerCase());
+    return [
+      { value: 'all',       label: 'All',       count: all.length },
+      { value: 'active',    label: 'Active',     count: all.filter(o => isActive(o.status)).length },
+      { value: 'delivered', label: 'Delivered',  count: all.filter(o => isDone(o.status)).length },
+      { value: 'cancelled', label: 'Cancelled',  count: all.filter(o => o.status?.toLowerCase() === 'cancelled').length },
+    ];
+  });
 
   private readonly modalService = inject(ModalService);
 
   readonly STATUS_OPTIONS = [
-    { value: 'PENDING',     label: 'Pending'     },
-    { value: 'IN_PROGRESS', label: 'In Progress' },
-    { value: 'ON_THE_WAY',  label: 'On The Way'  },
-    { value: 'COMPLETED',   label: 'Completed'   },
-    { value: 'CANCELLED',   label: 'Cancelled'   },
+    { value: 'PLACED',           label: 'Placed'            },
+    { value: 'ACCEPTED',         label: 'Accepted'          },
+    { value: 'PREPARING',        label: 'Preparing'         },
+    { value: 'READY',            label: 'Ready'             },
+    { value: 'READY_FOR_PICKUP', label: 'Ready for Pickup'  },
+    { value: 'PICKED_UP',        label: 'Picked Up'         },
+    { value: 'OUT_FOR_DELIVERY', label: 'Out for Delivery'  },
+    { value: 'DELIVERED',        label: 'Delivered'         },
+    { value: 'COMPLETED',        label: 'Completed'         },
+    { value: 'CANCELLED',        label: 'Cancelled'         },
   ];
 
   updateStatus(order: OrderDto, newStatus: string): void {
@@ -193,10 +206,20 @@ export class UserOrdersComponent implements OnInit {
 
   accentColor(status?: string): string {
     const map: Record<string, string> = {
-      delivered: '#22C55E',
-      cancelled: '#F43F5E',
-      pending:   '#F59E0B',
-      en_route:  '#3B82F6',
+      placed:           '#38BDF8',
+      accepted:         '#67E8F9',
+      preparing:        '#F59E0B',
+      ready:            '#8B5CF6',
+      ready_for_pickup: '#8B5CF6',
+      picked_up:        '#3B82F6',
+      out_for_delivery: '#6366F1',
+      delivered:        '#22C55E',
+      completed:        '#22C55E',
+      cancelled:        '#F43F5E',
+      // legacy
+      pending:          '#F59E0B',
+      in_progress:      '#3B82F6',
+      on_the_way:       '#6366F1',
     };
     return map[(status ?? '').toLowerCase()] ?? '#6366F1';
   }
@@ -213,7 +236,7 @@ export class UserOrdersComponent implements OnInit {
 
   isActive(status?: string): boolean {
     const s = (status ?? '').toLowerCase();
-    return s === 'pending' || s === 'in_progress' || s === 'en_route';
+    return ['placed','accepted','preparing','ready','ready_for_pickup','picked_up','out_for_delivery'].includes(s);
   }
 
   orderInitials(order: OrderDto): string {

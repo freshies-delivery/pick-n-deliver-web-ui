@@ -114,7 +114,15 @@
                     </div>
                     <div class="detail-row">
                       <span class="dr-key">Status</span>
-                      <span class="dr-val"><app-status-badge [status]="order.status" /></span>
+                      <span class="dr-val">
+                        <select class="status-select status-select--{{(order.status ?? '').toUpperCase().replace(' ', '_')}}"
+                                [value]="(order.status ?? '').toUpperCase()"
+                                (change)="updateStatus(order, $any($event.target).value)">
+                          @for (s of STATUS_OPTIONS; track s.value) {
+                            <option [value]="s.value">{{ s.label }}</option>
+                          }
+                        </select>
+                      </span>
                     </div>
                     <div class="detail-row">
                       <span class="dr-key">Amount</span>

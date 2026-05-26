@@ -134,6 +134,27 @@ export class UserOrdersComponent implements OnInit {
 
   private readonly modalService = inject(ModalService);
 
+  readonly STATUS_OPTIONS = [
+    { value: 'PENDING',     label: 'Pending'     },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'ON_THE_WAY',  label: 'On The Way'  },
+    { value: 'COMPLETED',   label: 'Completed'   },
+    { value: 'CANCELLED',   label: 'Cancelled'   },
+  ];
+
+  updateStatus(order: OrderDto, newStatus: string): void {
+    if (!order.orderId) return;
+    this.orderService.update(order.orderId, { status: newStatus }).subscribe({
+      next: () => {
+        this.orders.update(list =>
+          list.map(o => o.orderId === order.orderId ? { ...o, status: newStatus } : o)
+        );
+        this.snackBar.open('Status updated', 'Close', { duration: 2000 });
+      },
+      error: () => this.snackBar.open('Failed to update status', 'Close', { duration: 3000 }),
+    });
+  }
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly userContext: UserContextService,

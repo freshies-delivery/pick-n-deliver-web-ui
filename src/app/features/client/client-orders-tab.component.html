@@ -36,7 +36,13 @@
             </span>
             <span>{{o.itemCount}} item{{o.itemCount === 1 ? '' : 's'}}</span>
             <span class="amount">₹{{o.totalAmount | number:'1.0-0'}}</span>
-            <span class="status-badge" [class]="statusClass(o.statusCode)">{{statusLabel(o.statusCode)}}</span>
+            <select class="status-select status-select--{{currentStatus(o.statusCode).toLowerCase()}}"
+                    [value]="currentStatus(o.statusCode)"
+                    (change)="updateStatus(o, $any($event.target).value)">
+              @for (s of STATUS_OPTIONS; track s.value) {
+                <option [value]="s.value">{{s.label}}</option>
+              }
+            </select>
             <span class="date">{{o.createdTime | date:'dd MMM, HH:mm'}}</span>
           </div>
         }

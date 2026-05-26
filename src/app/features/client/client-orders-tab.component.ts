@@ -15,6 +15,8 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
 import { AppDashService } from '../../core/services/app-dash.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
 import { AppDashOrderRowDto } from '../../core/models/app-dash.models';
+import { OutletOrderService } from './services/outlet-order.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-client-orders-tab',
@@ -47,10 +49,39 @@ export class ClientOrdersTabComponent implements OnInit {
     { value: 'cancelled', label: 'Cancelled'  },
   ]);
 
-  private readonly dashService = inject(AppDashService);
-  private readonly hierService = inject(HierarchyStateService);
-  private readonly route       = inject(ActivatedRoute);
-  private readonly destroyRef  = inject(DestroyRef);
+  private readonly dashService  = inject(AppDashService);
+  private readonly hierService  = inject(HierarchyStateService);
+  private readonly route        = inject(ActivatedRoute);
+  private readonly destroyRef   = inject(DestroyRef);
+  private readonly orderService = inject(OutletOrderService);
+  private readonly toastService = inject(ToastService);
+
+  readonly STATUS_OPTIONS = [
+    { value: 'PENDING',     label: 'Pending'     },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'ON_THE_WAY',  label: 'On The Way'  },
+    { value: 'COMPLETED',   label: 'Completed'   },
+    { value: 'CANCELLED',   label: 'Cancelled'   },
+  ];
+
+  private readonly STATUS_CODE_MAP: Record<number, string> = {
+    0: 'PENDING',
+    1: 'IN_PROGRESS',
+    2: 'ON_THE_WAY',
+    3: 'COMPLETED',
+    4: 'CANCELLED',
+  };
+
+  currentStatus(code: number): string {
+    return this.STATUS_CODE_MAP[code] ?? 'PENDING';
+  }
+
+  updateStatus(order: AppDashOrderRowDto, newStatus: string): void {
+    this.orderService.update(order.orderId, { status: newStatus }).subscribe({
+      next: () => this.toastService.success('Status updated'),
+      error: () => this.toastService.error('Failed to update status'),
+    });
+  }
 
   constructor() {
     const id = Number(this.route.snapshot.paramMap.get('clientId'));

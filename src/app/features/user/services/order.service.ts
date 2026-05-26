@@ -45,5 +45,9 @@ export class OrderService {
   get(id: number): Observable<OrderDto> {
     return this.http.get<OrderDto>(`${this.endpoint}/${id}`);
   }
+
+  update(id: number, payload: Partial<OrderDto>): Observable<OrderDto> {
+    return this.http.put<OrderDto>(`${this.endpoint}/${id}`, payload);
+  }
 }
 

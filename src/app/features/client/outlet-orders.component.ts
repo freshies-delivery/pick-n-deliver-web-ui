@@ -86,6 +86,7 @@ export class OutletOrdersComponent implements OnChanges {
     { key: 'all',         label: 'All' },
     { key: 'PENDING',     label: 'Pending' },
     { key: 'IN_PROGRESS', label: 'In Progress' },
+    { key: 'ON_THE_WAY',  label: 'On The Way' },
     { key: 'COMPLETED',   label: 'Completed' },
     { key: 'CANCELLED',   label: 'Cancelled' },
   ];
@@ -146,7 +147,7 @@ export class OutletOrdersComponent implements OnChanges {
 
   isActive(status?: string): boolean {
     const s = (status ?? '').toUpperCase();
-    return s === 'PENDING' || s === 'IN_PROGRESS';
+    return s === 'PENDING' || s === 'IN_PROGRESS' || s === 'ON_THE_WAY';
   }
 
   confirmDelete(order: OutletOrderDto): void {
@@ -168,6 +169,7 @@ export class OutletOrdersComponent implements OnChanges {
     switch ((status ?? '').toUpperCase()) {
       case 'PENDING':     return '#FCD34D';
       case 'IN_PROGRESS': return '#93C5FD';
+      case 'ON_THE_WAY':  return '#7DD3FC';
       case 'COMPLETED':   return '#86EFAC';
       case 'CANCELLED':   return '#FCA5A5';
       default:            return '#A5B4FC';
@@ -190,6 +192,7 @@ export class OutletOrdersComponent implements OnChanges {
     const all = [
       { label: 'Mark Pending',     value: 'PENDING' },
       { label: 'Mark In Progress', value: 'IN_PROGRESS' },
+      { label: 'Mark On The Way',  value: 'ON_THE_WAY' },
       { label: 'Mark Completed',   value: 'COMPLETED' },
       { label: 'Cancel',           value: 'CANCELLED' },
     ];

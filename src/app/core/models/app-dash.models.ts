@@ -107,8 +107,10 @@ export interface AppDashItemDto {
 
 export interface AppDashRatingDto {
   ratingId:      number;
-  userId?:       number;
-  targetType?:   string;
+  raterType?:    string;  // USER | DELIVERY_PARTNER | OUTLET
+  raterId?:      number;
+  userId?:       number;  // set when raterType = USER (display convenience)
+  targetType?:   string;  // USER | DELIVERY_PARTNER | OUTLET | ITEM
   targetId?:     number;
   score:         number;
   comment?:      string;

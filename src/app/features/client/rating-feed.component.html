@@ -42,11 +42,11 @@
         <!-- Card header -->
         <div class="rc-header">
           <div class="rc-user">
-            <div class="rc-avatar" [style.background]="avatarColor(rating.userId)">
-              {{ avatarInitials(rating.userId) }}
+            <div class="rc-avatar" [style.background]="avatarColor(rating.raterId)">
+              {{ avatarInitials(rating.raterId) }}
             </div>
             <div>
-              <div class="rc-name">User #{{ rating.userId }}</div>
+              <div class="rc-name">User #{{ rating.raterId }}</div>
               @if (rating.createdAt) {
                 <div class="rc-date">{{ rating.createdAt | date:'MMM d, yyyy' }}</div>
               }

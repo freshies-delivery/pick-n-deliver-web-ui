@@ -176,6 +176,23 @@ export class AppDashService {
     return this.http.get<any>(`${BASE}/clients/${id}/analytics`, { params: { range } });
   }
 
+  // FEATURED OUTLETS
+  getFeaturedOutlets(): Observable<any> {
+    return this.http.get<any>(`${BASE}/featured-outlets`);
+  }
+  addFeaturedOutlet(outletId: number, displayOrder?: number): Observable<any> {
+    return this.http.post<any>(`${BASE}/featured-outlets`, { outletId, displayOrder });
+  }
+  updateFeaturedOutlet(id: number, patch: { displayOrder?: number; isActive?: boolean }): Observable<any> {
+    return this.http.put<any>(`${BASE}/featured-outlets/${id}`, patch);
+  }
+  deleteFeaturedOutlet(id: number): Observable<any> {
+    return this.http.delete<any>(`${BASE}/featured-outlets/${id}`);
+  }
+  reorderFeaturedOutlets(orderedIds: number[]): Observable<any> {
+    return this.http.put<any>(`${BASE}/featured-outlets/reorder`, orderedIds);
+  }
+
   // USERS
   getUsers(page = 0, size = 20, search?: string): Observable<any> {
     let p = new HttpParams().set('page', page).set('size', size);

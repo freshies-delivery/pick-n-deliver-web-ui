@@ -5,8 +5,9 @@ import { apiUrl } from '../../../core/api.config';
 
 export interface RatingDto {
   ratingId?: number;
-  userId?: number;
-  targetType?: string;
+  raterType?: string;  // USER | DELIVERY_PARTNER | OUTLET
+  raterId?: number;
+  targetType?: string; // USER | DELIVERY_PARTNER | OUTLET | ITEM
   targetId?: number;
   score?: number;
   comment?: string;

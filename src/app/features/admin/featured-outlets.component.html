@@ -1,0 +1,69 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Admin / Featured Outlets'"
+    [title]="'Featured Outlets'"
+    [subtitle]="rows().length + ' outlets in carousel'"
+    [actions]="headerActions"
+  />
+
+  <app-stats-strip [stats]="statsStrip()" />
+
+  <div class="list-body">
+    @if (loading()) {
+      <app-skeleton-list [rows]="4" />
+    } @else if (rows().length === 0) {
+      <app-empty-state
+        title="No featured outlets"
+        message="Add outlets to the featured carousel using the button above."
+      />
+    } @else {
+      <div class="featured-list">
+        @for (row of rows(); track row.featuredOutletId; let i = $index) {
+          <div class="featured-row" [class.inactive]="!row.isActive">
+            <!-- Order handle / position -->
+            <div class="order-cell">
+              <span class="order-num">{{ i + 1 }}</span>
+              <div class="order-btns">
+                <button class="icon-btn" [disabled]="i === 0" (click)="moveUp(i)" title="Move up">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+                </button>
+                <button class="icon-btn" [disabled]="i === rows().length - 1" (click)="moveDown(i)" title="Move down">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Outlet info -->
+            <div class="outlet-info">
+              <div class="outlet-avatar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13V6l6-4 6 4v7"/><path d="M6 13v-3h4v3"/><path d="M2 13h12"/><path d="M10 21H2v-8"/><path d="M22 21H12v-5a2 2 0 0 1 4 0v5"/></svg>
+              </div>
+              <div class="outlet-meta">
+                <span class="outlet-name">{{ row.outletName }}</span>
+                <span class="outlet-sub">ID: {{ row.outletId }}{{ row.type ? ' · ' + row.type : '' }}</span>
+              </div>
+            </div>
+
+            <!-- Status toggle -->
+            <div class="status-cell">
+              <button
+                class="status-badge"
+                [class.active]="row.isActive"
+                (click)="toggleActive(row)"
+                title="Toggle active">
+                {{ row.isActive ? 'Active' : 'Inactive' }}
+              </button>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions-cell">
+              <button class="icon-btn danger" (click)="confirmDelete(row)" title="Remove">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

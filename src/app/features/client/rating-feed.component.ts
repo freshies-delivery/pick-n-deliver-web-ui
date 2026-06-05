@@ -43,7 +43,7 @@ export class RatingFeedComponent {
     return Array.from({ length: 5 }, (_, i) => i + 1);
   }
 
-  avatarColor(userId?: number): string {
+  avatarColor(raterId?: number): string {
     const colors = [
       'rgba(99,102,241,0.7)',
       'rgba(34,197,94,0.7)',
@@ -51,11 +51,11 @@ export class RatingFeedComponent {
       'rgba(168,85,247,0.7)',
       'rgba(239,68,68,0.7)'
     ];
-    return colors[(userId ?? 0) % colors.length];
+    return colors[(raterId ?? 0) % colors.length];
   }
 
-  avatarInitials(userId?: number): string {
-    return 'U' + (userId ?? '?');
+  avatarInitials(raterId?: number): string {
+    return 'U' + (raterId ?? '?');
   }
 
   onSortChange(event: Event): void {

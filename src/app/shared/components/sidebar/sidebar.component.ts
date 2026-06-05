@@ -47,6 +47,7 @@ export class SidebarComponent {
   navigateConfig(): void { this.router.navigate(['/dashboard/admin/config']); }
   navigateOffers(): void { this.router.navigate(['/dashboard/admin/offers']); }
   navigateNotifications(): void { this.router.navigate(['/dashboard/admin/notifications']); }
+  navigateFeaturedOutlets(): void { this.router.navigate(['/dashboard/admin/featured-outlets']); }
 
   isRouteActive(prefix: string): boolean { return this.router.url.startsWith(prefix); }
   isRouteExact(path: string): boolean { return this.router.url === path || this.router.url === path + '/'; }

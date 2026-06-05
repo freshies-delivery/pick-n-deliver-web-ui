@@ -56,6 +56,13 @@ export const routes: Routes = [
             (m) => m.NotificationsPageComponent
           )
       },
+      {
+        path: 'admin/featured-outlets',
+        loadComponent: () =>
+          import('./features/admin/featured-outlets.component').then(
+            (m) => m.FeaturedOutletsComponent
+          )
+      },
       { path: '**', redirectTo: '' }
     ]
   },

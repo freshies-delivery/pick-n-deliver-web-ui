@@ -6,6 +6,7 @@ import { provideRouter, withComponentInputBinding, withRouterConfig } from '@ang
 import { routes } from './app.routes';
 import { apiEnvelopeInterceptor } from './core/interceptors/api-envelope.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { ThemeService } from './core/services/theme.service';
 
 export const appConfig: ApplicationConfig = {
@@ -16,7 +17,7 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withRouterConfig({ paramsInheritanceStrategy: 'always' })
     ),
-    provideHttpClient(withInterceptors([apiEnvelopeInterceptor, errorInterceptor])),
+    provideHttpClient(withInterceptors([jwtInterceptor, apiEnvelopeInterceptor, errorInterceptor])),
     provideAnimationsAsync(),
     {
       provide: APP_INITIALIZER,

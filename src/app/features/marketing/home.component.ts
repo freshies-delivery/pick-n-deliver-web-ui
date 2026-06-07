@@ -65,10 +65,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loginError = 'Please enter a valid email address.';
       return;
     }
-    this.auth.login(this.loginEmail, this.loginPassword);
-    this.closeLogin();
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
-    this.router.navigateByUrl(returnUrl);
+    this.auth.login(this.loginEmail, this.loginPassword).subscribe({
+      next: () => {
+        this.closeLogin();
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: () => {
+        this.loginError = 'Invalid email or password.';
+      }
+    });
   }
 
   onKeydown(e: KeyboardEvent) {

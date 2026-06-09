@@ -25,7 +25,7 @@ export interface RatingCommentDto {
 @Injectable({ providedIn: 'root' })
 export class RatingService {
   private readonly ratingsEndpoint = apiUrl('/api/ratings');
-  private readonly commentsEndpoint = apiUrl('/api/rating-comments');
+  private readonly commentsEndpoint = apiUrl('/api/ratings/comments');
 
   constructor(private readonly http: HttpClient) {}
 

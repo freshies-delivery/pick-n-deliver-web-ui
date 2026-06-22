@@ -50,7 +50,7 @@
       <!-- Left: Category nav -->
       <div class="cat-nav">
         @for (cat of categories(); track cat.categoryId) {
-          @if (isLoadingItems(cat.categoryId!) || getItems(cat.categoryId!).length > 0) {
+          @if (catSearch() === '' || isLoadingItems(cat.categoryId!) || getItems(cat.categoryId!).length > 0) {
             <div class="cn-item"
                  [class.active]="activeCatId() === cat.categoryId"
                  (click)="scrollToCategory(cat.categoryId!)">

@@ -1,15 +1,12 @@
 import {
   Component, Inject, Optional, OnInit,
-  ChangeDetectionStrategy, signal, DestroyRef, inject
+  ChangeDetectionStrategy, signal, inject
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ImageSearchComponent } from '../../shared/components/image-search/image-search.component';
-import { Segment } from '../admin/segment.service';
-import { AppDashService } from '../../core/services/app-dash.service';
 import { CategoryDto } from './services/category.service';
 
 export interface CategoryModalData {
@@ -27,17 +24,13 @@ export interface CategoryModalData {
   styleUrl:    './category-form-modal.component.scss',
 })
 export class CategoryFormModalComponent implements OnInit {
-  private readonly fb          = inject(FormBuilder);
-  private readonly destroyRef  = inject(DestroyRef);
-  private readonly dashService = inject(AppDashService);
+  private readonly fb = inject(FormBuilder);
 
-  readonly segments = signal<Segment[]>([]);
-  readonly isEdit   = signal(false);
+  readonly isEdit = signal(false);
 
   readonly form = this.fb.group({
     name:        ['', [Validators.required, Validators.maxLength(255)]],
     description: ['', Validators.maxLength(255)],
-    segment_id:  [null as number | null],
     image_url:   [''],
   });
 
@@ -56,24 +49,13 @@ export class CategoryFormModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.dashService.getSegments()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((segs: any[]) => {
-        const mapped: Segment[] = (segs ?? []).map((s: any) => ({
-          id: String(s.segmentId), name: s.name, description: s.description ?? '',
-          criteria: '', criteriaReadable: '', userCount: s.clientCount ?? 0,
-          isActive: true, createdAt: new Date(), color: '#6366F1',
-        }));
-        this.segments.set(mapped);
-      });
-
     if (this.data?.category) {
       this.isEdit.set(true);
       const c = this.data.category;
       this.form.patchValue({
         name:        c.name        ?? '',
         description: c.description ?? '',
-        image_url:   '',
+        image_url:   c.imageUrl ?? '',
       });
     }
   }

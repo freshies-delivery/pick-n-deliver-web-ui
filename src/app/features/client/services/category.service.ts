@@ -7,6 +7,7 @@ export interface CategoryDto {
   categoryId?: number;
   name: string;
   description?: string;
+  imageUrl?: string;
   outletId?: number;
   outletIds?: number[];
   itemIds?: number[];

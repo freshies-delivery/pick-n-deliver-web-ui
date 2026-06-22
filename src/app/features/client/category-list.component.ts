@@ -89,9 +89,18 @@ export class CategoryListComponent implements OnChanges, OnDestroy {
   }
 
   reloadItems(catId: number): void {
-    this.itemsCache.delete(catId);
-    this.loadingItems.delete(catId);
-    this.loadItems(catId);
+    const itemSig = this.itemsCache.get(catId);
+    const loadSig = this.loadingItems.get(catId);
+    // Reuse the existing signal instances. The OnPush view tracks the signals it read during the
+    // last render, so replacing them (delete + new signal) would leave the view tracking the
+    // discarded ones and the refreshed data wouldn't show until the next change-detection pass.
+    if (!itemSig || !loadSig) { this.loadItems(catId); return; }
+    loadSig.set(true);
+    this.dashService.getItems(this.outletId, catId)
+      .pipe(finalize(() => loadSig.set(false)))
+      .subscribe({
+        next: items => itemSig.set(Array.isArray(items) ? items : [])
+      });
   }
 
   getItems(catId: number): any[] {
@@ -163,7 +172,6 @@ export class CategoryListComponent implements OnChanges, OnDestroy {
         name:        value.name,
         description: value.description ?? '',
         imageUrl:    value.image_url ?? '',
-        segmentId:   value.segment_id ?? null,
       };
       this.dashService.createCategory(this.outletId, dto).subscribe({
         next: () => { this.toastService.success('Category created'); this.loadCategories(); },
@@ -180,7 +188,6 @@ export class CategoryListComponent implements OnChanges, OnDestroy {
         name:        value.name ?? cat.name,
         description: value.description ?? cat.description ?? '',
         imageUrl:    value.image_url ?? cat.imageUrl ?? '',
-        segmentId:   value.segment_id ?? cat.segmentId ?? null,
       };
       this.dashService.updateCategory(this.outletId, cat.categoryId, dto).subscribe({
         next: () => { this.toastService.success('Category updated'); this.loadCategories(); },

@@ -183,7 +183,7 @@
                 }
               </div>
               <div class="oo-detail-actions">
-                @for (next of nextStatuses(order.status); track next.value) {
+                @for (next of nextStatuses(order.status, order.type); track next.value) {
                   <button type="button" class="oo-action-btn" (click)="$event.stopPropagation(); updateStatus(order, next.value)">
                     {{ next.label }}
                   </button>

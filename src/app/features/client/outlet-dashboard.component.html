@@ -1,4 +1,18 @@
 <div class="od-wrap">
+
+  <!-- Date Range Selector -->
+  <div class="date-range-bar">
+    @for (r of DATE_RANGES; track r.key) {
+      <button
+        class="dr-pill"
+        type="button"
+        [class.active]="dateRange() === r.key"
+        (click)="setDateRange(r.key)">
+        {{ r.label }}
+      </button>
+    }
+  </div>
+
   @if (loading()) {
     <div class="od-skeleton">
 

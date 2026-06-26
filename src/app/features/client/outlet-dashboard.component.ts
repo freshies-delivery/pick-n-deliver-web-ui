@@ -45,6 +45,29 @@ export class OutletDashboardComponent implements OnInit, OnDestroy {
   readonly loading        = signal(true);
   readonly lastRefreshed  = signal<Date>(new Date());
 
+  readonly dateRange = signal<'today' | 'week' | 'month'>('today');
+  readonly DATE_RANGES: { key: 'today' | 'week' | 'month'; label: string }[] = [
+    { key: 'today', label: 'Today' },
+    { key: 'week',  label: 'This Week' },
+    { key: 'month', label: 'This Month' },
+  ];
+
+  readonly rangeLabel = computed(() =>
+    ({ today: 'Today', week: 'This Week', month: 'This Month' }[this.dateRange()])
+  );
+  readonly rangeCompare = computed(() =>
+    ({ today: 'vs yesterday', week: 'vs last week', month: 'vs last month' }[this.dateRange()])
+  );
+  readonly weeklyChartLabel = computed(() =>
+    ({ today: 'Orders — Last 7 Days', week: 'Orders — This Week', month: 'Orders — This Month' }[this.dateRange()])
+  );
+
+  setDateRange(range: 'today' | 'week' | 'month'): void {
+    if (this.dateRange() === range) return;
+    this.dateRange.set(range);
+    this.loadAll();
+  }
+
   readonly activeCount = computed(() =>
     this.liveOrders().filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length
   );
@@ -67,7 +90,7 @@ export class OutletDashboardComponent implements OnInit, OnDestroy {
 
   loadAll(): void {
     this.loading.set(true);
-    this.dashService.getOutletDashboard(this.outletId, 'today')
+    this.dashService.getOutletDashboard(this.outletId, this.dateRange())
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: d => {

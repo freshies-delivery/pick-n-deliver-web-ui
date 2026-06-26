@@ -52,6 +52,12 @@ export class OutletOrderService {
     return this.http.put<OutletOrderDto>(`${this.endpoint}/${id}`, payload);
   }
 
+  /** Status-only update — PATCH /api/orders/{id}/status. The backend validates the
+   *  transition against the order's type and rejects invalid moves with HTTP 400. */
+  updateStatus(id: number, status: string): Observable<OutletOrderDto> {
+    return this.http.patch<OutletOrderDto>(`${this.endpoint}/${id}/status`, { status });
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.endpoint}/${id}`);
   }

@@ -67,7 +67,7 @@ export class OutletOrdersComponent implements OnChanges {
   readonly stats = computed(() => {
     const all = this.orders();
     const total    = all.length;
-    const active   = all.filter(o => ['PLACED','ACCEPTED','PREPARING','READY','READY_FOR_PICKUP','PICKED_UP','OUT_FOR_DELIVERY'].includes((o.status ?? '').toUpperCase())).length;
+    const active   = all.filter(o => this.ACTIVE_STATUSES.includes((o.status ?? '').toUpperCase())).length;
     const revenue  = all.reduce((s, o) => s + (o.totalAmount ?? 0), 0);
     const avgOrder = total > 0 ? revenue / total : 0;
     return { total, active, revenue, avgOrder };
@@ -82,18 +82,18 @@ export class OutletOrdersComponent implements OnChanges {
     return m;
   });
 
+  // Mirrors the backend OrderStatus enum (com.pickndeliver.server.enums.OrderStatus).
   readonly filterTabs = [
     { key: 'all',              label: 'All' },
-    { key: 'PLACED',           label: 'Placed' },
-    { key: 'ACCEPTED',         label: 'Accepted' },
+    { key: 'PENDING',          label: 'Pending' },
+    { key: 'CONFIRMED',        label: 'Confirmed' },
     { key: 'PREPARING',        label: 'Preparing' },
-    { key: 'READY',            label: 'Ready' },
     { key: 'READY_FOR_PICKUP', label: 'Ready for Pickup' },
-    { key: 'PICKED_UP',        label: 'Picked Up' },
+    { key: 'OUT_FOR_PICKUP',   label: 'Out for Pickup' },
     { key: 'OUT_FOR_DELIVERY', label: 'Out for Delivery' },
     { key: 'DELIVERED',        label: 'Delivered' },
-    { key: 'COMPLETED',        label: 'Completed' },
     { key: 'CANCELLED',        label: 'Cancelled' },
+    { key: 'FAILED',           label: 'Failed' },
   ];
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -131,12 +131,14 @@ export class OutletOrdersComponent implements OnChanges {
 
   updateStatus(order: OutletOrderDto, status: string): void {
     if (!order.orderId) return;
-    this.orderService.update(order.orderId, { ...order, status }).subscribe({
+    this.orderService.updateStatus(order.orderId, status).subscribe({
       next: updated => {
-        this.orders.update(list => list.map(o => o.orderId === updated.orderId ? updated : o));
+        // Merge so list-only fields (segmentName, etc.) the status response omits are kept.
+        this.orders.update(list => list.map(o => o.orderId === order.orderId ? { ...o, ...updated } : o));
         this.toastService.success('Status updated');
       },
-      error: () => this.toastService.error('Failed to update status'),
+      error: err => this.toastService.error(
+        err?.status === 400 ? 'That status change isn’t allowed' : 'Failed to update status'),
     });
   }
 
@@ -150,9 +152,13 @@ export class OutletOrdersComponent implements OnChanges {
     this.modalService.openOrderTracking(orderId).subscribe();
   }
 
+  // Non-terminal backend statuses (everything except DELIVERED / FAILED / CANCELLED).
+  private readonly ACTIVE_STATUSES = [
+    'PENDING', 'CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP', 'OUT_FOR_PICKUP', 'OUT_FOR_DELIVERY',
+  ];
+
   isActive(status?: string): boolean {
-    const s = (status ?? '').toUpperCase();
-    return ['PLACED','ACCEPTED','PREPARING','READY','READY_FOR_PICKUP','PICKED_UP','OUT_FOR_DELIVERY'].includes(s);
+    return this.ACTIVE_STATUSES.includes((status ?? '').toUpperCase());
   }
 
   confirmDelete(order: OutletOrderDto): void {
@@ -172,20 +178,15 @@ export class OutletOrdersComponent implements OnChanges {
 
   accentColor(status?: string): string {
     switch ((status ?? '').toUpperCase()) {
-      case 'PLACED':           return '#38BDF8';
-      case 'ACCEPTED':         return '#67E8F9';
+      case 'PENDING':          return '#38BDF8';
+      case 'CONFIRMED':        return '#67E8F9';
       case 'PREPARING':        return '#FCD34D';
-      case 'READY':
       case 'READY_FOR_PICKUP': return '#C4B5FD';
-      case 'PICKED_UP':        return '#93C5FD';
+      case 'OUT_FOR_PICKUP':   return '#93C5FD';
       case 'OUT_FOR_DELIVERY': return '#A5B4FC';
       case 'DELIVERED':        return '#6EE7B7';
-      case 'COMPLETED':        return '#86EFAC';
       case 'CANCELLED':        return '#FCA5A5';
-      // legacy
-      case 'PENDING':          return '#FCD34D';
-      case 'IN_PROGRESS':      return '#93C5FD';
-      case 'ON_THE_WAY':       return '#A5B4FC';
+      case 'FAILED':           return '#F87171';
       default:                 return '#A5B4FC';
     }
   }
@@ -202,20 +203,26 @@ export class OutletOrdersComponent implements OnChanges {
     return '₹' + v.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
 
-  nextStatuses(current?: string): { label: string; value: string }[] {
+  /**
+   * Valid next statuses for the order-status editor, mirroring the backend
+   * state machine in OrderService.validateStatusTransition (type-aware).
+   * DELIVERY: …READY_FOR_PICKUP → OUT_FOR_PICKUP → OUT_FOR_DELIVERY → DELIVERED.
+   * PICKUP:   …READY_FOR_PICKUP → DELIVERED.
+   */
+  nextStatuses(current?: string, type?: string): { label: string; value: string }[] {
+    const cancel = { label: 'Cancel', value: 'CANCELLED' };
+    const fail   = { label: 'Mark Failed', value: 'FAILED' };
+    const isPickup = (type ?? 'DELIVERY').toUpperCase() === 'PICKUP';
     switch ((current ?? '').toUpperCase()) {
-      case 'PLACED':           return [{ label: 'Accept Order',          value: 'ACCEPTED' },       { label: 'Cancel', value: 'CANCELLED' }];
-      case 'ACCEPTED':         return [{ label: 'Start Preparing',       value: 'PREPARING' },      { label: 'Cancel', value: 'CANCELLED' }];
-      case 'PREPARING':        return [
-        { label: 'Mark Ready (Delivery)',  value: 'READY' },
-        { label: 'Ready for Pickup',       value: 'READY_FOR_PICKUP' },
-        { label: 'Cancel',                 value: 'CANCELLED' },
-      ];
-      case 'READY':            return [{ label: 'Rider Picked Up',       value: 'PICKED_UP' },      { label: 'Cancel', value: 'CANCELLED' }];
-      case 'READY_FOR_PICKUP': return [{ label: 'Mark Completed',        value: 'COMPLETED' },      { label: 'Cancel', value: 'CANCELLED' }];
-      case 'PICKED_UP':        return [{ label: 'Out for Delivery',      value: 'OUT_FOR_DELIVERY' },{ label: 'Cancel', value: 'CANCELLED' }];
-      case 'OUT_FOR_DELIVERY': return [{ label: 'Mark Delivered',        value: 'DELIVERED' },      { label: 'Cancel', value: 'CANCELLED' }];
-      default:                 return [];
+      case 'PENDING':          return [{ label: 'Confirm Order',          value: 'CONFIRMED' },        cancel];
+      case 'CONFIRMED':        return [{ label: 'Start Preparing',        value: 'PREPARING' },        cancel];
+      case 'PREPARING':        return [{ label: 'Mark Ready for Pickup',  value: 'READY_FOR_PICKUP' }, cancel];
+      case 'READY_FOR_PICKUP': return isPickup
+        ? [{ label: 'Mark Delivered',      value: 'DELIVERED' },      cancel]
+        : [{ label: 'Rider Out for Pickup', value: 'OUT_FOR_PICKUP' }, cancel];
+      case 'OUT_FOR_PICKUP':   return [{ label: 'Out for Delivery',       value: 'OUT_FOR_DELIVERY' }, cancel, fail];
+      case 'OUT_FOR_DELIVERY': return [{ label: 'Mark Delivered',         value: 'DELIVERED' },        fail];
+      default:                 return [];  // DELIVERED / FAILED / CANCELLED are terminal
     }
   }
 }

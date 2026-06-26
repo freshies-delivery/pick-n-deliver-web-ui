@@ -261,10 +261,27 @@
   text-overflow: ellipsis;
 }
 
+.oo-meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 2px;
+}
+
 .oo-user {
   font-size: 10.5px;
   color: var(--t3);
-  margin-top: 1px;
+}
+
+.oo-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  color: var(--t3);
+
+  svg { opacity: 0.7; }
 }
 
 .oo-type {

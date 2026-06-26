@@ -203,6 +203,17 @@ export class OutletOrdersComponent implements OnChanges {
     return '₹' + v.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
 
+  /** Formats the order's createdTime (ISO string from the backend) as e.g. "26 Jun 2026, 4:48 PM". */
+  formatDateTime(value?: string | null): string {
+    if (!value) return '—';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', hour12: true,
+    });
+  }
+
   /**
    * Valid next statuses for the order-status editor, mirroring the backend
    * state machine in OrderService.validateStatusTransition (type-aware).

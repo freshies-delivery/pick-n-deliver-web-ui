@@ -16,6 +16,7 @@ export interface OutletOrderDto {
   orderId?: number;
   type?: string;
   status?: string;
+  createdTime?: string;
   totalAmount?: number;
   taxDetails?: string;
   requestBag?: boolean;

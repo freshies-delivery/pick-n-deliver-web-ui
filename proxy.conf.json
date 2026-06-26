@@ -1,13 +1,13 @@
 {
   "/api": {
-    "target": "http://localhost:8086",
+    "target": "http://localhost:8090",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
     "pathRewrite": { "^/api": "/api/admin-app/api" }
   },
   "/ws": {
-    "target": "http://localhost:8080",
+    "target": "http://localhost:8091",
     "secure": false,
     "changeOrigin": true,
     "ws": true,

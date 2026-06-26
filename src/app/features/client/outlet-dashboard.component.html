@@ -147,9 +147,9 @@
           </svg>
         </div>
         <div class="kpi-value">{{ stats()!.ordersToday }}</div>
-        <div class="kpi-label">Orders Today</div>
+        <div class="kpi-label">Orders {{ rangeLabel() }}</div>
         <div class="kpi-change" [class.up]="stats()!.ordersTodayChange >= 0" [class.down]="stats()!.ordersTodayChange < 0">
-          {{ stats()!.ordersTodayChange >= 0 ? '↑' : '↓' }} {{ stats()!.ordersTodayChange | number:'1.0-0' }}% vs yesterday
+          {{ stats()!.ordersTodayChange >= 0 ? '↑' : '↓' }} {{ stats()!.ordersTodayChange | number:'1.0-0' }}% {{ rangeCompare() }}
         </div>
         <div class="sparkline">
           @for (v of stats()!.sparklines.orders; track $index) {
@@ -169,9 +169,9 @@
           </svg>
         </div>
         <div class="kpi-value">{{ formatRevenue(stats()!.revenueToday) }}</div>
-        <div class="kpi-label">Revenue Today</div>
+        <div class="kpi-label">Revenue {{ rangeLabel() }}</div>
         <div class="kpi-change" [class.up]="stats()!.revenueTodayChange >= 0" [class.down]="stats()!.revenueTodayChange < 0">
-          {{ stats()!.revenueTodayChange >= 0 ? '↑' : '↓' }} {{ stats()!.revenueTodayChange | number:'1.0-0' }}% vs yesterday
+          {{ stats()!.revenueTodayChange >= 0 ? '↑' : '↓' }} {{ stats()!.revenueTodayChange | number:'1.0-0' }}% {{ rangeCompare() }}
         </div>
         <div class="sparkline">
           @for (v of stats()!.sparklines.revenue; track $index) {
@@ -253,7 +253,7 @@
         </div>
 
         <div class="weekly-chart">
-          <div class="wc-label">Orders — Last 7 Days</div>
+          <div class="wc-label">{{ weeklyChartLabel() }}</div>
           <div class="wc-bars">
             @for (day of stats()!.weeklyOrders; track day.day; let i = $index) {
               <div class="wc-col">

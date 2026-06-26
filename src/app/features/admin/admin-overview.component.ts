@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
-import { Subscription, switchMap } from 'rxjs';
+import { Subscription, combineLatest, switchMap, tap } from 'rxjs';
 
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { ModalService } from '../../core/services/modal.service';
@@ -55,6 +55,13 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
     { key: 'week',  label: 'This Week' },
     { key: 'month', label: 'This Month' },
   ];
+
+  readonly rangeLabel = computed(() =>
+    ({ today: 'Today', week: 'This Week', month: 'This Month' }[this.dateRange()])
+  );
+  readonly rangeCompare = computed(() =>
+    ({ today: 'vs yesterday', week: 'vs last week', month: 'vs last month' }[this.dateRange()])
+  );
 
   readonly OUTLET_CITIES: Record<number, string> = {
     1: 'Chennai', 2: 'Bengaluru', 3: 'Mumbai', 4: 'Delhi', 5: 'Hyderabad',
@@ -140,10 +147,14 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
     }
   };
 
-  private readonly stats$ = toObservable(this.locationService.selectedIds).pipe(
-    switchMap(ids => {
-      return this.dashService.getGlobalStats(ids.length > 0 ? ids : undefined);
-    })
+  private readonly stats$ = combineLatest([
+    toObservable(this.locationService.selectedIds),
+    toObservable(this.dateRange),
+  ]).pipe(
+    tap(() => this.loading.set(true)),
+    switchMap(([ids, range]) =>
+      this.dashService.getGlobalStats(ids.length > 0 ? ids : undefined, range)
+    )
   );
 
   private statsSub?: Subscription;

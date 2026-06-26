@@ -153,8 +153,8 @@
           </div>
           <div class="stat-body">
             <div class="stat-value">{{ stats()!.ordersToday | number }}</div>
-            <div class="stat-label">Orders Today</div>
-            <div class="stat-trend up">↑ {{ stats()!.ordersGrowthPercent }}% vs yesterday</div>
+            <div class="stat-label">Orders {{ rangeLabel() }}</div>
+            <div class="stat-trend up">↑ {{ stats()!.ordersGrowthPercent }}% {{ rangeCompare() }}</div>
           </div>
         </div>
 

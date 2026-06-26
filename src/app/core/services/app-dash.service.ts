@@ -10,8 +10,8 @@ export class AppDashService {
   private readonly http = inject(HttpClient);
 
   // GLOBAL DASHBOARD
-  getGlobalStats(locationIds?: number[]): Observable<any> {
-    let p = new HttpParams();
+  getGlobalStats(locationIds?: number[], range = 'today'): Observable<any> {
+    let p = new HttpParams().set('range', range);
     if (locationIds && locationIds.length > 0) {
       locationIds.forEach(id => p = p.append('locationIds', String(id)));
     }

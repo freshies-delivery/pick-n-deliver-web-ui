@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { apiUrl } from '../api.config';
 
 export interface AuthUser {
   name: string;
@@ -32,7 +33,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<{ success: boolean; token: string }> {
-    return this.http.post<{ success: boolean; token: string }>('/api/auth/login', { email, password }).pipe(
+    return this.http.post<{ success: boolean; token: string }>(apiUrl('/api/auth/login'), { email, password }).pipe(
       tap(res => {
         if (res.success && res.token) {
           localStorage.setItem(TOKEN_KEY, res.token);

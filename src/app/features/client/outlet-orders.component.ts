@@ -1,14 +1,15 @@
 import {
-  Component, Input, OnChanges, SimpleChanges,
+  Component, Input, OnChanges, OnDestroy, SimpleChanges,
   ChangeDetectionStrategy, inject, signal, computed,
 } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { OutletOrderService, OutletOrderDto } from './services/outlet-order.service';
 import { ModalService } from '../../core/services/modal.service';
 import { ToastService } from '../../core/services/toast.service';
+import { OrderSocketService } from '../../core/services/order-socket.service';
 
 @Component({
   selector: 'app-outlet-orders',
@@ -18,13 +19,16 @@ import { ToastService } from '../../core/services/toast.service';
   templateUrl: './outlet-orders.component.html',
   styleUrl: './outlet-orders.component.scss',
 })
-export class OutletOrdersComponent implements OnChanges {
+export class OutletOrdersComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) outletId!: number;
   @Input() outletName = '';
 
   private readonly orderService  = inject(OutletOrderService);
   private readonly modalService  = inject(ModalService);
   private readonly toastService  = inject(ToastService);
+  private readonly socketService = inject(OrderSocketService);
+
+  private liveSubs: Subscription[] = [];
 
   readonly loading      = signal(true);
   readonly orders       = signal<OutletOrderDto[]>([]);
@@ -97,7 +101,40 @@ export class OutletOrdersComponent implements OnChanges {
   ];
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['outletId'] && this.outletId) this.load();
+    if (changes['outletId'] && this.outletId) {
+      this.load();
+      this.subscribeLive(this.outletId);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.teardownLive();
+  }
+
+  /** Live updates: new orders prepend, status changes patch the matching row. */
+  private subscribeLive(outletId: number): void {
+    this.teardownLive();
+    this.liveSubs.push(
+      this.socketService.watchOutletOrders(outletId).subscribe(order => this.onLiveNewOrder(order)),
+      this.socketService.watchOutletOrderUpdates(outletId).subscribe(update => this.onLiveStatus(update)),
+    );
+  }
+
+  private teardownLive(): void {
+    this.liveSubs.forEach(s => s.unsubscribe());
+    this.liveSubs = [];
+  }
+
+  private onLiveNewOrder(order: OutletOrderDto): void {
+    if (!order?.orderId) return;
+    this.orders.update(list =>
+      list.some(o => o.orderId === order.orderId) ? list : [order, ...list]);
+  }
+
+  private onLiveStatus(update: { orderId: number; status: string }): void {
+    if (!update?.orderId) return;
+    this.orders.update(list =>
+      list.map(o => o.orderId === update.orderId ? { ...o, status: update.status } : o));
   }
 
   load(): void {

@@ -7,11 +7,11 @@
     "pathRewrite": { "^/api": "/api/admin-app/api" }
   },
   "/ws": {
-    "target": "http://localhost:8091",
+    "target": "http://localhost:8090",
     "secure": false,
     "changeOrigin": true,
     "ws": true,
     "logLevel": "debug",
-    "pathRewrite": { "^/ws": "/api/user-app/ws" }
+    "pathRewrite": { "^/ws": "/api/admin-app/ws" }
   }
 }

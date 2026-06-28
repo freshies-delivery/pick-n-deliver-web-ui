@@ -1,9 +1,11 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderSocketService implements OnDestroy {
+  private readonly auth = inject(AuthService);
   private client: Client | null = null;
   private isConnected = false;
   private pendingCallbacks: Array<() => void> = [];
@@ -17,9 +19,12 @@ export class OrderSocketService implements OnDestroy {
 
   private ensureClient(): void {
     if (this.client) return;
+    const token = this.auth.token;
     this.client = new Client({
       brokerURL: this.brokerURL,
       reconnectDelay: 5000,
+      // Forwarded on the STOMP CONNECT frame for broker-side authentication.
+      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
       onConnect: () => {
         this.isConnected = true;
         const pending = [...this.pendingCallbacks];
@@ -33,9 +38,9 @@ export class OrderSocketService implements OnDestroy {
     this.client.activate();
   }
 
-  watchOrder(orderId: number): Observable<any> {
+  /** Subscribes to an arbitrary STOMP destination; emits each parsed message body. */
+  watch(destination: string): Observable<any> {
     this.ensureClient();
-    const topic = `/topic/orders/${orderId}`;
 
     return new Observable(observer => {
       let stompSub: StompSubscription | undefined;
@@ -43,7 +48,7 @@ export class OrderSocketService implements OnDestroy {
 
       const doSubscribe = () => {
         if (teardownCalled || !this.client) return;
-        stompSub = this.client.subscribe(topic, (msg: IMessage) => {
+        stompSub = this.client.subscribe(destination, (msg: IMessage) => {
           try {
             const data = JSON.parse(msg.body);
             this.zone.run(() => observer.next(data));
@@ -62,6 +67,20 @@ export class OrderSocketService implements OnDestroy {
         stompSub?.unsubscribe();
       };
     });
+  }
+
+  watchOrder(orderId: number): Observable<any> {
+    return this.watch(`/topic/orders/${orderId}`);
+  }
+
+  /** New orders placed for an outlet (full order payload). */
+  watchOutletOrders(outletId: number): Observable<any> {
+    return this.watch(`/topic/outlet/${outletId}/orders`);
+  }
+
+  /** Status changes for an outlet's orders ({ orderId, status }). */
+  watchOutletOrderUpdates(outletId: number): Observable<{ orderId: number; status: string }> {
+    return this.watch(`/topic/outlet/${outletId}/order-updates`);
   }
 
   ngOnDestroy(): void {

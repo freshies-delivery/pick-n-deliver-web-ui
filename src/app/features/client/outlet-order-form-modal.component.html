@@ -38,6 +38,59 @@
       </select>
     </div>
 
+    <!-- Items -->
+    <div class="form-divider"></div>
+    <div class="form-section-label">Items <span class="required">*</span></div>
+
+    <div class="form-group">
+      <select #itemPicker class="form-select"
+        [disabled]="loadingItems() || availableItems().length === 0"
+        (change)="addItem(itemPicker.value); itemPicker.value = ''">
+        <option value="">
+          @if (loadingItems()) { Loading items… }
+          @else if (items().length === 0) { No items available for this outlet }
+          @else if (availableItems().length === 0) { All items added }
+          @else { Add an item… }
+        </option>
+        @for (item of availableItems(); track item.itemId) {
+          <option [value]="item.itemId">{{ item.name }} — {{ formatAmount(item.price ?? 0) }}</option>
+        }
+      </select>
+    </div>
+
+    @if (lines().length > 0) {
+      <div class="oi-lines">
+        @for (line of lines(); track line.itemId) {
+          <div class="oi-line">
+            <div class="oi-line-info">
+              <div class="oi-line-name">{{ line.itemName }}</div>
+              <div class="oi-line-price">{{ formatAmount(line.unitPrice) }} each</div>
+            </div>
+            <div class="oi-qty">
+              <button type="button" class="oi-qty-btn" (click)="changeQty(line.itemId, -1)" aria-label="Decrease quantity">−</button>
+              <input class="oi-qty-input" type="number" min="1" [value]="line.quantity"
+                (input)="setQty(line.itemId, $any($event.target).value)" />
+              <button type="button" class="oi-qty-btn" (click)="changeQty(line.itemId, 1)" aria-label="Increase quantity">+</button>
+            </div>
+            <div class="oi-line-total">{{ formatAmount(line.unitPrice * line.quantity) }}</div>
+            <button type="button" class="oi-remove" (click)="removeLine(line.itemId)" aria-label="Remove item">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                <path d="M3.5 3.5l7 7M10.5 3.5l-7 7"/>
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+      <div class="oi-total-row">
+        <span>Total</span>
+        <span class="oi-total-val">{{ formatAmount(total()) }}</span>
+      </div>
+    } @else {
+      <span class="form-hint">Add at least one item to the order.</span>
+    }
+
+    <div class="form-divider"></div>
+
     <div class="form-group">
       <label class="form-label">Notes <span class="optional">(optional)</span></label>
       <textarea
@@ -55,7 +108,7 @@
 
   </form>
 
-  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid">
+  <button footer class="btn-save" type="button" (click)="save()" [disabled]="form.invalid || lines().length === 0">
     <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
       <path d="M2 7l4 4 6-6"/>
     </svg>

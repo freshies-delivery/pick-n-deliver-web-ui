@@ -22,3 +22,128 @@ form {
   cursor: pointer;
   accent-color: #6366F1;
 }
+
+/* ── Order items ─────────────────────────────────────────────── */
+.oi-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.oi-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--bdr);
+  border-radius: 9px;
+  background: rgba(99, 102, 241, 0.04);
+}
+
+.oi-line-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.oi-line-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.oi-line-price {
+  font-size: 11px;
+  color: var(--t3);
+  margin-top: 1px;
+}
+
+.oi-qty {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.oi-qty-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.08);
+  color: #A5B4FC;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(99, 102, 241, 0.18); }
+}
+
+.oi-qty-input {
+  width: 40px;
+  text-align: center;
+  padding: 4px 2px;
+  border: 1px solid var(--bdr);
+  border-radius: 6px;
+  background: #0A0B14;
+  color: var(--t1);
+  font-size: 12.5px;
+  font-family: inherit;
+  outline: none;
+
+  &:focus { border-color: rgba(99, 102, 241, 0.5); }
+
+  /* hide number spinners */
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+}
+
+.oi-line-total {
+  width: 64px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--t1);
+  flex-shrink: 0;
+}
+
+.oi-remove {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--t3);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+
+  svg { width: 12px; height: 12px; }
+  &:hover { background: rgba(244, 63, 94, 0.12); color: #F87171; }
+}
+
+.oi-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.oi-total-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--t1);
+}

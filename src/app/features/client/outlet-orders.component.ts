@@ -32,6 +32,7 @@ export class OutletOrdersComponent implements OnChanges, OnDestroy {
 
   readonly loading      = signal(true);
   readonly orders       = signal<OutletOrderDto[]>([]);
+  readonly searchQuery   = signal<string>('');
   readonly statusFilter  = signal<string>('all');
   readonly segmentFilter = signal<string>('all');
   readonly expandedId    = signal<number | null>(null);
@@ -60,13 +61,31 @@ export class OutletOrdersComponent implements OnChanges, OnDestroy {
   readonly filteredOrders = computed(() => {
     const f   = this.statusFilter();
     const seg = this.segmentFilter();
+    const q   = this.searchQuery().trim().toLowerCase();
     return this.orders().filter(o => {
       const matchesStatus  = f === 'all' || (o.status ?? '').toUpperCase() === f;
       const matchesSegment = seg === 'all' ||
         (seg === '__none__' ? o.segmentId == null : String(o.segmentId) === seg);
-      return matchesStatus && matchesSegment;
+      const matchesSearch  = !q || this.matchesSearch(o, q);
+      return matchesStatus && matchesSegment && matchesSearch;
     });
   });
+
+  /** Matches a search term against order id, user id, type, status, segment, notes and item names. */
+  private matchesSearch(o: OutletOrderDto, q: string): boolean {
+    const haystack = [
+      o.orderId != null ? '#' + o.orderId : '',
+      o.orderId,
+      o.userId != null ? 'user #' + o.userId : '',
+      o.userId,
+      o.type,
+      o.status,
+      o.segmentName,
+      o.notes,
+      ...(o.orderItems ?? []).map(i => i.itemName),
+    ];
+    return haystack.some(v => v != null && String(v).toLowerCase().includes(q));
+  }
 
   readonly stats = computed(() => {
     const all = this.orders();

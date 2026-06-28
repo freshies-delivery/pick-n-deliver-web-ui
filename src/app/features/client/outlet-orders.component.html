@@ -88,6 +88,25 @@
       }
     </div>
 
+    <div class="oo-search">
+      <svg class="oo-search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>
+      </svg>
+      <input
+        type="text"
+        class="oo-search-input"
+        placeholder="Search orders…"
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)" />
+      @if (searchQuery()) {
+        <button type="button" class="oo-search-clear" (click)="searchQuery.set('')" aria-label="Clear search">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <path d="M3.5 3.5l7 7M10.5 3.5l-7 7"/>
+          </svg>
+        </button>
+      }
+    </div>
+
     <button type="button" class="oo-btn-create" (click)="openCreate()">
       <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path d="M7 2v10M2 7h10"/>
@@ -100,10 +119,17 @@
   @if (loading()) {
     <app-skeleton-list [rows]="6" />
   } @else if (filteredOrders().length === 0) {
-    <app-empty-state
-      [title]="statusFilter() === 'all' ? 'No orders yet' : 'No ' + statusFilter().toLowerCase().replace('_', ' ') + ' orders'"
-      [message]="statusFilter() === 'all' ? 'Use the New Order button to create the first order for this outlet' : 'Change the filter to see other orders'"
-    />
+    @if (searchQuery()) {
+      <app-empty-state
+        title="No matching orders"
+        [message]="'No orders match \'' + searchQuery() + '\'. Try a different search.'"
+      />
+    } @else {
+      <app-empty-state
+        [title]="statusFilter() === 'all' ? 'No orders yet' : 'No ' + statusFilter().toLowerCase().replace('_', ' ') + ' orders'"
+        [message]="statusFilter() === 'all' ? 'Use the New Order button to create the first order for this outlet' : 'Change the filter to see other orders'"
+      />
+    }
   } @else {
     <div class="oo-list">
       @for (order of filteredOrders(); track order.orderId) {

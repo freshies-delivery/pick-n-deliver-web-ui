@@ -47,7 +47,9 @@ export class UserFormModalComponent implements OnInit {
   ngOnInit(): void {
     this.offerService.list()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(offers => this.offers.set(offers.filter(o => o.status === 'active')));
+      .subscribe(offers => this.offers.set(
+        offers.filter(o => !o.offerExpiry || o.offerExpiry.getTime() >= Date.now())
+      ));
 
     if (this.data?.user) {
       this.isEdit.set(true);

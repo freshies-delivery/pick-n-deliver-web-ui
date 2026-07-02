@@ -2,14 +2,15 @@
   <app-page-header
     [breadcrumb]="'Admin / Offers'"
     [title]="'Offers'"
-    [subtitle]="offers().length + ' offers'"
+    [subtitle]="offers().length + ' unassigned offers'"
+    [actions]="headerActions"
   />
 
   <app-stats-strip [stats]="statsStrip()" />
 
   <app-page-toolbar
     searchPlaceholder="Search offers…"
-    [filterOptions]="filterOptions()"
+    [filterOptions]="filterOptions"
     [activeFilter]="filter()"
     (searchChange)="searchQuery.set($event); currentPage.set(1)"
     (filterChange)="filter.set($event); currentPage.set(1)"
@@ -25,17 +26,19 @@
       />
     } @else {
       <div class="offers-list">
-        @for (offer of pagedOffers(); track offer.id) {
+        @for (offer of pagedOffers(); track offer.offerId) {
           <app-rich-list-item
-            [id]="offer.id"
-            [name]="offer.name"
-            [description]="offer.code"
+            [id]="offer.offerId"
+            [name]="offer.offerName"
+            [description]="offer.offerCode"
             [category]="discountLabel(offer)"
-            [status]="offer.status"
+            [status]="status(offer)"
             [stats]="offerStats(offer)"
-            [showEdit]="false"
-            [showDelete]="false"
+            [showEdit]="true"
+            [showDelete]="true"
             [accentBar]="true"
+            (editClick)="openEdit(offer)"
+            (deleteClick)="confirmDelete(offer)"
           />
         }
       </div>

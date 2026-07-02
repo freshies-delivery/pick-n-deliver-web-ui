@@ -58,8 +58,8 @@
       <label class="form-label">Assign Active Offer</label>
       <select formControlName="offer_id" class="form-select">
         <option [value]="null">— None —</option>
-        @for (offer of offers(); track offer.id) {
-          <option [value]="offer.id">{{ offer.name }} ({{ offer.code }})</option>
+        @for (offer of offers(); track offer.offerId) {
+          <option [value]="offer.offerId">{{ offer.offerName }} ({{ offer.offerCode }})</option>
         }
       </select>
       <span class="form-hint">Only active offers are shown</span>

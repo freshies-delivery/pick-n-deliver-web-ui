@@ -246,6 +246,23 @@ button.mat-mdc-icon-button {
   line-height: 1.6;
 }
 
+// Native date/time pickers default to a light color-scheme, which renders the
+// calendar-picker indicator dark-on-dark (invisible) against our dark inputs.
+// Force the dark scheme so the icon and popup are visible and clickable.
+input.form-input[type="date"],
+input.form-input[type="datetime-local"],
+input.form-input[type="time"] {
+  color-scheme: dark;
+  cursor: pointer;
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.65;
+    transition: opacity 180ms;
+    &:hover { opacity: 1; }
+  }
+}
+
 .form-select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236666AA' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");

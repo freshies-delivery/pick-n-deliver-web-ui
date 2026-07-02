@@ -55,26 +55,18 @@
     @if (!isFreeDelivery) {
       <div class="form-group">
         <label class="form-label">{{ currentTypeConfig.discountLabel }} <span class="required">*</span></label>
-        @if (isBuyXGetY) {
-          <div class="buy-get-row">
-            <div class="form-group" style="flex:1">
-              <label class="form-label" style="font-size:10px">Buy Qty</label>
-              <input formControlName="buy_qty" class="form-input" type="number" min="1" placeholder="2" />
-            </div>
-            <span class="buy-get-sep">→ Get</span>
-            <div class="form-group" style="flex:1">
-              <label class="form-label" style="font-size:10px">Free Qty</label>
-              <input formControlName="get_qty" class="form-input" type="number" min="1" placeholder="1" />
-            </div>
-          </div>
-        } @else {
-          <div class="input-prefix-wrap">
-            <span class="input-prefix">{{ form.get('offer_type')?.value === 'PERCENTAGE' ? '%' : '₹' }}</span>
-            <input formControlName="offer_discount" class="form-input with-prefix" type="number" min="0"
-              [max]="form.get('offer_type')?.value === 'PERCENTAGE' ? 100 : null" placeholder="0"
-              [class.ng-invalid]="form.get('offer_discount')?.invalid && form.get('offer_discount')?.touched"
-              [class.ng-touched]="form.get('offer_discount')?.touched" />
-          </div>
+        <div class="input-prefix-wrap">
+          <span class="input-prefix">{{ form.get('offer_type')?.value === 'PERCENTAGE' ? '%' : '₹' }}</span>
+          <input formControlName="offer_discount" class="form-input with-prefix" type="number" min="0"
+            [max]="form.get('offer_type')?.value === 'PERCENTAGE' ? 100 : null" placeholder="0"
+            [class.ng-invalid]="form.get('offer_discount')?.invalid && form.get('offer_discount')?.touched"
+            [class.ng-touched]="form.get('offer_discount')?.touched" />
+        </div>
+        @if (form.get('offer_discount')?.hasError('required') && form.get('offer_discount')?.touched) {
+          <span class="form-error">Discount value is required</span>
+        }
+        @if (form.get('offer_discount')?.hasError('max') && form.get('offer_discount')?.touched) {
+          <span class="form-error">Percentage cannot exceed 100</span>
         }
       </div>
     }
@@ -85,6 +77,14 @@
         Delivery charge will be waived for users with this code
       </div>
     }
+
+    <div class="form-divider"></div>
+
+    <div class="form-group">
+      <label class="form-label">Expiry Date <span class="optional">(optional)</span></label>
+      <input #expiryInput formControlName="offer_expiry" class="form-input" type="date"
+             (click)="openPicker(expiryInput)" />
+    </div>
 
   </form>
 

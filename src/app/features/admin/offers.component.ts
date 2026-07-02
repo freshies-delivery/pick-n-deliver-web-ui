@@ -8,9 +8,16 @@ import { RichListItemComponent, ListStat } from '../../shared/components/rich-li
 import { SkeletonListComponent } from '../../shared/components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
-import { Offer, OfferService } from './offer.service';
+import { Offer, OfferType, OfferPayload, OfferService } from './offer.service';
 import { ModalService } from '../../core/services/modal.service';
 import { ToastService } from '../../core/services/toast.service';
+
+const TYPE_LABELS: Record<OfferType, string> = {
+  PERCENTAGE:    'Percentage',
+  FLAT:          'Flat',
+  FREE_DELIVERY: 'Free Delivery',
+  BUY_X_GET_Y:   'Buy X Get Y',
+};
 
 @Component({
   selector: 'app-offers',
@@ -40,11 +47,14 @@ export class OffersComponent implements OnInit {
     const f = this.filter();
     const q = this.searchQuery().toLowerCase().trim();
     return this.offers().filter(o => {
-      const matchesFilter = f === 'all' || o.status === f;
+      const matchesFilter =
+        f === 'all' ||
+        (f === 'active' && !this.isExpired(o)) ||
+        (f === 'expired' && this.isExpired(o));
       const matchesSearch = !q ||
-        o.name.toLowerCase().includes(q) ||
-        o.code.toLowerCase().includes(q) ||
-        o.applicableCategories.some(c => c.toLowerCase().includes(q));
+        o.offerName.toLowerCase().includes(q) ||
+        o.offerCode.toLowerCase().includes(q) ||
+        TYPE_LABELS[o.offerType].toLowerCase().includes(q);
       return matchesFilter && matchesSearch;
     });
   });
@@ -56,9 +66,8 @@ export class OffersComponent implements OnInit {
 
   readonly statsStrip = computed((): StripStat[] => {
     const all = this.offers();
-    const active = all.filter(o => o.status === 'active').length;
-    const scheduled = all.filter(o => o.status === 'scheduled').length;
-    const expired = all.filter(o => o.status === 'expired').length;
+    const active = all.filter(o => !this.isExpired(o)).length;
+    const expired = all.filter(o => this.isExpired(o)).length;
     return [
       {
         value: all.length,
@@ -76,14 +85,6 @@ export class OffersComponent implements OnInit {
         valueColor: '#22c55e'
       },
       {
-        value: scheduled,
-        label: 'Scheduled',
-        iconPath: 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
-        iconBg: 'rgba(234,179,8,0.15)',
-        iconColor: '#eab308',
-        valueColor: '#eab308'
-      },
-      {
         value: expired,
         label: 'Expired',
         iconPath: 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
@@ -94,12 +95,12 @@ export class OffersComponent implements OnInit {
     ];
   });
 
-  readonly filterOptions = computed((): FilterOption[] => [
-    { value: 'all', label: 'All', count: this.offers().length },
-    { value: 'active', label: 'Active', count: this.offers().filter(o => o.status === 'active').length },
-    { value: 'scheduled', label: 'Scheduled', count: this.offers().filter(o => o.status === 'scheduled').length },
-    { value: 'expired', label: 'Expired', count: this.offers().filter(o => o.status === 'expired').length }
-  ]);
+  // Counts are shown in the stats strip above, so the filter pills omit them.
+  readonly filterOptions: FilterOption[] = [
+    { value: 'all', label: 'All' },
+    { value: 'active', label: 'Active' },
+    { value: 'expired', label: 'Expired' }
+  ];
 
   private readonly modalService = inject(ModalService);
   private readonly toastService = inject(ToastService);
@@ -116,15 +117,19 @@ export class OffersComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.offerService.list()
+    // Only the standalone pool — offers not yet assigned to a user/outlet/item.
+    this.offerService.list(true)
       .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({ next: (offers) => this.offers.set(offers) });
+      .subscribe({
+        next: (offers) => this.offers.set(offers),
+        error: () => this.toastService.error('Failed to load offers'),
+      });
   }
 
   openCreate(): void {
     this.modalService.openAddOffer().subscribe(value => {
       if (!value) return;
-      this.offerService.create(value).subscribe({
+      this.offerService.create(value as unknown as OfferPayload).subscribe({
         next: () => { this.toastService.success('Offer created'); this.load(); },
         error: () => this.toastService.error('Failed to create offer'),
       });
@@ -134,7 +139,7 @@ export class OffersComponent implements OnInit {
   openEdit(offer: Offer): void {
     this.modalService.openEditOffer(offer as unknown as Record<string, unknown>).subscribe(value => {
       if (!value) return;
-      this.offerService.update(offer.id, value).subscribe({
+      this.offerService.update(offer.offerId, value as unknown as OfferPayload).subscribe({
         next: () => { this.toastService.success('Offer updated'); this.load(); },
         error: () => this.toastService.error('Failed to update offer'),
       });
@@ -142,32 +147,46 @@ export class OffersComponent implements OnInit {
   }
 
   confirmDelete(offer: Offer): void {
-    this.modalService.openConfirm({ title: 'Delete Offer', message: `Delete offer "${offer.name}" (${offer.code})?` })
+    this.modalService.openConfirm({ title: 'Delete Offer', message: `Delete offer "${offer.offerName}" (${offer.offerCode})?` })
       .subscribe(confirmed => {
         if (!confirmed) return;
-        this.offerService.delete(offer.id).subscribe({
+        this.offerService.delete(offer.offerId).subscribe({
           next: () => { this.toastService.success('Offer deleted'); this.load(); },
           error: () => this.toastService.error('Failed to delete offer'),
         });
       });
   }
 
-  usagePercent(offer: Offer): number {
-    if (!offer.usageLimit) return 0;
-    return Math.round((offer.usageCount / offer.usageLimit) * 100);
+  isExpired(offer: Offer): boolean {
+    return !!offer.offerExpiry && offer.offerExpiry.getTime() < Date.now();
+  }
+
+  status(offer: Offer): string {
+    return this.isExpired(offer) ? 'expired' : 'active';
+  }
+
+  typeLabel(offer: Offer): string {
+    return TYPE_LABELS[offer.offerType];
+  }
+
+  expiryLabel(offer: Offer): string {
+    if (!offer.offerExpiry) return 'No expiry';
+    return offer.offerExpiry.toLocaleDateString();
   }
 
   offerStats(offer: Offer): ListStat[] {
     return [
-      { value: offer.usageCount, label: 'Used' },
-      { value: offer.usageLimit, label: 'Limit' },
-      { value: this.usagePercent(offer) + '%', label: 'Used %' }
+      { value: this.typeLabel(offer), label: 'Type' },
+      { value: this.expiryLabel(offer), label: 'Expires' }
     ];
   }
 
   discountLabel(offer: Offer): string {
-    return offer.discountType === 'percentage'
-      ? offer.discountValue + '% OFF'
-      : '₹' + offer.discountValue + ' OFF';
+    switch (offer.offerType) {
+      case 'PERCENTAGE':    return offer.offerDiscount + '% OFF';
+      case 'FLAT':          return '₹' + offer.offerDiscount + ' OFF';
+      case 'FREE_DELIVERY': return 'Free Delivery';
+      case 'BUY_X_GET_Y':   return 'Buy X Get Y';
+    }
   }
 }

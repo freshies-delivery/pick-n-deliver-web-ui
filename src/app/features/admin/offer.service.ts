@@ -1,24 +1,39 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { apiUrl } from '../../core/api.config';
 
+export type OfferType = 'PERCENTAGE' | 'FLAT' | 'FREE_DELIVERY' | 'BUY_X_GET_Y';
+
+/**
+ * Matches the backend OfferDto. Offers are created standalone here; the
+ * user/outlet/item target lists stay empty until an offer is assigned later.
+ */
 export interface Offer {
-  id: string;
-  name: string;
-  code: string;
-  discountType: 'percentage' | 'flat';
-  discountValue: number;
-  minOrderValue: number;
-  maxDiscountCap: number;
-  applicableCategories: string[];
-  startDate: Date;
-  endDate: Date;
-  usageCount: number;
-  usageLimit: number;
-  status: 'active' | 'expired' | 'scheduled';
-  createdAt: Date;
+  offerId: number;
+  offerType: OfferType;
+  offerName: string;
+  offerDescription: string;
+  offerCode: string;
+  offerDiscount: number;
+  offerExpiry: Date | null;
+  userIds: number[];
+  outletIds: number[];
+  itemIds: number[];
+}
+
+/** Request body sent to create/update — the OfferDto shape the API expects. */
+export interface OfferPayload {
+  offerName: string;
+  offerCode: string;
+  offerDescription: string;
+  offerType: OfferType;
+  offerDiscount: number;
+  offerExpiry: string | null;
+  userIds?: number[];
+  outletIds?: number[];
+  itemIds?: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,43 +42,43 @@ export class OfferService {
 
   constructor(private readonly http: HttpClient) {}
 
-  create(body: Record<string, unknown>): Observable<Offer> {
-    return this.http.post<Record<string, unknown>>(this.endpoint, body).pipe(map(r => this.map(r)));
-  }
-
-  update(id: string, body: Record<string, unknown>): Observable<Offer> {
-    return this.http.put<Record<string, unknown>>(`${this.endpoint}/${id}`, body).pipe(map(r => this.map(r)));
-  }
-
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.endpoint}/${id}`);
-  }
-
-  list(): Observable<Offer[]> {
-    // TODO: Replace with real endpoint once API contract is defined.
-    // Mock: public/mock/offers.json
-    return this.http.get<Record<string, unknown>[]>('mock/offers.json').pipe(
-      delay(400),
-      map((data) => data.map((raw) => this.map(raw)))
+  /**
+   * @param unassignedOnly when true, requests only offers not yet attached to any
+   *   user/outlet/item (`?assigned=false`) — used by the admin "create & assign later"
+   *   page to avoid fetching the entire offer table.
+   */
+  list(unassignedOnly = false): Observable<Offer[]> {
+    const url = unassignedOnly ? `${this.endpoint}?assigned=false` : this.endpoint;
+    return this.http.get<Record<string, unknown>[]>(url).pipe(
+      map((data) => (data ?? []).map((raw) => this.map(raw)))
     );
   }
 
+  create(body: OfferPayload): Observable<Offer> {
+    return this.http.post<Record<string, unknown>>(this.endpoint, body).pipe(map(r => this.map(r)));
+  }
+
+  update(id: number, body: OfferPayload): Observable<Offer> {
+    return this.http.put<Record<string, unknown>>(`${this.endpoint}/${id}`, body).pipe(map(r => this.map(r)));
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.endpoint}/${id}`);
+  }
+
   private map(raw: Record<string, unknown>): Offer {
+    const expiry = raw['offerExpiry'] as string | null;
     return {
-      id: raw['id'] as string,
-      name: raw['name'] as string,
-      code: raw['code'] as string,
-      discountType: raw['discount_type'] as 'percentage' | 'flat',
-      discountValue: raw['discount_value'] as number,
-      minOrderValue: raw['min_order_value'] as number,
-      maxDiscountCap: raw['max_discount_cap'] as number,
-      applicableCategories: raw['applicable_categories'] as string[],
-      startDate: new Date(raw['start_date'] as string),
-      endDate: new Date(raw['end_date'] as string),
-      usageCount: raw['usage_count'] as number,
-      usageLimit: raw['usage_limit'] as number,
-      status: raw['status'] as 'active' | 'expired' | 'scheduled',
-      createdAt: new Date(raw['created_at'] as string)
+      offerId: raw['offerId'] as number,
+      offerType: (raw['offerType'] as OfferType) ?? 'PERCENTAGE',
+      offerName: (raw['offerName'] as string) ?? '',
+      offerDescription: (raw['offerDescription'] as string) ?? '',
+      offerCode: (raw['offerCode'] as string) ?? '',
+      offerDiscount: (raw['offerDiscount'] as number) ?? 0,
+      offerExpiry: expiry ? new Date(expiry) : null,
+      userIds: (raw['userIds'] as number[]) ?? [],
+      outletIds: (raw['outletIds'] as number[]) ?? [],
+      itemIds: (raw['itemIds'] as number[]) ?? [],
     };
   }
 }

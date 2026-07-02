@@ -6,6 +6,7 @@ import { UserActivityComponent } from './user-activity.component';
 import { UserExploreComponent } from './user-explore.component';
 import { UserOrdersComponent } from './user-orders.component';
 import { UserAddressesComponent } from './user-addresses.component';
+import { UserOffersComponent } from './user-offers.component';
 import { UserRatingsComponent } from './user-ratings.component';
 
 export const USER_ROUTES: Routes = [
@@ -30,6 +31,11 @@ export const USER_ROUTES: Routes = [
   {
     path: ':userId/addresses',
     component: UserAddressesComponent,
+    canActivate: [UserHierarchyGuard]
+  },
+  {
+    path: ':userId/offers',
+    component: UserOffersComponent,
     canActivate: [UserHierarchyGuard]
   },
   {

@@ -54,6 +54,13 @@ export class OfferService {
     );
   }
 
+  /** Offers assigned to a specific user. */
+  listByUser(userId: number): Observable<Offer[]> {
+    return this.http.get<Record<string, unknown>[]>(`${this.endpoint}/user/${userId}`).pipe(
+      map((data) => (data ?? []).map((raw) => this.map(raw)))
+    );
+  }
+
   create(body: OfferPayload): Observable<Offer> {
     return this.http.post<Record<string, unknown>>(this.endpoint, body).pipe(map(r => this.map(r)));
   }

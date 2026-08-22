@@ -14,6 +14,7 @@ import { FabActionService } from '../../core/services/fab-action.service';
 import { ModalService } from '../../core/services/modal.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AppDashService } from '../../core/services/app-dash.service';
+import { OfferService } from '../admin/offer.service';
 
 @Component({
   selector: 'app-outlet-list',
@@ -60,6 +61,7 @@ export class OutletListComponent implements OnInit, OnDestroy {
   private readonly modalService  = inject(ModalService);
   private readonly toastService  = inject(ToastService);
   private readonly dashService   = inject(AppDashService);
+  private readonly offerService  = inject(OfferService);
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -124,6 +126,11 @@ export class OutletListComponent implements OnInit, OnDestroy {
               longitude:    value.longitude ?? null,
             };
             this.dashService.upsertOutletAddress(created.outletId, addrDto).subscribe();
+          }
+          if (created?.outletId && value.offer_ids?.length) {
+            this.offerService.attachToOutlet(created.outletId, value.offer_ids).subscribe({
+              error: () => this.toastService.error('Outlet created, but applying offers failed')
+            });
           }
           this.toastService.success('Outlet created');
           this.loadOutlets();

@@ -65,6 +65,36 @@
       </div>
     </div>
 
+    <!-- Offers -->
+    @if (!isEdit()) {
+      <div class="form-divider"></div>
+      <div class="form-section-label">Offers</div>
+      <span class="form-hint">Apply existing client offers to this outlet.</span>
+
+      @if (loadingOffers()) {
+        <div class="offers-empty">Loading offers…</div>
+      } @else if (offers().length === 0) {
+        <div class="offers-empty">No client offers available to apply.</div>
+      } @else {
+        <div class="offer-picker">
+          @for (offer of offers(); track offer.offerId) {
+            <button type="button" class="offer-option"
+              [class.selected]="isOfferSelected(offer.offerId)"
+              (click)="toggleOffer(offer.offerId)">
+              <span class="offer-check">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 7l4 4 6-6"/></svg>
+              </span>
+              <span class="offer-info">
+                <span class="offer-name">{{ offer.offerName }}</span>
+                <span class="offer-code">{{ offer.offerCode }}</span>
+              </span>
+              <span class="offer-badge">{{ offerBadge(offer) }}</span>
+            </button>
+          }
+        </div>
+      }
+    }
+
     <!-- Address -->
     <div class="form-divider"></div>
     <div class="form-section-label">Address</div>

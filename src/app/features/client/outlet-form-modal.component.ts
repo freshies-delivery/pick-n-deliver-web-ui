@@ -10,6 +10,7 @@ import { debounceTime } from 'rxjs/operators';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ImageSearchComponent } from '../../shared/components/image-search/image-search.component';
 import { OutletDto } from './services/outlet.service';
+import { Offer, OfferService } from '../admin/offer.service';
 
 export interface OutletModalData {
   clientId?: number;
@@ -28,12 +29,18 @@ const OUTLET_TYPES = ['RESTAURANT', 'CAFE', 'BAKERY', 'CLOUD_KITCHEN', 'GROCERY'
   styleUrl:    './outlet-form-modal.component.scss',
 })
 export class OutletFormModalComponent implements OnInit {
-  private readonly fb         = inject(FormBuilder);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly fb           = inject(FormBuilder);
+  private readonly destroyRef   = inject(DestroyRef);
+  private readonly offerService = inject(OfferService);
 
   readonly isEdit      = signal(false);
   readonly locating    = signal(false);
   readonly outletTypes = OUTLET_TYPES;
+
+  // Client offers the user can apply to the new outlet (create mode only).
+  readonly offers          = signal<Offer[]>([]);
+  readonly loadingOffers   = signal(false);
+  readonly selectedOfferIds = signal<number[]>([]);
 
   readonly form = this.fb.group({
     name:               ['', [Validators.required, Validators.maxLength(255)]],
@@ -84,6 +91,40 @@ export class OutletFormModalComponent implements OnInit {
         outlet_uri: o.outletUri ?? '', is_veg: o.isVeg ?? false,
         is_pickup_available: o.isPickupAvailable ?? true,
       });
+    } else if (this.data?.clientId) {
+      // Create mode: offer the client's existing offers so the new outlet can inherit them.
+      this.loadOffers(this.data.clientId);
+    }
+  }
+
+  private loadOffers(clientId: number): void {
+    this.loadingOffers.set(true);
+    this.offerService.listByClient(clientId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: offers => { this.offers.set(offers); this.loadingOffers.set(false); },
+        error: () => this.loadingOffers.set(false),
+      });
+  }
+
+  isOfferSelected(id: number): boolean {
+    return this.selectedOfferIds().includes(id);
+  }
+
+  toggleOffer(id: number): void {
+    const current = this.selectedOfferIds();
+    this.selectedOfferIds.set(
+      current.includes(id) ? current.filter(x => x !== id) : [...current, id]
+    );
+  }
+
+  offerBadge(offer: Offer): string {
+    switch (offer.offerType) {
+      case 'PERCENTAGE':    return offer.offerDiscount + '% OFF';
+      case 'FLAT':          return '₹' + offer.offerDiscount + ' OFF';
+      case 'FREE_DELIVERY': return 'Free Delivery';
+      case 'BUY_X_GET_Y':   return 'Buy X Get Y';
+      default:              return '';
     }
   }
 
@@ -108,7 +149,7 @@ export class OutletFormModalComponent implements OnInit {
 
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.dialogRef.close(this.form.value);
+    this.dialogRef.close({ ...this.form.value, offer_ids: this.selectedOfferIds() });
   }
 
   close(): void { this.dialogRef.close(); }

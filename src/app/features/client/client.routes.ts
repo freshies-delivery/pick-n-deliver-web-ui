@@ -8,6 +8,7 @@ import { ClientDashboardTabComponent } from './client-dashboard-tab.component';
 import { ClientOrdersTabComponent } from './client-orders-tab.component';
 import { ClientRatingsTabComponent } from './client-ratings-tab.component';
 import { ClientAnalyticsTabComponent } from './client-analytics-tab.component';
+import { ClientOffersTabComponent } from './client-offers-tab.component';
 import { HierarchyGuard } from '../../core/guards/hierarchy.guard';
 
 export const CLIENT_ROUTES: Routes = [
@@ -36,6 +37,11 @@ export const CLIENT_ROUTES: Routes = [
   {
     path: ':clientId/analytics',
     component: ClientAnalyticsTabComponent,
+    canActivate: [HierarchyGuard]
+  },
+  {
+    path: ':clientId/offers',
+    component: ClientOffersTabComponent,
     canActivate: [HierarchyGuard]
   },
   {
@@ -71,6 +77,11 @@ export const CLIENT_ROUTES: Routes = [
   },
   {
     path: ':clientId/outlets/:outletId/orders',
+    component: OutletDetailComponent,
+    canActivate: [HierarchyGuard]
+  },
+  {
+    path: ':clientId/outlets/:outletId/offers',
     component: OutletDetailComponent,
     canActivate: [HierarchyGuard]
   },

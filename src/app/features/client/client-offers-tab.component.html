@@ -1,0 +1,47 @@
+<div class="page">
+  <app-page-header
+    [breadcrumb]="'Clients'"
+    [title]="clientName()"
+    [subtitle]="'Offers usable across all outlets under this client'"
+    [actions]="headerActions"
+  />
+
+  <!-- Client Tab Navigation -->
+  <div class="client-tabs">
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'dashboard']" routerLinkActive="active">Dashboard</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'outlets']" routerLinkActive="active">Outlets</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'orders']" routerLinkActive="active">Orders</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'offers']" routerLinkActive="active">Offers</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'ratings']" routerLinkActive="active">Ratings</a>
+    <a class="client-tab" [routerLink]="['/dashboard/clients', clientId(), 'analytics']" routerLinkActive="active">Analytics</a>
+  </div>
+
+  <div class="page-content">
+    @if (loading()) {
+      <app-skeleton-list [rows]="5" />
+    } @else if (offers().length === 0) {
+      <app-empty-state
+        title="No client-wide offers yet"
+        message="Use “Create Offer” to add an offer usable across all outlets under this client."
+      />
+    } @else {
+      <div class="offers-list">
+        @for (offer of offers(); track offer.offerId) {
+          <app-rich-list-item
+            [id]="offer.offerId"
+            [name]="offer.offerName"
+            [description]="offer.offerCode"
+            [category]="discountLabel(offer)"
+            [status]="status(offer)"
+            [stats]="offerStats(offer)"
+            [showEdit]="true"
+            [showDelete]="true"
+            [accentBar]="true"
+            (editClick)="openEdit(offer)"
+            (deleteClick)="confirmDelete(offer)"
+          />
+        }
+      </div>
+    }
+  </div>
+</div>

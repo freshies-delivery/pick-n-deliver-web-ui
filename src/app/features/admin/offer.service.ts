@@ -61,6 +61,35 @@ export class OfferService {
     );
   }
 
+  /** Offers usable at a specific outlet. */
+  listByOutlet(outletId: number): Observable<Offer[]> {
+    return this.http.get<Record<string, unknown>[]>(`${this.endpoint}/outlet/${outletId}`).pipe(
+      map((data) => (data ?? []).map((raw) => this.map(raw)))
+    );
+  }
+
+  /** Client-wide offers (usable across all of the client's outlets). */
+  listByClient(clientId: number): Observable<Offer[]> {
+    return this.http.get<Record<string, unknown>[]>(`${this.endpoint}/client/${clientId}`).pipe(
+      map((data) => (data ?? []).map((raw) => this.map(raw)))
+    );
+  }
+
+  /** Create an offer locked to a single outlet. */
+  createForOutlet(outletId: number, body: OfferPayload): Observable<Offer> {
+    return this.http.post<Record<string, unknown>>(`${this.endpoint}/outlet/${outletId}`, body).pipe(map(r => this.map(r)));
+  }
+
+  /** Create an offer applied to all of the client's current outlets. */
+  createForClient(clientId: number, body: OfferPayload): Observable<Offer> {
+    return this.http.post<Record<string, unknown>>(`${this.endpoint}/client/${clientId}`, body).pipe(map(r => this.map(r)));
+  }
+
+  /** Attach existing offers to an outlet without touching their other assignments. */
+  attachToOutlet(outletId: number, offerIds: number[]): Observable<void> {
+    return this.http.post<void>(`${this.endpoint}/outlet/${outletId}/attach`, offerIds);
+  }
+
   create(body: OfferPayload): Observable<Offer> {
     return this.http.post<Record<string, unknown>>(this.endpoint, body).pipe(map(r => this.map(r)));
   }

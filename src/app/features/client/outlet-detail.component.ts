@@ -8,6 +8,7 @@ import { OutletRatingsComponent } from './outlet-ratings.component';
 import { OutletAddressComponent } from './outlet-address.component';
 import { OutletDashboardComponent } from './outlet-dashboard.component';
 import { OutletOrdersComponent } from './outlet-orders.component';
+import { OutletOffersComponent } from './outlet-offers.component';
 import { PageHeaderComponent, PageHeaderAction } from '../../shared/components/page-header/page-header.component';
 import { CategoryDto } from './services/category.service';
 import { HierarchyStateService } from '../../core/services/hierarchy-state.service';
@@ -24,6 +25,7 @@ import { ModalService } from '../../core/services/modal.service';
     OutletAddressComponent,
     OutletDashboardComponent,
     OutletOrdersComponent,
+    OutletOffersComponent,
   ],
   templateUrl: './outlet-detail.component.html',
   styleUrl: './outlet-detail.component.scss',
@@ -39,7 +41,7 @@ import { ModalService } from '../../core/services/modal.service';
 export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(CategoryListComponent) private readonly categoryListComponent?: CategoryListComponent;
 
-  readonly activeTab = signal<'address' | 'categories' | 'ratings' | 'dashboard' | 'orders'>('dashboard');
+  readonly activeTab = signal<'address' | 'categories' | 'ratings' | 'dashboard' | 'orders' | 'offers'>('dashboard');
   private openCategoryDialogPending = false;
 
   readonly clientId = signal(0);
@@ -51,6 +53,7 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'ratings' as const,    label: 'Ratings' },
     { key: 'address' as const,    label: 'Address' },
     { key: 'orders' as const,     label: 'Orders' },
+    { key: 'offers' as const,     label: 'Offers' },
   ];
 
   readonly headerActions: PageHeaderAction[] = [
@@ -96,6 +99,8 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       this.activeTab.set('categories');
     } else if (url.endsWith('/orders')) {
       this.activeTab.set('orders');
+    } else if (url.endsWith('/offers')) {
+      this.activeTab.set('offers');
     } else if (url.endsWith('/address')) {
       this.activeTab.set('address');
     } else {
@@ -116,7 +121,7 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fabActionService.unregisterAction('addCategory');
   }
 
-  setTab(tab: 'address' | 'categories' | 'ratings' | 'dashboard' | 'orders'): void {
+  setTab(tab: 'address' | 'categories' | 'ratings' | 'dashboard' | 'orders' | 'offers'): void {
     this.activeTab.set(tab);
     const cId = this.clientId();
     const oId = this.outletId();
@@ -128,6 +133,8 @@ export class OutletDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'dashboard']);
     } else if (tab === 'orders') {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'orders']);
+    } else if (tab === 'offers') {
+      this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'offers']);
     } else {
       this.router.navigate(['/dashboard/clients', cId, 'outlets', oId, 'address']);
     }

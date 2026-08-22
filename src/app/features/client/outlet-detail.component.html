@@ -43,5 +43,9 @@
     @if (activeTab() === 'orders') {
       <app-outlet-orders [outletId]="outletId()" />
     }
+
+    @if (activeTab() === 'offers') {
+      <app-outlet-offers [outletId]="outletId()" />
+    }
   </div>
 </div>
